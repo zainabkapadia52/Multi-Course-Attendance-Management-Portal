@@ -13,7 +13,7 @@ A centralized database-driven system for managing attendance across multiple cou
 
 ## Entity-Relationship Diagram
 
-![ER Diagram](images/ER_Diagram.jpg)
+![ER Diagram](images/ER_diagram.jpg)
 
 *Complete ER diagram showing entities, relationships, attributes, cardinality ratios, and participation constraints.*
 
