@@ -62,7 +62,7 @@ A centralized database-driven system for managing attendance across multiple cou
 
 - Primary Keys on all tables
 - Foreign Keys with referential integrity (CASCADE/RESTRICT)
-- NOT NULL constraints (3+ per table)
+- NOT NULL constraints
 - UNIQUE constraints (RollNo, CourseCode, Username)
 - CHECK constraints (Status validation, date/time logic)
 - Logical constraints (EndTime > StartTime, session dates within semester bounds)
