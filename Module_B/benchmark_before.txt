@@ -1,0 +1,6 @@
+Query                                       Time (ms)   Rows Plan
+------------------------------------------------------------------------------------------
+Student attendance lookup                      0.0148      1 SCAN ar
+Correction requests by student                 0.0083      0 SEARCH correction_requests USING INDEX sqlite_autoindex_correction_requests_1 (student_id=?)
+Enrollment lookup                              0.0090      2 SCAN course_enrollments
+Attendance records for a session               0.0379      3 SCAN attendance_records

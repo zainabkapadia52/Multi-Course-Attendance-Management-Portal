@@ -1,0 +1,465 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="fw-bold mb-4">Admin Dashboard</h4>
+
+<ul class="nav nav-tabs mb-4">
+  <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-active">Active Semester</button></li>
+  <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-archive" onclick="loadArchive()">Archive</button></li>
+  <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-setup">Semester Setup</button></li>
+  <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-users">Users</button></li>
+  <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-attendance">Attendance Override</button></li>
+</ul>
+
+<div class="tab-content">
+
+  <!-- ACTIVE SEMESTER -->
+  <div class="tab-pane fade show active" id="tab-active">
+    <div id="active-sem-header" class="mb-3"></div>
+    <div id="active-courses-container"></div>
+  </div>
+
+  <!-- ARCHIVE -->
+  <div class="tab-pane fade" id="tab-archive">
+    <div class="d-flex align-items-center gap-3 mb-3">
+      <label class="fw-semibold mb-0">Past Semester:</label>
+      <select id="archive-sem-select" class="form-select w-auto" onchange="loadArchiveSemester()">
+        <option value="">Select…</option>
+      </select>
+    </div>
+    <div id="archive-courses-container"></div>
+  </div>
+
+  <!-- SEMESTER SETUP -->
+  <div class="tab-pane fade" id="tab-setup">
+    <div class="row g-4">
+      <div class="col-md-5">
+        <div class="card">
+          <div class="card-header">Create Semester</div>
+          <div class="card-body">
+            <input id="sem-name"   class="form-control mb-2" placeholder="e.g. Sem I 2026-27">
+            <input id="sem-start"  class="form-control mb-2" type="date">
+            <input id="sem-end"    class="form-control mb-2" type="date">
+            <div class="form-check mb-3">
+              <input id="sem-active" class="form-check-input" type="checkbox">
+              <label class="form-check-label" for="sem-active">Set as active semester</label>
+            </div>
+            <button class="btn btn-dark w-100" onclick="createSemester()">Create Semester</button>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-7">
+        <div class="card">
+          <div class="card-header">Add Course to Semester</div>
+          <div class="card-body">
+            <select id="course-sem" class="form-select mb-2"><option value="">Select semester…</option></select>
+            <input id="course-name" class="form-control mb-2" placeholder="Course name">
+            <input id="course-code" class="form-control mb-3" placeholder="Course code (e.g. CS432)">
+            <button class="btn btn-dark w-100" onclick="createCourse()">Add Course</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- USERS -->
+  <div class="tab-pane fade" id="tab-users">
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-header">Create User</div>
+          <div class="card-body">
+            <div id="user-err" class="alert alert-danger d-none"></div>
+            <input id="new-username" class="form-control mb-2" placeholder="Username">
+            <input id="new-password" class="form-control mb-2" type="password" placeholder="Password">
+            <select id="new-role" class="form-select mb-2" onchange="toggleProfileFields()">
+              <option value="">Select role…</option>
+              <option value="student">Student</option>
+              <option value="instructor">Instructor</option>
+              <option value="ta">TA</option>
+              <option value="dean">Dean</option>
+              <option value="admin">Admin</option>
+            </select>
+            <div id="student-fields" class="d-none">
+              <input id="new-rollno"  class="form-control mb-2" placeholder="Roll No (e.g. 24110001)">
+              <input id="new-program" class="form-control mb-2" placeholder="Program (e.g. B.Tech CSE)">
+              <input id="new-batch"   class="form-control mb-2" placeholder="Batch (e.g. 2024)">
+            </div>
+            <div id="instructor-fields" class="d-none">
+              <input id="new-dept"   class="form-control mb-2" placeholder="Department">
+              <input id="new-desig"  class="form-control mb-2" placeholder="Designation">
+            </div>
+            <button class="btn btn-dark w-100 mt-1" onclick="createUser()">Create User</button>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-8">
+        <div class="card">
+          <div class="card-header">All Users</div>
+          <div class="card-body p-0" style="max-height:520px;overflow-y:auto">
+            <table class="table table-sm mb-0" id="users-table">
+              <thead class="table-light sticky-top">
+                <tr><th>Username</th><th>Role</th><th>Details</th><th>Last Login</th><th></th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ATTENDANCE OVERRIDE -->
+  <div class="tab-pane fade" id="tab-attendance">
+    <div class="card mb-3">
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-5">
+            <label class="form-label fw-semibold">Course</label>
+            <select id="att-course" class="form-select" onchange="loadAttSessions()">
+              <option value="">Select course…</option>
+            </select>
+          </div>
+          <div class="col-md-5">
+            <label class="form-label fw-semibold">Session</label>
+            <select id="att-session" class="form-select" onchange="loadAttRecords()">
+              <option value="">Select session…</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="att-records-container"></div>
+  </div>
+
+</div>
+
+<!-- ── Add Member Modal ──────────────────────────────────────────────────── -->
+<div class="modal fade" id="addMemberModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addModalTitle">Add Member</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="add-modal-err" class="alert alert-danger d-none"></div>
+        <input type="hidden" id="add-modal-course-id">
+        <input type="hidden" id="add-modal-type">
+        <label class="form-label fw-semibold" id="add-modal-label">Select</label>
+        <select id="add-modal-select" class="form-select"></select>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-dark" onclick="confirmAddMember()">Add</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ── shared helpers ────────────────────────────────────────────────────────────
+function profileText(u) {
+  if (u.roll_no) return [u.roll_no, u.program, u.batch ? `(${u.batch})` : ''].filter(Boolean).join(' · ');
+  if (u.department) return [u.department, u.designation].filter(Boolean).join(' · ');
+  return '';
+}
+
+function buildCourseCard(entry, editable) {
+  const c = entry.course;
+
+  const mkList = (items, removeUrl, nameKey, typeName) => {
+    if (!items.length) return `<p class="text-muted mb-0" style="font-size:.82rem">None assigned</p>`;
+    return items.map(it => `
+      <div class="d-flex justify-content-between align-items-center py-1 border-bottom">
+        <div>
+          <div style="font-size:.84rem;font-weight:500">${it.username || it[nameKey]}</div>
+          <div class="text-muted" style="font-size:.75rem">${profileText(it)}</div>
+        </div>
+        ${editable ? `<button class="btn btn-link btn-sm text-danger p-0 ms-2"
+          onclick="removeMember(${c.course_id},'${typeName}',${it.user_id})">✕</button>` : ''}
+      </div>`).join('');
+  };
+
+  return `
+    <div class="card mb-3" id="cc-${c.course_id}">
+      <div class="card-header d-flex justify-content-between align-items-center py-2">
+        <span><span class="badge bg-secondary me-2">${c.code}</span><strong>${c.name}</strong></span>
+        ${editable ? `<button class="btn btn-sm btn-outline-danger" onclick="deleteCourse(${c.course_id},'${c.code}')">Delete Course</button>` : ''}
+      </div>
+      <div class="card-body py-2">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <span class="fw-semibold" style="font-size:.85rem">Instructors <span class="badge bg-light text-dark">${entry.instructors.length}</span></span>
+              ${editable ? `<button class="btn btn-sm btn-link p-0" onclick="openAdd('instructor',${c.course_id},'${c.code}')">+ Add</button>` : ''}
+            </div>
+            ${mkList(entry.instructors, '', 'username', 'instructor')}
+          </div>
+          <div class="col-md-4">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <span class="fw-semibold" style="font-size:.85rem">TAs <span class="badge bg-light text-dark">${entry.tas.length}</span></span>
+              ${editable ? `<button class="btn btn-sm btn-link p-0" onclick="openAdd('ta',${c.course_id},'${c.code}')">+ Add</button>` : ''}
+            </div>
+            ${mkList(entry.tas, '', 'username', 'ta')}
+          </div>
+          <div class="col-md-4">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <span class="fw-semibold" style="font-size:.85rem">Students <span class="badge bg-light text-dark">${entry.students.length}</span></span>
+              ${editable ? `<button class="btn btn-sm btn-link p-0" onclick="openAdd('student',${c.course_id},'${c.code}')">+ Add</button>` : ''}
+            </div>
+            ${mkList(entry.students, '', 'username', 'student')}
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── active semester ───────────────────────────────────────────────────────────
+async function loadActiveSemester() {
+  const sem = await api("GET", "/api/admin/active-semester");
+  const hdr = document.getElementById("active-sem-header");
+  const con = document.getElementById("active-courses-container");
+  if (!sem.semester_id) {
+    hdr.innerHTML = '<div class="alert alert-warning">No active semester. Create one in Semester Setup.</div>';
+    return;
+  }
+  hdr.innerHTML = `<div class="card mb-3 border-0 bg-light"><div class="card-body py-2">
+    <strong>${sem.name}</strong>
+    <span class="text-muted ms-2" style="font-size:.9rem">${sem.start_date} → ${sem.end_date}</span>
+  </div></div>`;
+  const courses = await api("GET", `/api/admin/semesters/${sem.semester_id}/courses`);
+  con.innerHTML = courses.length
+    ? courses.map(e => buildCourseCard(e, true)).join("")
+    : '<p class="text-muted">No courses yet. Add them in Semester Setup.</p>';
+}
+
+// ── archive ───────────────────────────────────────────────────────────────────
+async function loadArchive() {
+  const sems = await api("GET", "/api/admin/semesters");
+  const past = sems.filter(s => !s.is_active);
+  const sel  = document.getElementById("archive-sem-select");
+  sel.innerHTML = `<option value="">Select…</option>` +
+    past.map(s => `<option value="${s.semester_id}">${s.name}</option>`).join("");
+}
+
+async function loadArchiveSemester() {
+  const sid = document.getElementById("archive-sem-select").value;
+  const con = document.getElementById("archive-courses-container");
+  if (!sid) { con.innerHTML = ""; return; }
+  const courses = await api("GET", `/api/admin/semesters/${sid}/courses`);
+  con.innerHTML = courses.length
+    ? courses.map(e => buildCourseCard(e, false)).join("")
+    : '<p class="text-muted">No courses in this semester.</p>';
+}
+
+// ── add / remove members ──────────────────────────────────────────────────────
+let _addCourseId, _addType;
+
+async function openAdd(type, courseId, courseCode) {
+  _addCourseId = courseId; _addType = type;
+  const labels = { instructor: "Instructor", ta: "TA", student: "Student" };
+  const urls   = { instructor: "/api/admin/instructors", ta: "/api/admin/tas", student: "/api/admin/students" };
+  document.getElementById("addModalTitle").textContent = `Add ${labels[type]} — ${courseCode}`;
+  document.getElementById("add-modal-label").textContent = `Select ${labels[type]}`;
+  document.getElementById("add-modal-err").classList.add("d-none");
+  const list = await api("GET", urls[type]);
+  document.getElementById("add-modal-select").innerHTML =
+    `<option value="">Choose…</option>` + list.map(u => `<option value="${u.user_id}">${u.username}</option>`).join("");
+  new bootstrap.Modal(document.getElementById("addMemberModal")).show();
+}
+
+async function confirmAddMember() {
+  const uid = parseInt(document.getElementById("add-modal-select").value);
+  if (!uid) return;
+  const urls    = { instructor: "instructors", ta: "tas", student: "enrollments" };
+  const bodies  = { instructor: {instructor_id: uid}, ta: {ta_id: uid}, student: {student_id: uid} };
+  const errEl   = document.getElementById("add-modal-err");
+  errEl.classList.add("d-none");
+  const res = await fetch(`/api/admin/courses/${_addCourseId}/${urls[_addType]}`, {
+    method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(bodies[_addType])
+  });
+  const d = await res.json();
+  if (res.ok) {
+    bootstrap.Modal.getInstance(document.getElementById("addMemberModal")).hide();
+    loadActiveSemester();
+  } else {
+    errEl.textContent = d.error; errEl.classList.remove("d-none");
+  }
+}
+
+async function removeMember(courseId, type, userId) {
+  if (!confirm("Remove this person from the course?")) return;
+  const urls = { instructor: `instructors/${userId}`, ta: `tas/${userId}`, student: `enrollments/${userId}` };
+  await api("DELETE", `/api/admin/courses/${courseId}/${urls[type]}`);
+  loadActiveSemester();
+}
+
+async function deleteCourse(cid, code) {
+  if (!confirm(`Delete course ${code}? This removes all its sessions and records.`)) return;
+  const d = await api("DELETE", `/api/admin/courses/${cid}`);
+  alert(d.message || d.error);
+  loadActiveSemester();
+}
+
+// ── semester setup ────────────────────────────────────────────────────────────
+async function loadSetupDropdowns() {
+  const sems = await api("GET", "/api/admin/semesters");
+  document.getElementById("course-sem").innerHTML =
+    `<option value="">Select semester…</option>` +
+    sems.map(s => `<option value="${s.semester_id}">${s.name}${s.is_active?' (active)':''}</option>`).join("");
+}
+
+async function createSemester() {
+  const name = document.getElementById("sem-name").value.trim();
+  if (!name) return alert("Name required");
+  await api("POST", "/api/admin/semesters", {
+    name,
+    start_date: document.getElementById("sem-start").value,
+    end_date:   document.getElementById("sem-end").value,
+    is_active:  document.getElementById("sem-active").checked ? 1 : 0
+  });
+  alert("Semester created"); loadActiveSemester(); loadSetupDropdowns();
+}
+
+async function createCourse() {
+  const name = document.getElementById("course-name").value.trim();
+  const code = document.getElementById("course-code").value.trim();
+  const sem  = parseInt(document.getElementById("course-sem").value);
+  if (!name || !code || !sem) return alert("All fields required");
+  await api("POST", "/api/admin/courses", { name, code, semester_id: sem });
+  alert("Course added"); loadActiveSemester();
+}
+
+// ── users ─────────────────────────────────────────────────────────────────────
+function toggleProfileFields() {
+  const role = document.getElementById("new-role").value;
+  document.getElementById("student-fields").classList.toggle("d-none", role !== "student");
+  document.getElementById("instructor-fields").classList.toggle("d-none", !["instructor","ta"].includes(role));
+}
+
+async function loadUsers() {
+  const data  = await api("GET", "/api/admin/users");
+  const tbody = document.querySelector("#users-table tbody");
+  tbody.innerHTML = data.map(u => `
+    <tr>
+      <td>${u.username}</td>
+      <td><span class="badge bg-secondary">${u.role}</span></td>
+      <td style="font-size:.8rem;color:#666">${profileText(u)||'—'}</td>
+      <td style="font-size:.8rem">${u.last_login ? u.last_login.slice(0,19) : '—'}</td>
+      <td><button class="btn btn-sm btn-outline-danger" onclick="deleteUser(${u.user_id},'${u.username}')">Delete</button></td>
+    </tr>`).join("");
+}
+
+async function createUser() {
+  const errEl = document.getElementById("user-err");
+  errEl.classList.add("d-none");
+  const role  = document.getElementById("new-role").value;
+  const body  = {
+    username: document.getElementById("new-username").value.trim(),
+    password: document.getElementById("new-password").value,
+    role,
+    roll_no:     document.getElementById("new-rollno").value.trim(),
+    program:     document.getElementById("new-program").value.trim(),
+    batch:       document.getElementById("new-batch").value.trim(),
+    department:  document.getElementById("new-dept").value.trim(),
+    designation: document.getElementById("new-desig").value.trim(),
+  };
+  if (!body.username || !body.password || !body.role) {
+    errEl.textContent = "Username, password and role are required";
+    errEl.classList.remove("d-none"); return;
+  }
+  const res = await fetch("/api/admin/users", {
+    method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(body)
+  });
+  const d = await res.json();
+  if (res.ok) { alert(d.message); loadUsers(); }
+  else { errEl.textContent = d.error; errEl.classList.remove("d-none"); }
+}
+
+async function deleteUser(uid, username) {
+  if (!confirm(`Permanently delete "${username}"?`)) return;
+  const d = await api("DELETE", `/api/admin/users/${uid}`);
+  alert(d.message || d.error); loadUsers();
+}
+
+// ── attendance override ───────────────────────────────────────────────────────
+async function loadAttCourses() {
+  const courses = await api("GET", "/api/admin/courses");
+  document.getElementById("att-course").innerHTML =
+    `<option value="">Select course…</option>` +
+    courses.map(c => `<option value="${c.course_id}">${c.code} — ${c.name}</option>`).join("");
+}
+
+async function loadAttSessions() {
+  const cid = document.getElementById("att-course").value;
+  const sel = document.getElementById("att-session");
+  document.getElementById("att-records-container").innerHTML = "";
+  if (!cid) { sel.innerHTML = `<option value="">Select session…</option>`; return; }
+  const data = await api("GET", `/api/admin/courses/${cid}/sessions`);
+  sel.innerHTML = `<option value="">Select session…</option>` +
+    data.map(s => `<option value="${s.att_session_id}">${s.session_date} — ${s.topic||'Session'}</option>`).join("");
+}
+
+async function loadAttRecords() {
+  const sid = document.getElementById("att-session").value;
+  const con = document.getElementById("att-records-container");
+  if (!sid) { con.innerHTML = ""; return; }
+  const records = await api("GET", `/api/admin/sessions/${sid}/records`);
+  if (!records.length) { con.innerHTML = '<p class="text-muted">No records for this session.</p>'; return; }
+  con.innerHTML = `
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        Attendance Records
+        <button class="btn btn-sm btn-dark" onclick="saveAllRecords()">Save All Changes</button>
+      </div>
+      <div class="card-body p-0">
+        <table class="table mb-0">
+          <thead class="table-light"><tr><th>Student</th><th>Status</th></tr></thead>
+          <tbody>${records.map(r => `
+            <tr>
+              <td>${r.username}</td>
+              <td>
+                <select class="form-select form-select-sm w-auto record-status" data-rid="${r.record_id}">
+                  <option value="present" ${r.status==='present'?'selected':''}>Present</option>
+                  <option value="absent"  ${r.status==='absent' ?'selected':''}>Absent</option>
+                  <option value="late"    ${r.status==='late'   ?'selected':''}>Late</option>
+                </select>
+              </td>
+            </tr>`).join("")}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+async function saveAllRecords() {
+  const selects = document.querySelectorAll(".record-status");
+  let updated = 0;
+  for (const sel of selects) {
+    await api("PUT", `/api/admin/records/${sel.dataset.rid}`, { status: sel.value });
+    updated++;
+  }
+  alert(`${updated} record(s) updated.`);
+}
+
+// ── init ──────────────────────────────────────────────────────────────────────
+loadActiveSemester();
+loadSetupDropdowns();
+loadUsers();
+loadAttCourses();
+
+window._realtimeHandlers = {
+  attendance_updated() {
+    const attTab = document.getElementById("tab-attendance");
+    if (attTab && attTab.classList.contains("active")) {
+      loadAttRecords();
+    }
+  },
+  attendance_session_created() {
+    loadAttCourses();
+  },
+};
+</script>
+{% endblock %}

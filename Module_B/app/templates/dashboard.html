@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="fw-bold mb-4">Student Portal — {{ user.username }}</h4>
+
+<ul class="nav nav-tabs mb-4" id="tabs">
+  <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-courses">My Courses</button></li>
+  <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-attendance">Attendance</button></li>
+  <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-corrections">Correction Requests</button></li>
+  <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-profile">Profile</button></li>
+</ul>
+
+<div class="tab-content">
+
+  <!-- COURSES -->
+  <div class="tab-pane fade show active" id="tab-courses">
+    <div class="card">
+      <div class="card-header">Enrolled Courses</div>
+      <div class="card-body p-0">
+        <table class="table mb-0" id="courses-table">
+          <thead class="table-light"><tr><th>Code</th><th>Name</th><th>Semester</th><th>Instructor(s)</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ATTENDANCE -->
+  <div class="tab-pane fade" id="tab-attendance">
+    <div class="card">
+      <div class="card-header">Attendance Records</div>
+      <div class="card-body p-0">
+        <table class="table mb-0" id="att-table">
+          <thead class="table-light"><tr><th>Date</th><th>Course</th><th>Topic</th><th>Status</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- CORRECTIONS -->
+  <div class="tab-pane fade" id="tab-corrections">
+    <div class="row g-4">
+      <div class="col-lg-5">
+        <div class="card">
+          <div class="card-header">New Correction Request</div>
+          <div class="card-body">
+            <div id="corr-err" class="alert alert-danger d-none"></div>
+            <div id="corr-ok"  class="alert alert-success d-none"></div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Course</label>
+              <select id="corr-course" class="form-select" onchange="loadSessions()">
+                <option value="">Select course…</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Session</label>
+              <select id="corr-session" class="form-select">
+                <option value="">Select session…</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Reason</label>
+              <textarea id="corr-reason" class="form-control" rows="3" placeholder="Explain why your attendance should be corrected…"></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Proof URL <span class="text-muted fw-normal">(optional)</span></label>
+              <input id="corr-proof" class="form-control" placeholder="https://…">
+            </div>
+            <button class="btn btn-dark w-100" onclick="submitCorrection()">Submit Request</button>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-7">
+        <div class="card">
+          <div class="card-header">My Requests</div>
+          <div class="card-body p-0">
+            <table class="table mb-0" id="req-table">
+              <thead class="table-light"><tr><th>Date</th><th>Course</th><th>Session</th><th>Status</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE -->
+  <div class="tab-pane fade" id="tab-profile">
+    <div class="card" style="max-width:480px">
+      <div class="card-header">My Profile</div>
+      <div class="card-body" id="profile-body">Loading…</div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let enrolledCourses = [];
+
+async function loadCourses() {
+  const data = await api("GET", "/api/student/courses");
+  enrolledCourses = data;
+  const tbody = document.querySelector("#courses-table tbody");
+  tbody.innerHTML = data.map(c =>
+    `<tr><td><span class="badge bg-secondary">${c.code}</span></td><td>${c.name}</td><td>${c.semester}</td><td>${c.instructors||'—'}</td></tr>`
+  ).join("");
+  const sel = document.getElementById("corr-course");
+  sel.innerHTML = `<option value="">Select course…</option>` +
+    data.map(c => `<option value="${c.course_id}">${c.code} — ${c.name}</option>`).join("");
+}
+
+async function loadAttendance() {
+  const data = await api("GET", "/api/student/attendance");
+  const tbody = document.querySelector("#att-table tbody");
+  tbody.innerHTML = data.map(r =>
+    `<tr><td>${r.session_date}</td><td>${r.course_name}</td><td>${r.topic||'—'}</td><td>${badge(r.status)}</td></tr>`
+  ).join("") || `<tr><td colspan="4" class="text-center text-muted py-3">No records yet</td></tr>`;
+}
+
+async function loadRequests() {
+  const data = await api("GET", "/api/student/corrections");
+  const tbody = document.querySelector("#req-table tbody");
+  tbody.innerHTML = data.map(r =>
+    `<tr><td>${r.created_at.slice(0,10)}</td><td>${r.course_name}</td><td>${r.session_date}</td><td>${badge(r.status)}</td></tr>`
+  ).join("") || `<tr><td colspan="4" class="text-center text-muted py-3">No requests yet</td></tr>`;
+}
+
+async function loadSessions() {
+  const cid = document.getElementById("corr-course").value;
+  const sel = document.getElementById("corr-session");
+  if (!cid) { sel.innerHTML = `<option value="">Select session…</option>`; return; }
+  const data = await api("GET", `/api/student/courses/${cid}/sessions`);
+  sel.innerHTML = `<option value="">Select session…</option>` +
+    data.map(s => `<option value="${s.att_session_id}">${s.session_date} — ${s.topic||'Session'}</option>`).join("");
+}
+
+async function submitCorrection() {
+  const errEl = document.getElementById("corr-err");
+  const okEl  = document.getElementById("corr-ok");
+  errEl.classList.add("d-none");
+  okEl.classList.add("d-none");
+
+  const body = {
+    course_id:      parseInt(document.getElementById("corr-course").value),
+    att_session_id: parseInt(document.getElementById("corr-session").value),
+    reason:         document.getElementById("corr-reason").value.trim(),
+    proof_url:      document.getElementById("corr-proof").value.trim()
+  };
+  if (!body.course_id || !body.att_session_id || !body.reason) {
+    errEl.textContent = "Course, session, and reason are required.";
+    errEl.classList.remove("d-none"); return;
+  }
+  const res = await fetch("/api/student/corrections", {
+    method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(body)
+  });
+  const data = await res.json();
+  if (res.ok) {
+    okEl.textContent = data.message;
+    okEl.classList.remove("d-none");
+    document.getElementById("corr-reason").value = "";
+    document.getElementById("corr-proof").value = "";
+    loadRequests();
+  } else {
+    errEl.textContent = data.error;
+    errEl.classList.remove("d-none");
+  }
+}
+
+async function loadProfile() {
+  const d = await api("GET", "/api/student/profile");
+  document.getElementById("profile-body").innerHTML = `
+    <table class="table mb-0">
+      <tr><th style="width:140px">Username</th><td>${d.username}</td></tr>
+      <tr><th>Role</th><td><span class="badge bg-secondary">${d.role}</span></td></tr>
+      <tr><th>Last login</th><td>${d.last_login ? d.last_login.replace('T',' ').slice(0,19)+' UTC' : '—'}</td></tr>
+    </table>`;
+}
+
+// Load all tabs on page ready
+loadCourses();
+loadAttendance();
+loadRequests();
+loadProfile();
+</script>
+{% endblock %}

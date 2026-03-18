@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="fw-bold mb-4">TA Panel — {{ user.username }}</h4>
+
+<ul class="nav nav-tabs mb-4">
+  <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-sessions">Attendance Sessions</button></li>
+  <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-update">Update Attendance</button></li>
+</ul>
+
+<div class="tab-content">
+
+  <!-- SESSIONS -->
+  <div class="tab-pane fade show active" id="tab-sessions">
+    <div class="card mb-3">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        Attendance Sessions
+        <button class="btn btn-sm btn-dark" data-bs-toggle="modal" data-bs-target="#taSessionModal">+ Create Session</button>
+      </div>
+      <div class="card-body p-0">
+        <table class="table mb-0" id="ta-sess-table">
+          <thead class="table-light"><tr><th>Date</th><th>Course</th><th>Topic</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- UPDATE ATTENDANCE -->
+  <div class="tab-pane fade" id="tab-update">
+    <div class="card mb-3">
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Session</label>
+            <select id="upd-session" class="form-select" onchange="loadUpdateRecords()">
+              <option value="">Select session…</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="upd-records-container"></div>
+  </div>
+
+</div>
+
+<!-- Create Session Modal -->
+<div class="modal fade" id="taSessionModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">New Attendance Session</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <div id="ta-sess-err" class="alert alert-danger d-none"></div>
+        <div class="row g-3 mb-3">
+          <div class="col-md-5">
+            <label class="form-label fw-semibold">Course</label>
+            <select id="ta-sess-course" class="form-select" onchange="loadTaStudents()"><option value="">Select…</option></select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Date</label>
+            <input id="ta-sess-date" class="form-control" type="date">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Topic</label>
+            <input id="ta-sess-topic" class="form-control" placeholder="Optional">
+          </div>
+        </div>
+        <div id="ta-student-list"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-dark" onclick="createTaSession()">Save Session</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function loadTaCourses() {
+  const courses = await api("GET", "/api/ta/courses");
+  document.getElementById("ta-sess-course").innerHTML =
+    `<option value="">Select…</option>` + courses.map(c =>
+      `<option value="${c.course_id}">${c.code} — ${c.name}</option>`).join("");
+}
+
+async function loadTaSessions() {
+  const data  = await api("GET", "/api/ta/attendance-sessions");
+  const tbody = document.querySelector("#ta-sess-table tbody");
+  tbody.innerHTML = data.map(s => `
+    <tr>
+      <td>${s.session_date}</td><td>${s.course_name}</td><td>${s.topic||'—'}</td>
+      <td><button class="btn btn-sm btn-outline-secondary" onclick="toggleTaStudents(${s.att_session_id}, this)">▶ Students</button></td>
+    </tr>
+    <tr id="ta-sturow-${s.att_session_id}" class="d-none bg-light">
+      <td colspan="4" id="ta-stucell-${s.att_session_id}" class="p-3">Loading…</td>
+    </tr>`).join("") || `<tr><td colspan="4" class="text-center text-muted py-3">No sessions yet</td></tr>`;
+
+  // Also populate update dropdown
+  document.getElementById("upd-session").innerHTML =
+    `<option value="">Select session…</option>` + data.map(s =>
+      `<option value="${s.att_session_id}">${s.session_date} — ${s.course_name} ${s.topic ? '('+s.topic+')' : ''}</option>`).join("");
+}
+
+async function toggleTaStudents(sid, btn) {
+  const row  = document.getElementById(`ta-sturow-${sid}`);
+  const cell = document.getElementById(`ta-stucell-${sid}`);
+  const show = row.classList.toggle("d-none") === false;
+  btn.textContent = show ? "▼ Students" : "▶ Students";
+  if (show && cell.textContent === "Loading…") {
+    const records = await api("GET", `/api/ta/attendance-sessions/${sid}/records`);
+    cell.innerHTML = records.length
+      ? `<table class="table table-sm mb-0" style="max-width:400px">
+          <thead class="table-light"><tr><th>Student</th><th>Status</th></tr></thead>
+          <tbody>${records.map(r => `<tr><td>${r.username}</td><td>${badge(r.status)}</td></tr>`).join("")}</tbody>
+         </table>`
+      : '<p class="text-muted mb-0">No records.</p>';
+  }
+}
+
+async function loadTaStudents() {
+  const cid = document.getElementById("ta-sess-course").value;
+  const div = document.getElementById("ta-student-list");
+  if (!cid) { div.innerHTML = ""; return; }
+  const students = await api("GET", `/api/ta/courses/${cid}/students`);
+  div.innerHTML = `<label class="form-label fw-semibold">Mark Attendance</label>
+    <div style="max-height:280px;overflow-y:auto">
+    <table class="table table-sm"><thead class="table-light"><tr><th>Student</th><th>Status</th></tr></thead>
+    <tbody>${students.map(s => `
+      <tr><td>${s.username}</td>
+      <td><select class="form-select form-select-sm ta-student-status" data-id="${s.user_id}">
+        <option value="present">Present</option>
+        <option value="absent" selected>Absent</option>
+        <option value="late">Late</option>
+      </select></td></tr>`).join("")}</tbody></table></div>`;
+}
+
+async function createTaSession() {
+  const errEl = document.getElementById("ta-sess-err");
+  errEl.classList.add("d-none");
+  const course_id    = parseInt(document.getElementById("ta-sess-course").value);
+  const session_date = document.getElementById("ta-sess-date").value;
+  if (!course_id || !session_date) {
+    errEl.textContent = "Course and date are required."; errEl.classList.remove("d-none"); return;
+  }
+  const records = [...document.querySelectorAll(".ta-student-status")].map(el => ({
+    student_id: parseInt(el.dataset.id), status: el.value
+  }));
+  const res = await fetch("/api/ta/attendance-sessions", {
+    method: "POST", headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ course_id, session_date, topic: document.getElementById("ta-sess-topic").value, records })
+  });
+  if (res.ok) {
+    bootstrap.Modal.getInstance(document.getElementById("taSessionModal")).hide();
+    alert("Session created!"); loadTaSessions();
+  } else {
+    const d = await res.json(); errEl.textContent = d.error; errEl.classList.remove("d-none");
+  }
+}
+
+async function loadUpdateRecords() {
+  const sid = document.getElementById("upd-session").value;
+  const con = document.getElementById("upd-records-container");
+  if (!sid) { con.innerHTML = ""; return; }
+  const records = await api("GET", `/api/ta/attendance-sessions/${sid}/records`);
+  if (!records.length) { con.innerHTML = '<p class="text-muted">No records for this session.</p>'; return; }
+  con.innerHTML = `
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        Edit Attendance
+        <button class="btn btn-sm btn-dark" onclick="saveTaRecords()">Save All</button>
+      </div>
+      <div class="card-body p-0">
+        <table class="table mb-0">
+          <thead class="table-light"><tr><th>Student</th><th>Status</th></tr></thead>
+          <tbody>${records.map(r => `
+            <tr>
+              <td>${r.username}</td>
+              <td><select class="form-select form-select-sm w-auto ta-upd-status" data-rid="${r.record_id}">
+                <option value="present" ${r.status==='present'?'selected':''}>Present</option>
+                <option value="absent"  ${r.status==='absent' ?'selected':''}>Absent</option>
+                <option value="late"    ${r.status==='late'   ?'selected':''}>Late</option>
+              </select></td>
+            </tr>`).join("")}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+async function saveTaRecords() {
+  const selects = document.querySelectorAll(".ta-upd-status");
+  for (const sel of selects)
+    await api("PUT", `/api/ta/records/${sel.dataset.rid}`, { status: sel.value });
+  alert(`${selects.length} record(s) saved.`);
+}
+
+loadTaCourses(); loadTaSessions();
+
+window._realtimeHandlers = {
+  attendance_session_created() {
+    loadTaSessions();
+  },
+  attendance_updated() {
+    loadUpdateRecords();
+  },
+};
+</script>
+{% endblock %}

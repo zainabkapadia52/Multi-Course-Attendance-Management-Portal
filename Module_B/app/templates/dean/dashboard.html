@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="fw-bold mb-4">Dean's View — {{ user.username }}</h4>
+
+<ul class="nav nav-tabs mb-4">
+  <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-current">Current Semester</button></li>
+  <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-archive" onclick="loadArchiveDropdown()">Archive</button></li>
+</ul>
+
+<div class="tab-content">
+
+  <div class="tab-pane fade show active" id="tab-current">
+    <div id="dean-active-header" class="mb-3"></div>
+    <div id="dean-active-courses"></div>
+  </div>
+
+  <div class="tab-pane fade" id="tab-archive">
+    <div class="d-flex align-items-center gap-3 mb-3">
+      <label class="fw-semibold mb-0">Semester:</label>
+      <select id="dean-archive-select" class="form-select w-auto" onchange="loadDeanArchiveCourses()">
+        <option value="">Select…</option>
+      </select>
+    </div>
+    <div id="dean-archive-courses"></div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let _deanCardCounter = 0;
+
+function buildReadonlyCard(entry) {
+  const c   = entry.course;
+  const uid = _deanCardCounter++; // unique id per card so multiple courses don't clash
+
+  const mkInlineList = (items, fields) => {
+    if (!items.length) return '<p class="text-muted mb-0" style="font-size:.83rem">None</p>';
+    return items.map(it => `
+      <div class="py-1 border-bottom">
+        <div style="font-size:.84rem;font-weight:500">${it.username}</div>
+        <div class="text-muted" style="font-size:.75rem">
+          ${fields.map(f => it[f]||'').filter(Boolean).join(' · ')}
+        </div>
+      </div>`).join('');
+  };
+
+  const studentRows = entry.students.map((s, i) => `
+    <tr>
+      <td class="text-muted" style="font-size:.82rem">${i + 1}</td>
+      <td style="font-size:.83rem">${s.username}</td>
+      <td style="font-size:.82rem">${s.roll_no  || '—'}</td>
+      <td style="font-size:.82rem">${s.program  || '—'}</td>
+      <td style="font-size:.82rem">${s.batch    || '—'}</td>
+    </tr>`).join('');
+
+  return `
+    <div class="card mb-3">
+      <div class="card-header py-2">
+        <span class="badge bg-secondary me-2">${c.code}</span>
+        <strong>${c.name}</strong>
+      </div>
+      <div class="card-body py-2">
+        <div class="row g-3">
+
+          <!-- Instructors — always visible -->
+          <div class="col-md-5">
+            <div class="fw-semibold mb-1" style="font-size:.85rem">
+              Instructors
+              <span class="badge bg-light text-dark ms-1">${entry.instructors.length}</span>
+            </div>
+            ${mkInlineList(entry.instructors, ['department','designation'])}
+          </div>
+
+          <!-- TAs — always visible -->
+          <div class="col-md-3">
+            <div class="fw-semibold mb-1" style="font-size:.85rem">
+              TAs
+              <span class="badge bg-light text-dark ms-1">${entry.tas.length}</span>
+            </div>
+            ${mkInlineList(entry.tas, ['department'])}
+          </div>
+
+          <!-- Students — collapsed by default -->
+          <div class="col-md-4">
+            <div class="d-flex align-items-center justify-content-between mb-1">
+              <span class="fw-semibold" style="font-size:.85rem">
+                Students
+                <span class="badge bg-light text-dark ms-1">${entry.students.length}</span>
+              </span>
+              <button class="btn btn-sm btn-outline-secondary py-0 px-2"
+                style="font-size:.78rem"
+                onclick="toggleDeanStudents('${uid}', this)">
+                ▶ Show
+              </button>
+            </div>
+
+            <!-- Collapsed panel -->
+            <div id="dean-stu-${uid}" class="d-none mt-1">
+              ${entry.students.length ? `
+                <input class="form-control form-control-sm mb-2"
+                  placeholder="Search students…"
+                  oninput="filterDeanStudents('${uid}', this.value)">
+                <div style="max-height:240px; overflow-y:auto">
+                  <table class="table table-sm mb-0" id="dean-stable-${uid}">
+                    <thead class="table-light" style="position:sticky;top:0">
+                      <tr>
+                        <th style="font-size:.78rem">#</th>
+                        <th style="font-size:.78rem">Username</th>
+                        <th style="font-size:.78rem">Roll No</th>
+                        <th style="font-size:.78rem">Program</th>
+                        <th style="font-size:.78rem">Batch</th>
+                      </tr>
+                    </thead>
+                    <tbody>${studentRows}</tbody>
+                  </table>
+                </div>` :
+                `<p class="text-muted mb-0" style="font-size:.83rem">No students enrolled.</p>`
+              }
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>`;
+}
+
+function toggleDeanStudents(uid, btn) {
+  const panel  = document.getElementById(`dean-stu-${uid}`);
+  const hidden = panel.classList.toggle("d-none");
+  btn.textContent = hidden ? "▶ Show" : "▼ Hide";
+}
+
+function filterDeanStudents(uid, query) {
+  const rows = document.querySelectorAll(`#dean-stable-${uid} tbody tr`);
+  const q    = query.toLowerCase();
+  rows.forEach(row => {
+    row.style.display = row.textContent.toLowerCase().includes(q) ? "" : "none";
+  });
+}
+
+async function loadActiveSemester() {
+  const sem = await api("GET", "/api/dean/active-semester");
+  const hdr = document.getElementById("dean-active-header");
+  const con = document.getElementById("dean-active-courses");
+  if (!sem.semester_id) {
+    hdr.innerHTML = '<div class="alert alert-info">No active semester currently set.</div>'; return;
+  }
+  hdr.innerHTML = `<div class="card border-0 bg-light mb-3"><div class="card-body py-2">
+    <strong>${sem.name}</strong>
+    <span class="text-muted ms-2" style="font-size:.9rem">${sem.start_date||''} → ${sem.end_date||''}</span>
+  </div></div>`;
+  const courses = await api("GET", `/api/dean/semesters/${sem.semester_id}/courses`);
+  con.innerHTML = courses.length
+    ? courses.map(buildReadonlyCard).join("")
+    : '<p class="text-muted">No courses in the active semester.</p>';
+}
+
+async function loadArchiveDropdown() {
+  const sems = await api("GET", "/api/dean/semesters");
+  const past = sems.filter(s => !s.is_active);
+  document.getElementById("dean-archive-select").innerHTML =
+    `<option value="">Select…</option>` +
+    past.map(s => `<option value="${s.semester_id}">${s.name}</option>`).join("");
+}
+
+async function loadDeanArchiveCourses() {
+  const sid = document.getElementById("dean-archive-select").value;
+  const con = document.getElementById("dean-archive-courses");
+  if (!sid) { con.innerHTML = ""; return; }
+  const courses = await api("GET", `/api/dean/semesters/${sid}/courses`);
+  con.innerHTML = courses.length
+    ? courses.map(buildReadonlyCard).join("")
+    : '<p class="text-muted">No courses found.</p>';
+}
+
+loadActiveSemester();
+</script>
+{% endblock %}

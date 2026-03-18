@@ -1,0 +1,282 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="fw-bold mb-4">Instructor Panel — {{ user.username }}</h4>
+
+<ul class="nav nav-tabs mb-4">
+  <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-courses">My Courses</button></li>
+  <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-sessions" onclick="loadSessions()">Attendance Sessions</button></li>
+  <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-corrections" onclick="loadCorrections()">Correction Requests</button></li>
+</ul>
+
+<div class="tab-content">
+
+  <!-- COURSES -->
+  <!-- COURSES -->
+  <div class="tab-pane fade show active" id="tab-courses">
+    <div class="mb-3 d-flex justify-content-end">
+      <button class="btn btn-sm btn-dark" data-bs-toggle="modal" data-bs-target="#sessionModal">
+        + Create Attendance Session
+      </button>
+    </div>
+    <div id="course-cards-container"></div>
+  </div>
+
+  <!-- SESSIONS with expandable student list -->
+  <div class="tab-pane fade" id="tab-sessions">
+    <div class="card">
+      <div class="card-header">All Attendance Sessions <span class="text-muted" style="font-size:.85rem">(click a row to see students)</span></div>
+      <div class="card-body p-0">
+        <table class="table mb-0" id="sess-table">
+          <thead class="table-light"><tr><th>Date</th><th>Course</th><th>Topic</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- CORRECTIONS -->
+  <div class="tab-pane fade" id="tab-corrections">
+    <div class="card">
+      <div class="card-header">Correction Requests</div>
+      <div class="card-body p-0">
+        <table class="table mb-0" id="corr-table">
+          <thead class="table-light">
+            <tr><th>Student</th><th>Course</th><th>Session</th><th>Reason</th><th>Proof</th><th>Status</th><th>Action</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Create Session Modal -->
+<div class="modal fade" id="sessionModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">New Attendance Session</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <div id="sess-err" class="alert alert-danger d-none"></div>
+        <div class="row g-3 mb-3">
+          <div class="col-md-5">
+            <label class="form-label fw-semibold">Course</label>
+            <select id="sess-course" class="form-select" onchange="loadStudentsForSession()"><option value="">Select…</option></select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Date</label>
+            <input id="sess-date" class="form-control" type="date">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Topic</label>
+            <input id="sess-topic" class="form-control" placeholder="Optional">
+          </div>
+        </div>
+        <div id="student-list"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-dark" onclick="createSession()">Save Session</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let myCourses = [];
+
+async function loadCourses() {
+  myCourses = await api("GET", "/api/instructor/courses");
+
+  // Populate session modal dropdown (unchanged)
+  document.getElementById("sess-course").innerHTML =
+    `<option value="">Select…</option>` + myCourses.map(c =>
+      `<option value="${c.course_id}">${c.code} — ${c.name}</option>`
+    ).join("");
+
+  const container = document.getElementById("course-cards-container");
+  if (!myCourses.length) {
+    container.innerHTML = `<p class="text-muted">No courses assigned to you this semester.</p>`;
+    return;
+  }
+
+  // Render a card per course (students load lazily on expand)
+  container.innerHTML = myCourses.map(c => `
+    <div class="card mb-3">
+      <div class="card-header py-2 d-flex justify-content-between align-items-center">
+        <div>
+          <span class="badge bg-secondary me-2">${c.code}</span>
+          <strong>${c.name}</strong>
+          <span class="text-muted ms-2" style="font-size:.85rem">${c.semester}</span>
+        </div>
+        <button class="btn btn-sm btn-outline-secondary"
+          onclick="toggleEnrolledStudents(${c.course_id}, this)">
+          ▶ Enrolled Students
+        </button>
+      </div>
+      <div id="enrolled-${c.course_id}" class="d-none">
+        <div id="enrolled-inner-${c.course_id}" class="card-body p-3">
+          <p class="text-muted mb-0" style="font-size:.85rem">Loading…</p>
+        </div>
+      </div>
+    </div>`
+  ).join("");
+}
+
+async function toggleEnrolledStudents(courseId, btn) {
+  const wrapper = document.getElementById(`enrolled-${courseId}`);
+  const inner   = document.getElementById(`enrolled-inner-${courseId}`);
+  const isHidden = wrapper.classList.toggle("d-none");
+
+  btn.textContent = isHidden ? "▶ Enrolled Students" : "▼ Enrolled Students";
+
+  // Only fetch once — if inner still shows "Loading…"
+  if (!isHidden && inner.querySelector("p")?.textContent === "Loading…") {
+    const students = await api("GET", `/api/instructor/courses/${courseId}/students`);
+    if (!students.length) {
+      inner.innerHTML = `<p class="text-muted mb-0" style="font-size:.85rem">No students enrolled yet.</p>`;
+      return;
+    }
+    inner.innerHTML = `
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <span class="fw-semibold" style="font-size:.88rem">
+          Enrolled Students
+          <span class="badge bg-light text-dark ms-1">${students.length}</span>
+        </span>
+        <input class="form-control form-control-sm w-auto"
+          placeholder="Search…"
+          oninput="filterStudentTable(${courseId}, this.value)"
+          style="max-width:180px">
+      </div>
+      <table class="table table-sm mb-0" id="stutable-${courseId}">
+        <thead class="table-light">
+          <tr><th>#</th><th>Username</th><th>User ID</th></tr>
+        </thead>
+        <tbody>
+          ${students.map((s, i) => `
+            <tr>
+              <td class="text-muted">${i + 1}</td>
+              <td>${s.username}</td>
+              <td><span class="badge bg-light text-dark">${s.user_id}</span></td>
+            </tr>`).join("")}
+        </tbody>
+      </table>`;
+  }
+}
+
+function filterStudentTable(courseId, query) {
+  const rows = document.querySelectorAll(`#stutable-${courseId} tbody tr`);
+  const q    = query.toLowerCase();
+  rows.forEach(row => {
+    row.style.display = row.textContent.toLowerCase().includes(q) ? "" : "none";
+  });
+}
+
+async function loadStudentsForSession() {
+  const cid = document.getElementById("sess-course").value;
+  const div = document.getElementById("student-list");
+  if (!cid) { div.innerHTML = ""; return; }
+  const students = await api("GET", `/api/instructor/courses/${cid}/students`);
+  div.innerHTML = `<label class="form-label fw-semibold">Mark Attendance</label>
+    <div style="max-height:280px;overflow-y:auto">
+    <table class="table table-sm"><thead class="table-light"><tr><th>Student</th><th>Status</th></tr></thead>
+    <tbody>${students.map(s => `
+      <tr>
+        <td>${s.username}</td>
+        <td><select class="form-select form-select-sm student-status" data-id="${s.user_id}">
+          <option value="present">Present</option>
+          <option value="absent" selected>Absent</option>
+          <option value="late">Late</option>
+        </select></td>
+      </tr>`).join("")}</tbody></table></div>`;
+}
+
+async function loadSessions() {
+  const data  = await api("GET", "/api/instructor/attendance-sessions");
+  const tbody = document.querySelector("#sess-table tbody");
+  tbody.innerHTML = data.map(s => `
+    <tr class="cursor-pointer" onclick="toggleSessionStudents(${s.att_session_id}, this)">
+      <td>${s.session_date}</td><td>${s.course_name}</td><td>${s.topic||'—'}</td>
+      <td><span class="badge bg-light text-dark" id="toggle-label-${s.att_session_id}">▶ Students</span></td>
+    </tr>
+    <tr id="students-row-${s.att_session_id}" class="d-none bg-light">
+      <td colspan="4" id="students-cell-${s.att_session_id}" class="p-3">Loading…</td>
+    </tr>`).join("") || `<tr><td colspan="4" class="text-center text-muted py-3">No sessions yet</td></tr>`;
+}
+
+async function toggleSessionStudents(sid, row) {
+  const studentRow  = document.getElementById(`students-row-${sid}`);
+  const label       = document.getElementById(`toggle-label-${sid}`);
+  const cell        = document.getElementById(`students-cell-${sid}`);
+  const isHidden    = studentRow.classList.contains("d-none");
+  studentRow.classList.toggle("d-none", !isHidden);
+  label.textContent = isHidden ? "▼ Students" : "▶ Students";
+  if (isHidden && cell.textContent === "Loading…") {
+    const records = await api("GET", `/api/instructor/attendance-sessions/${sid}/records`);
+    cell.innerHTML = records.length
+      ? `<table class="table table-sm mb-0" style="max-width:480px">
+          <thead class="table-light"><tr><th>Student</th><th>Status</th></tr></thead>
+          <tbody>${records.map(r => `
+            <tr><td>${r.username}</td><td>${badge(r.status)}</td></tr>`).join("")}
+          </tbody></table>`
+      : '<p class="text-muted mb-0">No records for this session.</p>';
+  }
+}
+
+async function loadCorrections() {
+  const data  = await api("GET", "/api/instructor/corrections");
+  const tbody = document.querySelector("#corr-table tbody");
+  tbody.innerHTML = data.map(r => `
+    <tr>
+      <td>${r.student_name}</td><td>${r.course_name}</td><td>${r.session_date}</td>
+      <td>${r.reason}</td>
+      <td>${r.proof_url ? `<a href="${r.proof_url}" target="_blank">View</a>` : '—'}</td>
+      <td>${badge(r.status)}</td>
+      <td>${r.status==='pending' ? `
+        <button class="btn btn-sm btn-success me-1" onclick="resolve(${r.req_id},'accept')">Accept</button>
+        <button class="btn btn-sm btn-danger" onclick="resolve(${r.req_id},'reject')">Reject</button>` : '—'}
+      </td>
+    </tr>`).join("") || `<tr><td colspan="7" class="text-center text-muted py-3">No requests</td></tr>`;
+}
+
+async function createSession() {
+  const errEl = document.getElementById("sess-err");
+  errEl.classList.add("d-none");
+  const course_id    = parseInt(document.getElementById("sess-course").value);
+  const session_date = document.getElementById("sess-date").value;
+  if (!course_id || !session_date) {
+    errEl.textContent = "Course and date are required."; errEl.classList.remove("d-none"); return;
+  }
+  const records = [...document.querySelectorAll(".student-status")].map(el => ({
+    student_id: parseInt(el.dataset.id), status: el.value
+  }));
+  const res = await fetch("/api/instructor/attendance-sessions", {
+    method: "POST", headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ course_id, session_date, topic: document.getElementById("sess-topic").value, records })
+  });
+  if (res.ok) {
+    bootstrap.Modal.getInstance(document.getElementById("sessionModal")).hide();
+    alert("Attendance session created!"); loadSessions();
+  } else {
+    const d = await res.json();
+    errEl.textContent = d.error; errEl.classList.remove("d-none");
+  }
+}
+
+async function resolve(reqId, action) {
+  const d = await api("POST", `/api/instructor/corrections/${reqId}/${action}`);
+  alert(d.message || d.error); loadCorrections();
+}
+
+loadCourses();
+
+window._realtimeHandlers = {
+  correction_submitted() {
+    loadCorrections();
+    showToast('📋 A student submitted a new correction request.', 'info');
+  },
+};
+</script>
+{% endblock %}
