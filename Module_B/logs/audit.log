@@ -824,3 +824,33 @@
 127.0.0.1 - - [18/Mar/2026 23:26:51] "GET /api/student/corrections HTTP/1.1" 200 -
 127.0.0.1 - - [18/Mar/2026 23:26:51] "GET /stream HTTP/1.1" 200 -
 127.0.0.1 - - [18/Mar/2026 23:27:04] "GET /isAuth HTTP/1.1" 200 -
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 415-861-673
+127.0.0.1 - - [19/Mar/2026 01:07:48] "[32mGET / HTTP/1.1[0m" 302 -
+127.0.0.1 - - [19/Mar/2026 01:07:48] "GET /login HTTP/1.1" 200 -
+127.0.0.1 - - [19/Mar/2026 01:07:49] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-03-18T19:38:03.704401 | ACTION=LOGIN_OK | USER=4 | ENDPOINT=/login | username=student_a
+127.0.0.1 - - [19/Mar/2026 01:08:03] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [19/Mar/2026 01:08:03] "[32mGET / HTTP/1.1[0m" 302 -
+127.0.0.1 - - [19/Mar/2026 01:08:03] "GET /student HTTP/1.1" 200 -
+127.0.0.1 - - [19/Mar/2026 01:08:03] "GET /stream HTTP/1.1" 200 -
+127.0.0.1 - - [19/Mar/2026 01:08:03] "GET /api/student/courses HTTP/1.1" 200 -
+127.0.0.1 - - [19/Mar/2026 01:08:03] "GET /api/student/attendance HTTP/1.1" 200 -
+127.0.0.1 - - [19/Mar/2026 01:08:03] "GET /api/student/corrections HTTP/1.1" 200 -
+127.0.0.1 - - [19/Mar/2026 01:08:03] "GET /api/student/profile HTTP/1.1" 200 -
+2026-03-18T19:38:17.113122 | ACTION=LOGOUT | USER=None | ENDPOINT=/logout | 
+127.0.0.1 - - [19/Mar/2026 01:08:17] "[32mPOST /logout HTTP/1.1[0m" 302 -
+127.0.0.1 - - [19/Mar/2026 01:08:17] "GET /login HTTP/1.1" 200 -
+2026-03-18T19:38:35.230983 | ACTION=LOGIN_OK | USER=8 | ENDPOINT=/login | username=dean_joshi
+127.0.0.1 - - [19/Mar/2026 01:08:35] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [19/Mar/2026 01:08:35] "[32mGET / HTTP/1.1[0m" 302 -
+127.0.0.1 - - [19/Mar/2026 01:08:35] "GET /dean HTTP/1.1" 200 -
+127.0.0.1 - - [19/Mar/2026 01:08:35] "GET /api/dean/active-semester HTTP/1.1" 200 -
+127.0.0.1 - - [19/Mar/2026 01:08:35] "GET /stream HTTP/1.1" 200 -
+127.0.0.1 - - [19/Mar/2026 01:08:35] "GET /api/dean/semesters/1/courses HTTP/1.1" 200 -
+127.0.0.1 - - [19/Mar/2026 01:08:40] "GET /api/dean/semesters HTTP/1.1" 200 -
+127.0.0.1 - - [19/Mar/2026 01:08:43] "GET /api/dean/semesters/2/courses HTTP/1.1" 200 -
