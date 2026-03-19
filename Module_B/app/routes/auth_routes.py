@@ -34,8 +34,10 @@ def do_login():
 
 @bp.get("/isAuth")
 def is_auth():
-    session_id = request.cookies.get("session_id") or request.headers.get("X-Session-Id")
-    mac        = request.cookies.get("session_mac") or request.headers.get("X-Session-Mac")
+    # Support both cookies and headers for session tokens
+    session_id = request.cookies.get("session_id") or request.headers.get("X-Session-Id") or request.json.get("session_token") if request.is_json else None
+    mac        = request.cookies.get("session_mac") or request.headers.get("X-Session-Mac") or request.json.get("mac") if request.is_json else None
+    
     try:
         user = verify_session(session_id, mac)
         return jsonify({

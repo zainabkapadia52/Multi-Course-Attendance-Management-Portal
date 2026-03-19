@@ -28,6 +28,31 @@
   </p>
 </div>
 <script>
+// API-first: Check authentication on page load (frontend responsibility)
+async function checkAuth() {
+  try {
+    const res = await fetch("/isAuth");
+    if (res.ok) {
+      const data = await res.json();
+      // User is already authenticated, redirect to their dashboard
+      const roleRedirects = {
+        "admin": "/admin",
+        "instructor": "/instructor",
+        "student": "/student",
+        "dean": "/dean",
+        "ta": "/ta"
+      };
+      window.location.href = roleRedirects[data.role] || "/";
+    }
+    // If not authenticated (401), stay on login page
+  } catch (err) {
+    // If error, stay on login page
+  }
+}
+
+// Check auth when page loads
+checkAuth();
+
 async function doLogin() {
   const res = await fetch("/login", {
     method: "POST",

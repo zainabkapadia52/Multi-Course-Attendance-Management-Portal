@@ -36,10 +36,8 @@ def index():
 
 @bp.get("/login")
 def login_page():
-    # If already logged in, go straight to dashboard — don't show login again
-    user = _get_user()
-    if user:
-        return redirect(ROLE_REDIRECT.get(user["role"], "/"))
+    # API-first: Always serve the login page
+    # Let frontend JavaScript check authentication and redirect if needed
     resp = make_response(render_template("login.html"))
     # No-cache on login page too so back-button can't return to it after logout
     return _no_cache(resp)
