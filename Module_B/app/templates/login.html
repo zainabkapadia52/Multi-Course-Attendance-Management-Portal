@@ -28,46 +28,47 @@
   </p>
 </div>
 <script>
-// API-first: Check authentication on page load (frontend responsibility)
-async function checkAuth() {
-  try {
-    const res = await fetch("/isAuth");
-    if (res.ok) {
-      const data = await res.json();
-      // User is already authenticated, redirect to their dashboard
-      const roleRedirects = {
-        "admin": "/admin",
-        "instructor": "/instructor",
-        "student": "/student",
-        "dean": "/dean",
-        "ta": "/ta"
-      };
-      window.location.href = roleRedirects[data.role] || "/";
-    }
-    // If not authenticated (401), stay on login page
-  } catch (err) {
-    // If error, stay on login page
-  }
-}
+const ROLE_ROUTES = {
+  admin: "/admin", instructor: "/instructor",
+  student: "/student", dean: "/dean", ta: "/ta"
+};
 
-// Check auth when page loads
-checkAuth();
+// If this tab already has a valid session, skip login
+window.addEventListener("pageshow", function() {
+  const sid = sessionStorage.getItem("session_id");
+  const mac = sessionStorage.getItem("session_mac");
+  if (!sid) return;
+  fetch("/isAuth", {
+    headers: { "X-Session-Id": sid, "X-Session-Mac": mac || "" }
+  })
+    .then(r => r.ok ? r.json() : null)
+    .then(d => { if (d && d.role) window.location.replace(ROLE_ROUTES[d.role] || "/"); })
+    .catch(() => {});
+});
 
 async function doLogin() {
+  const errEl = document.getElementById("err");
+  errEl.classList.add("d-none");
   const res = await fetch("/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ user: document.getElementById("u").value, password: document.getElementById("p").value })
+    body: JSON.stringify({
+      user:     document.getElementById("u").value,
+      password: document.getElementById("p").value
+    })
   });
   const data = await res.json();
   if (res.ok) {
-    window.location.href = "/";
+    // ← these two lines were missing — this was the entire bug
+    sessionStorage.setItem("session_id",  data.session_token);
+    sessionStorage.setItem("session_mac", data.mac);
+    window.location.href = ROLE_ROUTES[data.role] || "/";
   } else {
-    const err = document.getElementById("err");
-    err.textContent = data.error;
-    err.classList.remove("d-none");
+    errEl.textContent = data.error;
+    errEl.classList.remove("d-none");
   }
 }
+
 document.addEventListener("keydown", e => { if (e.key === "Enter") doLogin(); });
 </script>
 </body>

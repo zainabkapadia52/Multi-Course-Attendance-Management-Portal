@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
-<h4 class="fw-bold mb-4">Student Portal — {{ user.username }}</h4>
+<h4 class="fw-bold mb-4">Student Portal</h4>
 
-<ul class="nav nav-tabs mb-4" id="tabs">
+<ul class="nav nav-tabs mb-4">
   <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-courses">My Courses</button></li>
   <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-attendance">Attendance</button></li>
   <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-corrections">Correction Requests</button></li>
@@ -11,29 +11,17 @@
 
 <div class="tab-content">
 
-  <!-- COURSES -->
+  <!-- COURSES + STATS -->
   <div class="tab-pane fade show active" id="tab-courses">
-    <div class="card">
-      <div class="card-header">Enrolled Courses</div>
-      <div class="card-body p-0">
-        <table class="table mb-0" id="courses-table">
-          <thead class="table-light"><tr><th>Code</th><th>Name</th><th>Semester</th><th>Instructor(s)</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
+    <div id="courses-stats-container">
+      <p class="text-muted">Loading…</p>
     </div>
   </div>
 
-  <!-- ATTENDANCE -->
+  <!-- ATTENDANCE — course-wise accordions -->
   <div class="tab-pane fade" id="tab-attendance">
-    <div class="card">
-      <div class="card-header">Attendance Records</div>
-      <div class="card-body p-0">
-        <table class="table mb-0" id="att-table">
-          <thead class="table-light"><tr><th>Date</th><th>Course</th><th>Topic</th><th>Status</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
+    <div id="attendance-container">
+      <p class="text-muted">Loading…</p>
     </div>
   </div>
 
@@ -48,19 +36,18 @@
             <div id="corr-ok"  class="alert alert-success d-none"></div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Course</label>
-              <select id="corr-course" class="form-select" onchange="loadSessions()">
+              <select id="corr-course" class="form-select" onchange="loadEligibleSessions()">
                 <option value="">Select course…</option>
               </select>
             </div>
             <div class="mb-3">
-              <label class="form-label fw-semibold">Session</label>
-              <select id="corr-session" class="form-select">
-                <option value="">Select session…</option>
-              </select>
+              <label class="form-label fw-semibold">Session <span class="text-muted fw-normal">(absent sessions only)</span></label>
+              <select id="corr-session" class="form-select"><option value="">Select session…</option></select>
+              <div id="sessions-info" class="form-text text-warning d-none">No absent sessions found for this course.</div>
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Reason</label>
-              <textarea id="corr-reason" class="form-control" rows="3" placeholder="Explain why your attendance should be corrected…"></textarea>
+              <textarea id="corr-reason" class="form-control" rows="3"></textarea>
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Proof URL <span class="text-muted fw-normal">(optional)</span></label>
@@ -97,51 +84,138 @@
 
 {% block scripts %}
 <script>
-let enrolledCourses = [];
+let _statsData = [];
 
-async function loadCourses() {
-  const data = await api("GET", "/api/student/courses");
-  enrolledCourses = data;
-  const tbody = document.querySelector("#courses-table tbody");
-  tbody.innerHTML = data.map(c =>
-    `<tr><td><span class="badge bg-secondary">${c.code}</span></td><td>${c.name}</td><td>${c.semester}</td><td>${c.instructors||'—'}</td></tr>`
-  ).join("");
-  const sel = document.getElementById("corr-course");
-  sel.innerHTML = `<option value="">Select course…</option>` +
+async function loadStats() {
+  const data = await api("GET", "/api/student/attendance-stats");
+  if (!data) return;
+  _statsData = data;
+
+  // Courses tab — stats cards
+  const con = document.getElementById("courses-stats-container");
+  if (!data.length) { con.innerHTML = '<p class="text-muted">Not enrolled in any courses.</p>'; return; }
+
+  con.innerHTML = data.map(c => {
+    const barColor = c.colour === "success" ? "#198754" : c.colour === "warning" ? "#ffc107" : "#dc3545";
+    return `
+      <div class="card mb-3">
+        <div class="card-body py-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div>
+              <span class="badge bg-secondary me-2">${c.code}</span>
+              <strong>${c.name}</strong>
+            </div>
+            <span class="badge bg-${c.colour === 'success' ? 'success' : c.colour === 'warning' ? 'warning text-dark' : 'danger'} fs-6">
+              ${c.percentage}%
+            </span>
+          </div>
+          <div class="progress mb-2" style="height:8px">
+            <div class="progress-bar" style="width:${c.percentage}%;background:${barColor}"></div>
+          </div>
+          <div class="d-flex gap-3" style="font-size:.82rem;color:#666">
+            <span>Total: <strong>${c.total_sessions}</strong></span>
+            <span class="text-success">Present: <strong>${c.present}</strong></span>
+            <span class="text-warning">Late: <strong>${c.late}</strong></span>
+            <span class="text-danger">Absent: <strong>${c.absent}</strong></span>
+          </div>
+          ${c.percentage < 50 ? '<div class="mt-2 text-danger" style="font-size:.82rem">⚠ Attendance below 50% — at risk</div>' : ''}
+        </div>
+      </div>`;
+  }).join("");
+
+  // Populate correction form dropdown
+  document.getElementById("corr-course").innerHTML =
+    '<option value="">Select course…</option>' +
     data.map(c => `<option value="${c.course_id}">${c.code} — ${c.name}</option>`).join("");
+
+  // Attendance tab — course-wise accordions
+  buildAttendanceView(data);
 }
 
-async function loadAttendance() {
-  const data = await api("GET", "/api/student/attendance");
-  const tbody = document.querySelector("#att-table tbody");
-  tbody.innerHTML = data.map(r =>
-    `<tr><td>${r.session_date}</td><td>${r.course_name}</td><td>${r.topic||'—'}</td><td>${badge(r.status)}</td></tr>`
-  ).join("") || `<tr><td colspan="4" class="text-center text-muted py-3">No records yet</td></tr>`;
+function buildAttendanceView(data) {
+  const con = document.getElementById("attendance-container");
+  if (!data.length) { con.innerHTML = '<p class="text-muted">No attendance records yet.</p>'; return; }
+
+  con.innerHTML = data.map((c, i) => `
+    <div class="card mb-3">
+      <div class="card-header d-flex justify-content-between align-items-center py-2"
+           style="cursor:pointer" onclick="toggleAttCourse('att-${c.course_id}', this)">
+        <div>
+          <span class="badge bg-secondary me-2">${c.code}</span>
+          <strong>${c.name}</strong>
+          <span class="ms-2 badge bg-${c.colour === 'success' ? 'success' : c.colour === 'warning' ? 'warning text-dark' : 'danger'}">
+            ${c.percentage}%
+          </span>
+        </div>
+        <span id="att-toggle-${c.course_id}" style="font-size:.85rem">▶ ${c.total_sessions} sessions</span>
+      </div>
+      <div id="att-${c.course_id}" class="d-none">
+        <div class="card-body p-0">
+          ${c.records.length ? `
+            <table class="table table-sm mb-0">
+              <thead class="table-light">
+                <tr><th>Date</th><th>Topic</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                ${c.records.map(r => `
+                  <tr>
+                    <td>${r.session_date}</td>
+                    <td>${r.topic || '—'}</td>
+                    <td>${badge(r.status)}</td>
+                  </tr>`).join("")}
+              </tbody>
+            </table>` :
+            '<p class="text-muted p-3 mb-0">No sessions recorded yet.</p>'
+          }
+        </div>
+      </div>
+    </div>`
+  ).join("");
+}
+
+function toggleAttCourse(id, hdr) {
+  const panel  = document.getElementById(id);
+  const hidden = panel.classList.toggle("d-none");
+  const cid    = id.replace("att-", "");
+  const label  = document.getElementById(`att-toggle-${cid}`);
+  const c      = _statsData.find(x => x.course_id == cid);
+  if (c) label.textContent = hidden ? `▶ ${c.total_sessions} sessions` : `▼ ${c.total_sessions} sessions`;
+}
+
+async function loadEligibleSessions() {
+  const cid  = document.getElementById("corr-course").value;
+  const sel  = document.getElementById("corr-session");
+  const info = document.getElementById("sessions-info");
+  info.classList.add("d-none");
+  if (!cid) { sel.innerHTML = '<option value="">Select session…</option>'; return; }
+  const data = await api("GET", `/api/student/courses/${cid}/sessions`);
+  if (!data || !data.length) {
+    sel.innerHTML = '<option value="">No absent sessions</option>';
+    info.classList.remove("d-none");
+  } else {
+    sel.innerHTML = '<option value="">Select session…</option>' + data.map(s =>
+      `<option value="${s.att_session_id}">${s.session_date} — ${s.topic || 'Session'}</option>`
+    ).join("");
+  }
 }
 
 async function loadRequests() {
   const data = await api("GET", "/api/student/corrections");
-  const tbody = document.querySelector("#req-table tbody");
-  tbody.innerHTML = data.map(r =>
-    `<tr><td>${r.created_at.slice(0,10)}</td><td>${r.course_name}</td><td>${r.session_date}</td><td>${badge(r.status)}</td></tr>`
-  ).join("") || `<tr><td colspan="4" class="text-center text-muted py-3">No requests yet</td></tr>`;
-}
-
-async function loadSessions() {
-  const cid = document.getElementById("corr-course").value;
-  const sel = document.getElementById("corr-session");
-  if (!cid) { sel.innerHTML = `<option value="">Select session…</option>`; return; }
-  const data = await api("GET", `/api/student/courses/${cid}/sessions`);
-  sel.innerHTML = `<option value="">Select session…</option>` +
-    data.map(s => `<option value="${s.att_session_id}">${s.session_date} — ${s.topic||'Session'}</option>`).join("");
+  if (!data) return;
+  document.querySelector("#req-table tbody").innerHTML = data.map(r =>
+    `<tr>
+      <td>${r.created_at.slice(0,10)}</td>
+      <td>${r.course_name}</td>
+      <td>${r.session_date}</td>
+      <td>${badge(r.status)}</td>
+    </tr>`
+  ).join("") || '<tr><td colspan="4" class="text-center text-muted py-3">No requests yet</td></tr>';
 }
 
 async function submitCorrection() {
   const errEl = document.getElementById("corr-err");
   const okEl  = document.getElementById("corr-ok");
-  errEl.classList.add("d-none");
-  okEl.classList.add("d-none");
-
+  errEl.classList.add("d-none"); okEl.classList.add("d-none");
   const body = {
     course_id:      parseInt(document.getElementById("corr-course").value),
     att_session_id: parseInt(document.getElementById("corr-session").value),
@@ -153,35 +227,39 @@ async function submitCorrection() {
     errEl.classList.remove("d-none"); return;
   }
   const res = await fetch("/api/student/corrections", {
-    method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(body)
+    method: "POST", headers: _sessionHeaders(), body: JSON.stringify(body)
   });
-  const data = await res.json();
+  const d = await res.json();
   if (res.ok) {
-    okEl.textContent = data.message;
-    okEl.classList.remove("d-none");
+    okEl.textContent = d.message; okEl.classList.remove("d-none");
     document.getElementById("corr-reason").value = "";
-    document.getElementById("corr-proof").value = "";
+    document.getElementById("corr-proof").value  = "";
     loadRequests();
   } else {
-    errEl.textContent = data.error;
-    errEl.classList.remove("d-none");
+    errEl.textContent = d.error; errEl.classList.remove("d-none");
   }
 }
 
 async function loadProfile() {
   const d = await api("GET", "/api/student/profile");
+  if (!d) return;
   document.getElementById("profile-body").innerHTML = `
     <table class="table mb-0">
-      <tr><th style="width:140px">Username</th><td>${d.username}</td></tr>
+      <tr><th style="width:130px">Username</th><td>${d.username}</td></tr>
       <tr><th>Role</th><td><span class="badge bg-secondary">${d.role}</span></td></tr>
-      <tr><th>Last login</th><td>${d.last_login ? d.last_login.replace('T',' ').slice(0,19)+' UTC' : '—'}</td></tr>
+      <tr><th>Roll No</th><td>${d.roll_no||'—'}</td></tr>
+      <tr><th>Program</th><td>${d.program||'—'}</td></tr>
+      <tr><th>Batch</th><td>${d.batch||'—'}</td></tr>
+      <tr><th>Last Login</th><td>${d.last_login ? d.last_login.slice(0,19)+' UTC' : '—'}</td></tr>
     </table>`;
 }
 
-// Load all tabs on page ready
-loadCourses();
-loadAttendance();
-loadRequests();
-loadProfile();
+loadStats(); loadRequests(); loadProfile();
+
+window._realtimeHandlers = {
+  correction_resolved() { loadStats(); loadRequests(); showToast("A correction request was resolved.", "info"); },
+  attendance_updated()  { loadStats(); },
+  attendance_session_created() { loadStats(); loadEligibleSessions(); },
+};
 </script>
 {% endblock %}

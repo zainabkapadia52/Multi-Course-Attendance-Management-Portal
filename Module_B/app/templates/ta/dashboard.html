@@ -1,66 +1,45 @@
 {% extends "base.html" %}
 {% block content %}
-<h4 class="fw-bold mb-4">TA Panel — {{ user.username }}</h4>
+<h4 class="fw-bold mb-4">TA Panel</h4>
 
 <ul class="nav nav-tabs mb-4">
-  <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-sessions">Attendance Sessions</button></li>
-  <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-update">Update Attendance</button></li>
+  <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-courses">My Courses</button></li>
+  <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-corrections" onclick="loadCorrections()">Correction Requests</button></li>
 </ul>
 
 <div class="tab-content">
 
-  <!-- SESSIONS -->
-  <div class="tab-pane fade show active" id="tab-sessions">
-    <div class="card mb-3">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        Attendance Sessions
-        <button class="btn btn-sm btn-dark" data-bs-toggle="modal" data-bs-target="#taSessionModal">+ Create Session</button>
-      </div>
-      <div class="card-body p-0">
-        <table class="table mb-0" id="ta-sess-table">
-          <thead class="table-light"><tr><th>Date</th><th>Course</th><th>Topic</th><th></th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </div>
+  <!-- COURSES — one card per course -->
+  <div class="tab-pane fade show active" id="tab-courses">
+    <div id="ta-course-cards"></div>
   </div>
 
-  <!-- UPDATE ATTENDANCE -->
-  <div class="tab-pane fade" id="tab-update">
-    <div class="card mb-3">
-      <div class="card-body">
-        <div class="row g-3">
-          <div class="col-md-6">
-            <label class="form-label fw-semibold">Session</label>
-            <select id="upd-session" class="form-select" onchange="loadUpdateRecords()">
-              <option value="">Select session…</option>
-            </select>
-          </div>
-        </div>
-      </div>
+  <!-- CORRECTIONS — course wise -->
+  <div class="tab-pane fade" id="tab-corrections">
+    <div class="card">
+      <div class="card-header">Correction Requests</div>
+      <div id="ta-corr-table" class="card-body p-0"></div>
     </div>
-    <div id="upd-records-container"></div>
   </div>
-
 </div>
 
 <!-- Create Session Modal -->
 <div class="modal fade" id="taSessionModal" tabindex="-1">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-      <div class="modal-header"><h5 class="modal-title">New Attendance Session</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-header">
+        <h5 class="modal-title" id="ta-modal-title">New Attendance Session</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
       <div class="modal-body">
         <div id="ta-sess-err" class="alert alert-danger d-none"></div>
+        <input type="hidden" id="ta-modal-course-id">
         <div class="row g-3 mb-3">
-          <div class="col-md-5">
-            <label class="form-label fw-semibold">Course</label>
-            <select id="ta-sess-course" class="form-select" onchange="loadTaStudents()"><option value="">Select…</option></select>
-          </div>
-          <div class="col-md-4">
+          <div class="col-md-6">
             <label class="form-label fw-semibold">Date</label>
             <input id="ta-sess-date" class="form-control" type="date">
           </div>
-          <div class="col-md-3">
+          <div class="col-md-6">
             <label class="form-label fw-semibold">Topic</label>
             <input id="ta-sess-topic" class="form-control" placeholder="Optional">
           </div>
@@ -78,133 +57,308 @@
 
 {% block scripts %}
 <script>
+let _taCourses = [];
+
 async function loadTaCourses() {
-  const courses = await api("GET", "/api/ta/courses");
-  document.getElementById("ta-sess-course").innerHTML =
-    `<option value="">Select…</option>` + courses.map(c =>
-      `<option value="${c.course_id}">${c.code} — ${c.name}</option>`).join("");
+  _taCourses = await api("GET", "/api/ta/courses");
+  if (!_taCourses) return;
+  const con = document.getElementById("ta-course-cards");
+  if (!_taCourses.length) {
+    con.innerHTML = '<p class="text-muted">No courses assigned.</p>'; return;
+  }
+  con.innerHTML = _taCourses.map(c => `
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center py-2">
+        <div>
+          <span class="badge bg-secondary me-2">${c.code}</span>
+          <strong>${c.name}</strong>
+          <span class="text-muted ms-2" style="font-size:.85rem">${c.semester}</span>
+        </div>
+        <button class="btn btn-sm btn-dark"
+          onclick="openCreateSession(${c.course_id}, '${c.code} — ${c.name}')">
+          + New Session
+        </button>
+      </div>
+      <div class="card-body p-0">
+        <div id="sessions-${c.course_id}">
+          <p class="text-muted p-3 mb-0" style="font-size:.85rem">Loading sessions…</p>
+        </div>
+      </div>
+    </div>`).join("");
+
+  for (const c of _taCourses) {
+    loadCourseSessions(c.course_id);
+  }
 }
 
-async function loadTaSessions() {
-  const data  = await api("GET", "/api/ta/attendance-sessions");
-  const tbody = document.querySelector("#ta-sess-table tbody");
-  tbody.innerHTML = data.map(s => `
-    <tr>
-      <td>${s.session_date}</td><td>${s.course_name}</td><td>${s.topic||'—'}</td>
-      <td><button class="btn btn-sm btn-outline-secondary" onclick="toggleTaStudents(${s.att_session_id}, this)">▶ Students</button></td>
-    </tr>
-    <tr id="ta-sturow-${s.att_session_id}" class="d-none bg-light">
-      <td colspan="4" id="ta-stucell-${s.att_session_id}" class="p-3">Loading…</td>
-    </tr>`).join("") || `<tr><td colspan="4" class="text-center text-muted py-3">No sessions yet</td></tr>`;
-
-  // Also populate update dropdown
-  document.getElementById("upd-session").innerHTML =
-    `<option value="">Select session…</option>` + data.map(s =>
-      `<option value="${s.att_session_id}">${s.session_date} — ${s.course_name} ${s.topic ? '('+s.topic+')' : ''}</option>`).join("");
+async function loadCourseSessions(courseId) {
+  const sessions = await api("GET", `/api/ta/courses/${courseId}/sessions`);
+  const con      = document.getElementById(`sessions-${courseId}`);
+  if (!sessions || !sessions.length) {
+    con.innerHTML = '<p class="text-muted p-3 mb-0" style="font-size:.85rem">No sessions yet.</p>'; return;
+  }
+  con.innerHTML = `
+    <table class="table table-sm mb-0">
+      <thead class="table-light">
+        <tr><th>Date</th><th>Topic</th><th>Students</th></tr>
+      </thead>
+      <tbody>
+        ${sessions.map(s => `
+          <tr>
+            <td>${s.session_date}</td>
+            <td>${s.topic || '—'}</td>
+            <td>
+              <button class="btn btn-link btn-sm p-0"
+                onclick="toggleTaSession(${s.att_session_id}, this)">
+                ▶ View / Edit
+              </button>
+            </td>
+          </tr>
+          <tr id="ta-sturow-${s.att_session_id}" class="d-none bg-light">
+            <td colspan="3" id="ta-stucell-${s.att_session_id}" class="p-3">Loading…</td>
+          </tr>`).join("")}
+      </tbody>
+    </table>`;
 }
 
-async function toggleTaStudents(sid, btn) {
+async function toggleTaSession(sid, btn) {
   const row  = document.getElementById(`ta-sturow-${sid}`);
   const cell = document.getElementById(`ta-stucell-${sid}`);
   const show = row.classList.toggle("d-none") === false;
-  btn.textContent = show ? "▼ Students" : "▶ Students";
-  if (show && cell.textContent === "Loading…") {
+  btn.textContent = show ? "▼ Close" : "▶ View / Edit";
+
+  if (show) {
     const records = await api("GET", `/api/ta/attendance-sessions/${sid}/records`);
-    cell.innerHTML = records.length
-      ? `<table class="table table-sm mb-0" style="max-width:400px">
-          <thead class="table-light"><tr><th>Student</th><th>Status</th></tr></thead>
-          <tbody>${records.map(r => `<tr><td>${r.username}</td><td>${badge(r.status)}</td></tr>`).join("")}</tbody>
-         </table>`
-      : '<p class="text-muted mb-0">No records.</p>';
+    if (!records) return;
+    if (!records.length) {
+      cell.innerHTML = '<p class="text-muted mb-0">No records.</p>'; return;
+    }
+    renderSessionRecords(sid, records, false);
   }
 }
 
-async function loadTaStudents() {
-  const cid = document.getElementById("ta-sess-course").value;
-  const div = document.getElementById("ta-student-list");
-  if (!cid) { div.innerHTML = ""; return; }
-  const students = await api("GET", `/api/ta/courses/${cid}/students`);
-  div.innerHTML = `<label class="form-label fw-semibold">Mark Attendance</label>
+function renderSessionRecords(sid, records, editMode) {
+  const cell = document.getElementById(`ta-stucell-${sid}`);
+  if (editMode) {
+    cell.innerHTML = `
+      <table class="table table-sm mb-2" style="max-width:480px">
+        <thead class="table-light">
+          <tr><th>Student</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          ${records.map(r => `
+            <tr>
+              <td>${r.username}</td>
+              <td>
+                <select class="form-select form-select-sm w-auto ta-upd-status"
+                  data-rid="${r.record_id}">
+                  <option value="present" ${r.status==='present'?'selected':''}>Present</option>
+                  <option value="absent"  ${r.status==='absent' ?'selected':''}>Absent</option>
+                </select>
+              </td>
+            </tr>`).join("")}
+        </tbody>
+      </table>
+      <button class="btn btn-sm btn-dark" onclick="saveSessionRecords(${sid})">Save</button>
+      <button class="btn btn-sm btn-outline-secondary ms-2"
+        onclick="renderSessionRecords(${sid}, ${JSON.stringify(records).replace(/"/g,'&quot;')}, false)">
+        Cancel
+      </button>`;
+  } else {
+    cell.innerHTML = `
+      <table class="table table-sm mb-2" style="max-width:480px">
+        <thead class="table-light">
+          <tr><th>Student</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          ${records.map(r => `
+            <tr>
+              <td>${r.username}</td>
+              <td>${badge(r.status)}</td>
+            </tr>`).join("")}
+        </tbody>
+      </table>
+      <button class="btn btn-sm btn-outline-warning"
+        onclick="switchToEdit(${sid})">Edit Attendance</button>`;
+  }
+}
+
+async function switchToEdit(sid) {
+  const records = await api("GET", `/api/ta/attendance-sessions/${sid}/records`);
+  if (!records) return;
+  renderSessionRecords(sid, records, true);
+}
+
+async function saveSessionRecords(sid) {
+  const selects = document.querySelectorAll(`#ta-stucell-${sid} .ta-upd-status`);
+  for (const sel of selects) {
+    await api("PUT", `/api/ta/records/${sel.dataset.rid}`, { status: sel.value });
+  }
+  showToast(`${selects.length} record(s) saved.`, "success");
+  const records = await api("GET", `/api/ta/attendance-sessions/${sid}/records`);
+  if (records) renderSessionRecords(sid, records, false);
+}
+
+async function openCreateSession(courseId, courseLabel) {
+  document.getElementById("ta-modal-course-id").value = courseId;
+  document.getElementById("ta-modal-title").textContent = `New Session — ${courseLabel}`;
+  document.getElementById("ta-sess-err").classList.add("d-none");
+  document.getElementById("ta-sess-date").value  = "";
+  document.getElementById("ta-sess-topic").value = "";
+  const students = await api("GET", `/api/ta/courses/${courseId}/students`);
+  if (!students) return;
+  document.getElementById("ta-student-list").innerHTML = `
+    <label class="form-label fw-semibold">Mark Attendance</label>
     <div style="max-height:280px;overflow-y:auto">
-    <table class="table table-sm"><thead class="table-light"><tr><th>Student</th><th>Status</th></tr></thead>
-    <tbody>${students.map(s => `
-      <tr><td>${s.username}</td>
-      <td><select class="form-select form-select-sm ta-student-status" data-id="${s.user_id}">
-        <option value="present">Present</option>
-        <option value="absent" selected>Absent</option>
-        <option value="late">Late</option>
-      </select></td></tr>`).join("")}</tbody></table></div>`;
+      <table class="table table-sm">
+        <thead class="table-light"><tr><th>Student</th><th>Status</th></tr></thead>
+        <tbody>
+          ${students.map(s => `
+            <tr>
+              <td>${s.username}</td>
+              <td>
+                <select class="form-select form-select-sm ta-new-status" data-id="${s.user_id}">
+                  <option value="present">Present</option>
+                  <option value="absent" selected>Absent</option>
+                </select>
+              </td>
+            </tr>`).join("")}
+        </tbody>
+      </table>
+    </div>`;
+  new bootstrap.Modal(document.getElementById("taSessionModal")).show();
 }
 
 async function createTaSession() {
-  const errEl = document.getElementById("ta-sess-err");
-  errEl.classList.add("d-none");
-  const course_id    = parseInt(document.getElementById("ta-sess-course").value);
+  const errEl      = document.getElementById("ta-sess-err");
+  const course_id  = parseInt(document.getElementById("ta-modal-course-id").value);
   const session_date = document.getElementById("ta-sess-date").value;
   if (!course_id || !session_date) {
-    errEl.textContent = "Course and date are required."; errEl.classList.remove("d-none"); return;
+    errEl.textContent = "Date is required."; errEl.classList.remove("d-none"); return;
   }
-  const records = [...document.querySelectorAll(".ta-student-status")].map(el => ({
+  const records = [...document.querySelectorAll(".ta-new-status")].map(el => ({
     student_id: parseInt(el.dataset.id), status: el.value
   }));
   const res = await fetch("/api/ta/attendance-sessions", {
-    method: "POST", headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({ course_id, session_date, topic: document.getElementById("ta-sess-topic").value, records })
+    method: "POST", headers: _sessionHeaders(),
+    body: JSON.stringify({
+      course_id, session_date,
+      topic: document.getElementById("ta-sess-topic").value,
+      records
+    })
   });
   if (res.ok) {
     bootstrap.Modal.getInstance(document.getElementById("taSessionModal")).hide();
-    alert("Session created!"); loadTaSessions();
+    showToast("Session created!", "success");
+    loadCourseSessions(course_id);
   } else {
-    const d = await res.json(); errEl.textContent = d.error; errEl.classList.remove("d-none");
+    const d = await res.json();
+    errEl.textContent = d.error; errEl.classList.remove("d-none");
   }
 }
 
-async function loadUpdateRecords() {
-  const sid = document.getElementById("upd-session").value;
-  const con = document.getElementById("upd-records-container");
-  if (!sid) { con.innerHTML = ""; return; }
-  const records = await api("GET", `/api/ta/attendance-sessions/${sid}/records`);
-  if (!records.length) { con.innerHTML = '<p class="text-muted">No records for this session.</p>'; return; }
-  con.innerHTML = `
-    <div class="card">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        Edit Attendance
-        <button class="btn btn-sm btn-dark" onclick="saveTaRecords()">Save All</button>
-      </div>
-      <div class="card-body p-0">
-        <table class="table mb-0">
-          <thead class="table-light"><tr><th>Student</th><th>Status</th></tr></thead>
-          <tbody>${records.map(r => `
-            <tr>
-              <td>${r.username}</td>
-              <td><select class="form-select form-select-sm w-auto ta-upd-status" data-rid="${r.record_id}">
-                <option value="present" ${r.status==='present'?'selected':''}>Present</option>
-                <option value="absent"  ${r.status==='absent' ?'selected':''}>Absent</option>
-                <option value="late"    ${r.status==='late'   ?'selected':''}>Late</option>
-              </select></td>
-            </tr>`).join("")}
-          </tbody>
-        </table>
-      </div>
-    </div>`;
+// ── corrections — course wise ─────────────────────────────────────────────────
+async function loadCorrections() {
+  const data = await api("GET", "/api/ta/corrections");
+  if (!data) return;
+
+  const con = document.getElementById("ta-corr-table").parentElement;
+
+  if (!data.length) {
+    con.innerHTML = `
+      <div class="card-body text-muted text-center py-4">
+        No correction requests yet.
+      </div>`; return;
+  }
+
+  // Group by course
+  const grouped = {};
+  for (const r of data) {
+    if (!grouped[r.course_id]) {
+      grouped[r.course_id] = { course_name: r.course_name, requests: [] };
+    }
+    grouped[r.course_id].requests.push(r);
+  }
+
+  con.innerHTML = Object.entries(grouped).map(([courseId, group]) => {
+    const pendingCount = group.requests.filter(r => r.status === 'pending').length;
+    return `
+      <div class="border-bottom">
+        <div class="d-flex justify-content-between align-items-center px-3 py-2"
+             style="cursor:pointer;background:#f8f9fa"
+             onclick="toggleTaCorrCourse('ta-corr-${courseId}', this)">
+          <span>
+            <strong>${group.course_name}</strong>
+            ${pendingCount > 0
+              ? `<span class="badge bg-warning text-dark ms-2">${pendingCount} pending</span>`
+              : '<span class="badge bg-secondary ms-2">all resolved</span>'}
+          </span>
+          <span id="ta-corr-toggle-${courseId}" style="font-size:.85rem">▶ Show</span>
+        </div>
+        <div id="ta-corr-${courseId}" class="d-none">
+          <table class="table mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Student</th><th>Session</th><th>Reason</th>
+                <th>Proof</th><th>Status</th><th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${group.requests.map(r => `
+                <tr>
+                  <td>${r.student_name}</td>
+                  <td>${r.session_date}<br>
+                    <span class="text-muted" style="font-size:.78rem">${r.topic||''}</span>
+                  </td>
+                  <td style="max-width:180px;word-break:break-word">${r.reason}</td>
+                  <td>${r.proof_url
+                    ? `<a href="${r.proof_url}" target="_blank">View</a>`
+                    : '—'}</td>
+                  <td>${badge(r.status)}</td>
+                  <td>${r.status === 'pending' ? `
+                    <button class="btn btn-sm btn-success me-1"
+                      onclick="resolveCorr(${r.req_id},'accept')">Accept</button>
+                    <button class="btn btn-sm btn-danger"
+                      onclick="resolveCorr(${r.req_id},'reject')">Reject</button>` : '—'}
+                  </td>
+                </tr>`).join("")}
+            </tbody>
+          </table>
+        </div>
+      </div>`;
+  }).join("");
+
+  // Auto-expand courses with pending requests
+  Object.keys(grouped).forEach(courseId => {
+    const hasPending = grouped[courseId].requests.some(r => r.status === 'pending');
+    if (hasPending) {
+      document.getElementById(`ta-corr-${courseId}`)?.classList.remove("d-none");
+      const toggle = document.getElementById(`ta-corr-toggle-${courseId}`);
+      if (toggle) toggle.textContent = "▼ Hide";
+    }
+  });
 }
 
-async function saveTaRecords() {
-  const selects = document.querySelectorAll(".ta-upd-status");
-  for (const sel of selects)
-    await api("PUT", `/api/ta/records/${sel.dataset.rid}`, { status: sel.value });
-  alert(`${selects.length} record(s) saved.`);
+function toggleTaCorrCourse(panelId, hdr) {
+  const panel    = document.getElementById(panelId);
+  const courseId = panelId.replace("ta-corr-", "");
+  const toggle   = document.getElementById(`ta-corr-toggle-${courseId}`);
+  const hidden   = panel.classList.toggle("d-none");
+  toggle.textContent = hidden ? "▶ Show" : "▼ Hide";
 }
 
-loadTaCourses(); loadTaSessions();
+async function resolveCorr(reqId, action) {
+  const d = await api("POST", `/api/ta/corrections/${reqId}/${action}`);
+  if (d) { showToast(d.message || d.error, d.error ? "danger" : "success"); loadCorrections(); }
+}
+
+loadTaCourses();
 
 window._realtimeHandlers = {
-  attendance_session_created() {
-    loadTaSessions();
-  },
-  attendance_updated() {
-    loadUpdateRecords();
-  },
+  correction_submitted() { loadCorrections(); showToast("New correction request submitted.", "info"); },
+  correction_resolved()  { loadCorrections(); },
+  attendance_updated()   { for (const c of _taCourses) loadCourseSessions(c.course_id); },
 };
 </script>
 {% endblock %}
+

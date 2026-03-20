@@ -36,9 +36,34 @@
         <div class="card">
           <div class="card-header">Create Semester</div>
           <div class="card-body">
-            <input id="sem-name"   class="form-control mb-2" placeholder="e.g. Sem I 2026-27">
-            <input id="sem-start"  class="form-control mb-2" type="date">
-            <input id="sem-end"    class="form-control mb-2" type="date">
+            <div id="sem-err" class="alert alert-danger d-none"></div>
+            <div class="row g-2 mb-2">
+              <div class="col-5">
+                <label class="form-label fw-semibold" style="font-size:.85rem">Semester</label>
+                <select id="sem-number" class="form-select">
+                  <option value="">Select…</option>
+                  <option value="1">Semester I</option>
+                  <option value="2">Semester II</option>
+                </select>
+              </div>
+              <div class="col-7">
+                <label class="form-label fw-semibold" style="font-size:.85rem">Academic Year</label>
+                <input id="sem-year" class="form-control" placeholder="e.g. 2025-26">
+              </div>
+            </div>
+            <div class="mb-1" style="font-size:.82rem;color:#888">
+              Preview: <strong id="sem-preview">—</strong>
+            </div>
+            <div class="row g-2 mb-2 mt-1">
+              <div class="col-6">
+                <label class="form-label fw-semibold" style="font-size:.85rem">Start Date</label>
+                <input id="sem-start" class="form-control" type="date">
+              </div>
+              <div class="col-6">
+                <label class="form-label fw-semibold" style="font-size:.85rem">End Date</label>
+                <input id="sem-end" class="form-control" type="date">
+              </div>
+            </div>
             <div class="form-check mb-3">
               <input id="sem-active" class="form-check-input" type="checkbox">
               <label class="form-check-label" for="sem-active">Set as active semester</label>
@@ -88,6 +113,11 @@
               <input id="new-dept"   class="form-control mb-2" placeholder="Department">
               <input id="new-desig"  class="form-control mb-2" placeholder="Designation">
             </div>
+            <div id="ta-fields" class="d-none">
+              <input id="ta-rollno"  class="form-control mb-2" placeholder="Roll No (e.g. 24110001)">
+              <input id="ta-program" class="form-control mb-2" placeholder="Program (e.g. M.Tech CSE)">
+              <input id="ta-batch"   class="form-control mb-2" placeholder="Batch (e.g. 2024)">
+            </div>
             <button class="btn btn-dark w-100 mt-1" onclick="createUser()">Create User</button>
           </div>
         </div>
@@ -95,14 +125,7 @@
       <div class="col-md-8">
         <div class="card">
           <div class="card-header">All Users</div>
-          <div class="card-body p-0" style="max-height:520px;overflow-y:auto">
-            <table class="table table-sm mb-0" id="users-table">
-              <thead class="table-light sticky-top">
-                <tr><th>Username</th><th>Role</th><th>Details</th><th>Last Login</th><th></th></tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
+          <div id="users-table" style="max-height:520px;overflow-y:auto"></div>
         </div>
       </div>
     </div>
@@ -169,18 +192,31 @@ function profileText(u) {
 function buildCourseCard(entry, editable) {
   const c = entry.course;
 
-  const mkList = (items, removeUrl, nameKey, typeName) => {
+  const mkInlineList = (items, typeName) => {
     if (!items.length) return `<p class="text-muted mb-0" style="font-size:.82rem">None assigned</p>`;
     return items.map(it => `
       <div class="d-flex justify-content-between align-items-center py-1 border-bottom">
         <div>
-          <div style="font-size:.84rem;font-weight:500">${it.username || it[nameKey]}</div>
+          <div style="font-size:.84rem;font-weight:500">${it.username}</div>
           <div class="text-muted" style="font-size:.75rem">${profileText(it)}</div>
         </div>
         ${editable ? `<button class="btn btn-link btn-sm text-danger p-0 ms-2"
           onclick="removeMember(${c.course_id},'${typeName}',${it.user_id})">✕</button>` : ''}
       </div>`).join('');
   };
+
+  const studentRows = entry.students.map((s, i) => `
+    <tr>
+      <td class="text-muted" style="font-size:.82rem">${i + 1}</td>
+      <td style="font-size:.83rem">${s.username}</td>
+      <td style="font-size:.82rem">${s.roll_no  || '—'}</td>
+      <td style="font-size:.82rem">${s.program  || '—'}</td>
+      <td style="font-size:.82rem">${s.batch    || '—'}</td>
+      ${editable ? `<td><button class="btn btn-link btn-sm text-danger p-0"
+        onclick="removeMember(${c.course_id},'student',${s.user_id})">✕</button></td>` : '<td></td>'}
+    </tr>`).join('');
+
+  const uid = `adm-${c.course_id}`;
 
   return `
     <div class="card mb-3" id="cc-${c.course_id}">
@@ -190,30 +226,86 @@ function buildCourseCard(entry, editable) {
       </div>
       <div class="card-body py-2">
         <div class="row g-3">
+
+          <!-- Instructors — always visible, small list -->
           <div class="col-md-4">
             <div class="d-flex justify-content-between align-items-center mb-1">
-              <span class="fw-semibold" style="font-size:.85rem">Instructors <span class="badge bg-light text-dark">${entry.instructors.length}</span></span>
+              <span class="fw-semibold" style="font-size:.85rem">
+                Instructors <span class="badge bg-light text-dark">${entry.instructors.length}</span>
+              </span>
               ${editable ? `<button class="btn btn-sm btn-link p-0" onclick="openAdd('instructor',${c.course_id},'${c.code}')">+ Add</button>` : ''}
             </div>
-            ${mkList(entry.instructors, '', 'username', 'instructor')}
+            ${mkInlineList(entry.instructors, 'instructor')}
           </div>
+
+          <!-- TAs — always visible, small list -->
           <div class="col-md-4">
             <div class="d-flex justify-content-between align-items-center mb-1">
-              <span class="fw-semibold" style="font-size:.85rem">TAs <span class="badge bg-light text-dark">${entry.tas.length}</span></span>
+              <span class="fw-semibold" style="font-size:.85rem">
+                TAs <span class="badge bg-light text-dark">${entry.tas.length}</span>
+              </span>
               ${editable ? `<button class="btn btn-sm btn-link p-0" onclick="openAdd('ta',${c.course_id},'${c.code}')">+ Add</button>` : ''}
             </div>
-            ${mkList(entry.tas, '', 'username', 'ta')}
+            ${mkInlineList(entry.tas, 'ta')}
           </div>
+
+          <!-- Students — collapsed, expand on click -->
           <div class="col-md-4">
             <div class="d-flex justify-content-between align-items-center mb-1">
-              <span class="fw-semibold" style="font-size:.85rem">Students <span class="badge bg-light text-dark">${entry.students.length}</span></span>
-              ${editable ? `<button class="btn btn-sm btn-link p-0" onclick="openAdd('student',${c.course_id},'${c.code}')">+ Add</button>` : ''}
+              <span class="fw-semibold" style="font-size:.85rem">
+                Students <span class="badge bg-light text-dark">${entry.students.length}</span>
+              </span>
+              <div class="d-flex gap-2 align-items-center">
+                ${editable ? `<button class="btn btn-sm btn-link p-0" onclick="openAdd('student',${c.course_id},'${c.code}')">+ Add</button>` : ''}
+                <button class="btn btn-sm btn-outline-secondary py-0 px-2"
+                  style="font-size:.78rem"
+                  onclick="toggleAdminStudents('${uid}', this)">
+                  ▶ Show
+                </button>
+              </div>
             </div>
-            ${mkList(entry.students, '', 'username', 'student')}
+
+            <!-- Collapsed by default -->
+            <div id="adm-stu-${uid}" class="d-none mt-1">
+              ${entry.students.length ? `
+                <input class="form-control form-control-sm mb-2"
+                  placeholder="Search students…"
+                  oninput="filterAdminStudents('${uid}', this.value)">
+                <div style="max-height:220px;overflow-y:auto">
+                  <table class="table table-sm mb-0" id="adm-stable-${uid}">
+                    <thead class="table-light" style="position:sticky;top:0">
+                      <tr>
+                        <th style="font-size:.78rem">#</th>
+                        <th style="font-size:.78rem">Username</th>
+                        <th style="font-size:.78rem">Roll No</th>
+                        <th style="font-size:.78rem">Program</th>
+                        <th style="font-size:.78rem">Batch</th>
+                        ${editable ? '<th></th>' : ''}
+                      </tr>
+                    </thead>
+                    <tbody>${studentRows}</tbody>
+                  </table>
+                </div>` :
+                `<p class="text-muted mb-0" style="font-size:.83rem">No students enrolled.</p>`
+              }
+            </div>
           </div>
+
         </div>
       </div>
     </div>`;
+}
+
+function toggleAdminStudents(uid, btn) {
+  const panel  = document.getElementById(`adm-stu-${uid}`);
+  const hidden = panel.classList.toggle("d-none");
+  btn.textContent = hidden ? "▶ Show" : "▼ Hide";
+}
+
+function filterAdminStudents(uid, query) {
+  document.querySelectorAll(`#adm-stable-${uid} tbody tr`).forEach(row => {
+    row.style.display = row.textContent.toLowerCase().includes(query.toLowerCase()) ? "" : "none";
+  });
 }
 
 // ── active semester ───────────────────────────────────────────────────────────
@@ -259,15 +351,89 @@ let _addCourseId, _addType;
 
 async function openAdd(type, courseId, courseCode) {
   _addCourseId = courseId; _addType = type;
-  const labels = { instructor: "Instructor", ta: "TA", student: "Student" };
-  const urls   = { instructor: "/api/admin/instructors", ta: "/api/admin/tas", student: "/api/admin/students" };
+  const labels = { instructor:"Instructor", ta:"TA", student:"Student" };
   document.getElementById("addModalTitle").textContent = `Add ${labels[type]} — ${courseCode}`;
   document.getElementById("add-modal-label").textContent = `Select ${labels[type]}`;
   document.getElementById("add-modal-err").classList.add("d-none");
+
+  // For instructors use available-instructors (filters already assigned)
+  // For TAs and students use full list
+  const urls = {
+    instructor: `/api/admin/courses/${courseId}/available-instructors`,
+    ta:         "/api/admin/tas",
+    student:    "/api/admin/students"
+  };
   const list = await api("GET", urls[type]);
+  if (!list) return;
   document.getElementById("add-modal-select").innerHTML =
-    `<option value="">Choose…</option>` + list.map(u => `<option value="${u.user_id}">${u.username}</option>`).join("");
+    `<option value="">Choose…</option>` +
+    list.map(u => `<option value="${u.user_id}">${u.username}</option>`).join("");
   new bootstrap.Modal(document.getElementById("addMemberModal")).show();
+}
+
+// Live preview of semester name
+document.addEventListener("DOMContentLoaded", () => {
+  ["sem-number", "sem-year"].forEach(id => {
+    document.getElementById(id)?.addEventListener("input", updateSemPreview);
+    document.getElementById(id)?.addEventListener("change", updateSemPreview);
+  });
+});
+
+function updateSemPreview() {
+  const num  = document.getElementById("sem-number").value;
+  const year = document.getElementById("sem-year").value.trim();
+  const label = num === "1" ? "I" : num === "2" ? "II" : "";
+  document.getElementById("sem-preview").textContent =
+    label && year ? `Sem ${label} ${year}` : "—";
+}
+
+async function createSemester() {
+  const errEl     = document.getElementById("sem-err");
+  errEl.classList.add("d-none");
+
+  const sem_number = document.getElementById("sem-number").value;
+  const acad_year  = document.getElementById("sem-year").value.trim();
+  const start_date = document.getElementById("sem-start").value;
+  const end_date   = document.getElementById("sem-end").value;
+  const is_active  = document.getElementById("sem-active").checked ? 1 : 0;
+
+  // Frontend validation
+  if (!sem_number) {
+    errEl.textContent = "Please select a semester number.";
+    errEl.classList.remove("d-none"); return;
+  }
+  if (!acad_year) {
+    errEl.textContent = "Academic year is required (e.g. 2025-26).";
+    errEl.classList.remove("d-none"); return;
+  }
+  if (start_date && end_date && start_date >= end_date) {
+    errEl.textContent = "Start date must be before end date.";
+    errEl.classList.remove("d-none"); return;
+  }
+
+  const res = await fetch("/api/admin/semesters", {
+    method: "POST",
+    headers: _sessionHeaders(),
+    body: JSON.stringify({ sem_number, acad_year, start_date, end_date, is_active })
+  });
+  const d = await res.json();
+
+  if (res.ok) {
+    errEl.classList.add("d-none");
+    // Reset form
+    document.getElementById("sem-number").value  = "";
+    document.getElementById("sem-year").value    = "";
+    document.getElementById("sem-start").value   = "";
+    document.getElementById("sem-end").value     = "";
+    document.getElementById("sem-active").checked = false;
+    document.getElementById("sem-preview").textContent = "—";
+    showToast(d.message, "success");
+    loadActiveSemester();
+    loadSetupDropdowns();
+  } else {
+    errEl.textContent = d.error;
+    errEl.classList.remove("d-none");
+  }
 }
 
 async function confirmAddMember() {
@@ -278,7 +444,7 @@ async function confirmAddMember() {
   const errEl   = document.getElementById("add-modal-err");
   errEl.classList.add("d-none");
   const res = await fetch(`/api/admin/courses/${_addCourseId}/${urls[_addType]}`, {
-    method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(bodies[_addType])
+    method: "POST", headers: _sessionHeaders(), body: JSON.stringify(bodies[_addType])
   });
   const d = await res.json();
   if (res.ok) {
@@ -311,18 +477,6 @@ async function loadSetupDropdowns() {
     sems.map(s => `<option value="${s.semester_id}">${s.name}${s.is_active?' (active)':''}</option>`).join("");
 }
 
-async function createSemester() {
-  const name = document.getElementById("sem-name").value.trim();
-  if (!name) return alert("Name required");
-  await api("POST", "/api/admin/semesters", {
-    name,
-    start_date: document.getElementById("sem-start").value,
-    end_date:   document.getElementById("sem-end").value,
-    is_active:  document.getElementById("sem-active").checked ? 1 : 0
-  });
-  alert("Semester created"); loadActiveSemester(); loadSetupDropdowns();
-}
-
 async function createCourse() {
   const name = document.getElementById("course-name").value.trim();
   const code = document.getElementById("course-code").value.trim();
@@ -335,21 +489,76 @@ async function createCourse() {
 // ── users ─────────────────────────────────────────────────────────────────────
 function toggleProfileFields() {
   const role = document.getElementById("new-role").value;
-  document.getElementById("student-fields").classList.toggle("d-none", role !== "student");
-  document.getElementById("instructor-fields").classList.toggle("d-none", !["instructor","ta"].includes(role));
+  document.getElementById("student-fields").classList.toggle("d-none",    role !== "student");
+  document.getElementById("instructor-fields").classList.toggle("d-none", role !== "instructor");
+  document.getElementById("ta-fields").classList.toggle("d-none",         role !== "ta");
 }
 
 async function loadUsers() {
-  const data  = await api("GET", "/api/admin/users");
-  const tbody = document.querySelector("#users-table tbody");
-  tbody.innerHTML = data.map(u => `
-    <tr>
-      <td>${u.username}</td>
-      <td><span class="badge bg-secondary">${u.role}</span></td>
-      <td style="font-size:.8rem;color:#666">${profileText(u)||'—'}</td>
-      <td style="font-size:.8rem">${u.last_login ? u.last_login.slice(0,19) : '—'}</td>
-      <td><button class="btn btn-sm btn-outline-danger" onclick="deleteUser(${u.user_id},'${u.username}')">Delete</button></td>
-    </tr>`).join("");
+  const data = await api("GET", "/api/admin/users");
+  if (!data) return;
+
+  // Group by role
+  const roles = ["admin", "dean", "instructor", "ta", "student"];
+  const grouped = {};
+  roles.forEach(r => grouped[r] = []);
+  data.forEach(u => { if (grouped[u.role]) grouped[u.role].push(u); });
+
+  const roleLabels = {
+    admin: "Admins", dean: "Deans",
+    instructor: "Instructors", ta: "Teaching Assistants", student: "Students"
+  };
+  const roleColors = {
+    admin: "danger", dean: "info",
+    instructor: "primary", ta: "warning", student: "secondary"
+  };
+
+  const container = document.querySelector("#users-table").parentElement;
+  container.innerHTML = roles.map(role => {
+    const users = grouped[role];
+    return `
+      <div class="border-bottom">
+        <div class="d-flex justify-content-between align-items-center px-3 py-2"
+             style="cursor:pointer;background:#f8f9fa"
+             onclick="toggleRoleGroup('rg-${role}', this)">
+          <span>
+            <span class="badge bg-${roleColors[role]} me-2">${users.length}</span>
+            <strong>${roleLabels[role]}</strong>
+          </span>
+          <span id="rg-toggle-${role}" style="font-size:.85rem">▶ Show</span>
+        </div>
+        <div id="rg-${role}" class="d-none">
+          ${users.length ? `
+            <table class="table table-sm mb-0">
+              <thead class="table-light">
+                <tr><th>Username</th><th>Details</th><th>Last Login</th><th></th></tr>
+              </thead>
+              <tbody>
+                ${users.map(u => `
+                  <tr>
+                    <td>${u.username}</td>
+                    <td style="font-size:.8rem;color:#666">${profileText(u) || '—'}</td>
+                    <td style="font-size:.8rem">${u.last_login ? u.last_login.slice(0,19) : '—'}</td>
+                    <td>
+                      <button class="btn btn-sm btn-outline-danger"
+                        onclick="deleteUser(${u.user_id},'${u.username}')">Delete</button>
+                    </td>
+                  </tr>`).join("")}
+              </tbody>
+            </table>` :
+            `<p class="text-muted px-3 py-2 mb-0" style="font-size:.85rem">No ${roleLabels[role].toLowerCase()} yet.</p>`
+          }
+        </div>
+      </div>`;
+  }).join("");
+}
+
+function toggleRoleGroup(panelId, hdr) {
+  const panel  = document.getElementById(panelId);
+  const role   = panelId.replace("rg-", "");
+  const toggle = document.getElementById(`rg-toggle-${role}`);
+  const hidden = panel.classList.toggle("d-none");
+  toggle.textContent = hidden ? "▶ Show" : "▼ Hide";
 }
 
 async function createUser() {
@@ -357,24 +566,32 @@ async function createUser() {
   errEl.classList.add("d-none");
   const role  = document.getElementById("new-role").value;
   const body  = {
-    username: document.getElementById("new-username").value.trim(),
-    password: document.getElementById("new-password").value,
+    username:    document.getElementById("new-username").value.trim(),
+    password:    document.getElementById("new-password").value,
     role,
+    // student fields
     roll_no:     document.getElementById("new-rollno").value.trim(),
     program:     document.getElementById("new-program").value.trim(),
     batch:       document.getElementById("new-batch").value.trim(),
+    // instructor fields
     department:  document.getElementById("new-dept").value.trim(),
     designation: document.getElementById("new-desig").value.trim(),
+    // ta fields (overwrite roll_no/program/batch with ta-specific inputs)
+    ...(role === "ta" ? {
+      roll_no:  document.getElementById("ta-rollno").value.trim(),
+      program:  document.getElementById("ta-program").value.trim(),
+      batch:    document.getElementById("ta-batch").value.trim(),
+    } : {})
   };
   if (!body.username || !body.password || !body.role) {
     errEl.textContent = "Username, password and role are required";
     errEl.classList.remove("d-none"); return;
   }
   const res = await fetch("/api/admin/users", {
-    method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(body)
+    method: "POST", headers: _sessionHeaders(), body: JSON.stringify(body)
   });
   const d = await res.json();
-  if (res.ok) { alert(d.message); loadUsers(); }
+  if (res.ok) { showToast(d.message, "success"); loadUsers(); }
   else { errEl.textContent = d.error; errEl.classList.remove("d-none"); }
 }
 
@@ -424,7 +641,6 @@ async function loadAttRecords() {
                 <select class="form-select form-select-sm w-auto record-status" data-rid="${r.record_id}">
                   <option value="present" ${r.status==='present'?'selected':''}>Present</option>
                   <option value="absent"  ${r.status==='absent' ?'selected':''}>Absent</option>
-                  <option value="late"    ${r.status==='late'   ?'selected':''}>Late</option>
                 </select>
               </td>
             </tr>`).join("")}

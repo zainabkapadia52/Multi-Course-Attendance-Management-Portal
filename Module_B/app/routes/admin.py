@@ -64,19 +64,45 @@ def list_semesters():
 @bp.post("/semesters")
 @require_role("admin")
 def create_semester():
-    d         = request.json or {}
-    name      = d.get("name", "").strip()
-    is_active = int(d.get("is_active", 0))
-    if not name:
-        return jsonify({"error": "name required"}), 400
+    d           = request.json or {}
+    sem_number  = str(d.get("sem_number", "")).strip()
+    acad_year   = str(d.get("acad_year", "")).strip()
+    start_date  = d.get("start_date", "").strip()
+    end_date    = d.get("end_date", "").strip()
+    is_active   = int(d.get("is_active", 0))
+
+    # Validate fields
+    if sem_number not in ("1", "2"):
+        return jsonify({"error": "Semester number must be 1 or 2"}), 400
+    if not acad_year:
+        return jsonify({"error": "Academic year is required"}), 400
+
+    # Validate dates if both provided
+    if start_date and end_date and start_date >= end_date:
+        return jsonify({"error": "Start date must be before end date"}), 400
+
+    # Build canonical name
+    sem_label = "I" if sem_number == "1" else "II"
+    name      = f"Sem {sem_label} {acad_year}"
+
     db = get_db()
+
+    # Duplicate check — same semester number + same academic year
+    exists = db.execute(
+        "SELECT 1 FROM semesters WHERE LOWER(name)=LOWER(?)", (name,)
+    ).fetchone()
+    if exists:
+        return jsonify({"error": f"Semester {sem_label} of {acad_year} already exists"}), 409
+
     if is_active:
         db.execute("UPDATE semesters SET is_active=0")
-    db.execute("INSERT INTO semesters (name,start_date,end_date,is_active) VALUES (?,?,?,?)",
-               (name, d.get("start_date",""), d.get("end_date",""), is_active))
+    db.execute(
+        "INSERT INTO semesters (name,start_date,end_date,is_active) VALUES (?,?,?,?)",
+        (name, start_date, end_date, is_active)
+    )
     db.commit()
     audit_log("CREATE_SEMESTER", "/api/admin/semesters", g.user["user_id"], f"name={name}")
-    return jsonify({"message": "Semester created"}), 201
+    return jsonify({"message": f"Semester '{name}' created"}), 201
 
 @bp.get("/semesters/<int:sid>/courses")
 @require_role("admin")
@@ -228,10 +254,15 @@ def create_user():
             (username, generate_password_hash(password), role)
         )
         user_id = cur.lastrowid
-        if role in ("instructor", "ta"):
-            db.execute(
+        if role == "instructor":
+                db.execute(
                 "INSERT INTO user_profiles (user_id,department,designation) VALUES (?,?,?)",
                 (user_id, d.get("department",""), d.get("designation",""))
+            )
+        elif role == "ta":
+            db.execute(
+                "INSERT INTO user_profiles (user_id,roll_no,program,batch) VALUES (?,?,?,?)",
+                (user_id, d.get("roll_no",""), d.get("program",""), d.get("batch",""))
             )
         elif role == "student":
             db.execute(
@@ -266,6 +297,19 @@ def delete_user(uid):
 @require_role("admin")
 def list_instructors():
     rows = get_db().execute("SELECT user_id,username FROM users WHERE role='instructor'").fetchall()
+    return jsonify([dict(r) for r in rows])
+
+@bp.get("/courses/<int:cid>/available-instructors")
+@require_role("admin")
+def available_instructors(cid):
+    """Instructors NOT yet assigned to this course."""
+    rows = get_db().execute(
+        """SELECT u.user_id, u.username FROM users u
+           WHERE u.role='instructor'
+           AND u.user_id NOT IN (
+               SELECT instructor_id FROM course_instructors WHERE course_id=?
+           )""", (cid,)
+    ).fetchall()
     return jsonify([dict(r) for r in rows])
 
 @bp.get("/students")
@@ -305,7 +349,7 @@ def session_records(sid):
 @require_role("admin")
 def update_record(rid):
     status = (request.json or {}).get("status")
-    if status not in ("present","absent","late"):
+    if status not in ("present","absent"):
         return jsonify({"error": "Invalid status"}), 400
     db = get_db()
     db.execute("UPDATE attendance_records SET status=? WHERE record_id=?", (status, rid))

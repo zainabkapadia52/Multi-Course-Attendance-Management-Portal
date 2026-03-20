@@ -26,8 +26,13 @@ def course_students(cid):
                       (cid, g.user["user_id"])).fetchone():
         return jsonify({"error": "Forbidden"}), 403
     rows = db.execute(
-        "SELECT u.user_id,u.username FROM users u JOIN course_enrollments ce ON ce.student_id=u.user_id WHERE ce.course_id=?",
-        (cid,)
+        """SELECT u.user_id, u.username,
+                  p.roll_no, p.program, p.batch
+           FROM users u
+           JOIN course_enrollments ce ON ce.student_id=u.user_id
+           LEFT JOIN user_profiles p ON p.user_id=u.user_id
+           WHERE ce.course_id=?
+           ORDER BY u.username""", (cid,)
     ).fetchall()
     return jsonify([dict(r) for r in rows])
 
@@ -52,7 +57,7 @@ def create_session():
     sid = cur.lastrowid
     for rec in records:
         s, st = rec.get("student_id"), rec.get("status","absent")
-        if s and st in ("present","absent","late"):
+        if s and st in ("present","absent"):
             db.execute("INSERT INTO attendance_records (att_session_id,student_id,status) VALUES (?,?,?)", (sid, s, st))
     db.commit()
     broadcast("attendance_session_created", {
@@ -87,9 +92,13 @@ def session_records(sid):
     ).fetchone():
         return jsonify({"error": "Forbidden"}), 403
     rows = db.execute(
-        """SELECT ar.record_id, u.username, ar.status
-           FROM attendance_records ar JOIN users u ON u.user_id=ar.student_id
-           WHERE ar.att_session_id=? ORDER BY u.username""", (sid,)
+        """SELECT ar.record_id, u.username, ar.status,
+                  p.roll_no, p.program, p.batch
+           FROM attendance_records ar
+           JOIN users u ON u.user_id=ar.student_id
+           LEFT JOIN user_profiles p ON p.user_id=u.user_id
+           WHERE ar.att_session_id=?
+           ORDER BY u.username""", (sid,)
     ).fetchall()
     return jsonify([dict(r) for r in rows])
 
@@ -128,8 +137,8 @@ def accept_correction(req_id):
                (req["att_session_id"], req["student_id"]))
     db.commit()
     broadcast("correction_resolved", {
-        "req_id":    req_id,
-        "status":    "accepted",
+        "req_id":     req_id,
+        "status":     "rejected",     # ← fixed
         "student_id": req["student_id"],
         "course_id":  req["course_id"],
     })
@@ -162,3 +171,81 @@ def reject_correction(req_id):
 
     audit_log("REJECT_CORRECTION", f"/api/instructor/corrections/{req_id}/reject", g.user["user_id"])
     return jsonify({"message": "Rejected"})
+
+@bp.get("/courses/<int:cid>/sessions")
+@require_role("instructor")
+def course_sessions(cid):
+    db = get_db()
+    if not db.execute("SELECT 1 FROM course_instructors WHERE course_id=? AND instructor_id=?",
+                      (cid, g.user["user_id"])).fetchone():
+        return jsonify({"error": "Forbidden"}), 403
+    rows = db.execute(
+        """SELECT att_session_id, session_date, topic
+           FROM attendance_sessions
+           WHERE course_id=?
+           ORDER BY session_date DESC""", (cid,)
+    ).fetchall()
+    return jsonify([dict(r) for r in rows])
+
+
+@bp.get("/courses/<int:cid>/tas")
+@require_role("instructor")
+def course_tas(cid):
+    db = get_db()
+    if not db.execute("SELECT 1 FROM course_instructors WHERE course_id=? AND instructor_id=?",
+                      (cid, g.user["user_id"])).fetchone():
+        return jsonify({"error": "Forbidden"}), 403
+    rows = db.execute(
+        """SELECT u.user_id, u.username,
+                  p.department, p.designation
+           FROM users u
+           JOIN course_tas ct ON ct.ta_id=u.user_id
+           LEFT JOIN user_profiles p ON p.user_id=u.user_id
+           WHERE ct.course_id=?
+           ORDER BY u.username""", (cid,)
+    ).fetchall()
+    return jsonify([dict(r) for r in rows])
+
+
+@bp.get("/available-tas/<int:cid>")
+@require_role("instructor")
+def available_tas(cid):
+    """TAs not yet assigned to this course."""
+    rows = get_db().execute(
+        """SELECT u.user_id, u.username FROM users u
+           WHERE u.role='ta'
+           AND u.user_id NOT IN (
+               SELECT ta_id FROM course_tas WHERE course_id=?
+           )""", (cid,)
+    ).fetchall()
+    return jsonify([dict(r) for r in rows])
+
+@bp.post("/courses/<int:cid>/tas")
+@require_role("instructor")
+def assign_ta(cid):
+    db  = get_db()
+    if not db.execute("SELECT 1 FROM course_instructors WHERE course_id=? AND instructor_id=?",
+                      (cid, g.user["user_id"])).fetchone():
+        return jsonify({"error": "Forbidden"}), 403
+    tid = (request.json or {}).get("ta_id")
+    if not tid:
+        return jsonify({"error": "ta_id required"}), 400
+    try:
+        db.execute("INSERT INTO course_tas VALUES (?,?)", (cid, tid))
+        db.commit()
+    except Exception:
+        return jsonify({"error": "Already assigned"}), 409
+    audit_log("INSTR_ASSIGN_TA", f"/api/instructor/courses/{cid}/tas", g.user["user_id"])
+    return jsonify({"message": "TA assigned"}), 201
+
+@bp.delete("/courses/<int:cid>/tas/<int:tid>")
+@require_role("instructor")
+def remove_ta(cid, tid):
+    db = get_db()
+    if not db.execute("SELECT 1 FROM course_instructors WHERE course_id=? AND instructor_id=?",
+                      (cid, g.user["user_id"])).fetchone():
+        return jsonify({"error": "Forbidden"}), 403
+    db.execute("DELETE FROM course_tas WHERE course_id=? AND ta_id=?", (cid, tid))
+    db.commit()
+    audit_log("INSTR_REMOVE_TA", f"/api/instructor/courses/{cid}/tas/{tid}", g.user["user_id"])
+    return jsonify({"message": "TA removed"})

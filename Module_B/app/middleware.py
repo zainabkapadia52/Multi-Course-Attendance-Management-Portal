@@ -3,13 +3,19 @@ from flask import request, jsonify, g
 from .auth import verify_session, AuthError
 from .logger import audit_log
 
+def _read_session():
+    session_id = (request.headers.get("X-Session-Id")
+                  or request.cookies.get("session_id"))
+    mac        = (request.headers.get("X-Session-Mac")
+                  or request.cookies.get("session_mac"))
+    return session_id, mac
+
 def require_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        session_id = request.cookies.get("session_id")
-        mac        = request.cookies.get("session_mac")
+        sid, mac = _read_session()
         try:
-            g.user = verify_session(session_id, mac)
+            g.user = verify_session(sid, mac)
         except AuthError as e:
             audit_log("UNAUTHORIZED", request.path, None)
             return jsonify({"error": str(e)}), 401
@@ -20,10 +26,9 @@ def require_role(*allowed_roles):
     def decorator(f):
         @wraps(f)
         def decorated(*args, **kwargs):
-            session_id = request.cookies.get("session_id")
-            mac        = request.cookies.get("session_mac")
+            sid, mac = _read_session()
             try:
-                g.user = verify_session(session_id, mac)
+                g.user = verify_session(sid, mac)
             except AuthError as e:
                 audit_log("UNAUTHORIZED", request.path, None)
                 return jsonify({"error": str(e)}), 401
