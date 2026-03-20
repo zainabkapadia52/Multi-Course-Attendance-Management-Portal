@@ -194,10 +194,14 @@ function showInstrArchiveSemester() {
             onclick="toggleInstrArchivePanel('ia-ta-${c.course_id}', this)">
             ▶ TAs <span class="badge bg-light text-dark ms-1">${c.tas.length}</span>
           </button>
+          <button class="btn btn-sm btn-outline-dark"
+            onclick="toggleInstrArchivePanel('ia-sess-${c.course_id}', this)">
+            ▶ Sessions <span class="badge bg-light text-dark ms-1">${c.sessions.length}</span>
+          </button>
         </div>
       </div>
 
-      <!-- Students panel -->
+      <!-- Students -->
       <div id="ia-stu-${c.course_id}" class="d-none border-top">
         <div class="p-3">
           ${c.students.length ? `
@@ -210,9 +214,9 @@ function showInstrArchiveSemester() {
                   <tr><th>#</th><th>Username</th><th>Roll No</th><th>Program</th><th>Batch</th></tr>
                 </thead>
                 <tbody>
-                  ${c.students.map((s, i) => `
+                  ${c.students.map((s,i) => `
                     <tr>
-                      <td class="text-muted">${i + 1}</td>
+                      <td class="text-muted">${i+1}</td>
                       <td>${s.username}</td>
                       <td>${s.roll_no  || '—'}</td>
                       <td>${s.program  || '—'}</td>
@@ -226,7 +230,7 @@ function showInstrArchiveSemester() {
         </div>
       </div>
 
-      <!-- TAs panel -->
+      <!-- TAs -->
       <div id="ia-ta-${c.course_id}" class="d-none border-top">
         <div class="p-3">
           ${c.tas.length ? c.tas.map(t => `
@@ -237,6 +241,53 @@ function showInstrArchiveSemester() {
               </div>
             </div>`).join("") :
             '<p class="text-muted mb-0" style="font-size:.85rem">No TAs assigned.</p>'
+          }
+        </div>
+      </div>
+
+      <!-- Sessions -->
+      <div id="ia-sess-${c.course_id}" class="d-none border-top">
+        <div class="p-0">
+          ${c.sessions.length ? `
+            <table class="table table-sm mb-0">
+              <thead class="table-light">
+                <tr><th>Date</th><th>Topic</th><th>Attendance</th></tr>
+              </thead>
+              <tbody>
+                ${c.sessions.map(s => `
+                  <tr>
+                    <td>${s.session_date}</td>
+                    <td>${s.topic || '—'}</td>
+                    <td>
+                      <button class="btn btn-link btn-sm p-0"
+                        onclick="toggleInstrArchivePanel('ia-rec-${s.att_session_id}', this)">
+                        ▶ View
+                      </button>
+                    </td>
+                  </tr>
+                  <tr id="ia-rec-${s.att_session_id}" class="d-none bg-light">
+                    <td colspan="3" class="p-3">
+                      ${s.records.length ? `
+                        <table class="table table-sm mb-0" style="max-width:400px">
+                          <thead class="table-light">
+                            <tr><th>Student</th><th>Roll No</th><th>Status</th></tr>
+                          </thead>
+                          <tbody>
+                            ${s.records.map(r => `
+                              <tr>
+                                <td>${r.username}</td>
+                                <td>${r.roll_no || '—'}</td>
+                                <td>${badge(r.status)}</td>
+                              </tr>`).join("")}
+                          </tbody>
+                        </table>` :
+                        '<p class="text-muted mb-0">No records.</p>'
+                      }
+                    </td>
+                  </tr>`).join("")}
+              </tbody>
+            </table>` :
+            '<p class="text-muted p-3 mb-0" style="font-size:.85rem">No sessions recorded.</p>'
           }
         </div>
       </div>

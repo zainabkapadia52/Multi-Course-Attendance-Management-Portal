@@ -320,25 +320,50 @@ def archive():
                    FROM users u
                    JOIN course_enrollments ce ON ce.student_id=u.user_id
                    LEFT JOIN user_profiles p ON p.user_id=u.user_id
-                   WHERE ce.course_id=?
-                   ORDER BY u.username""", (c["course_id"],)
+                   WHERE ce.course_id=? ORDER BY u.username""",
+                (c["course_id"],)
             ).fetchall()
             tas = db.execute(
                 """SELECT u.username, p.department, p.designation
                    FROM users u
                    JOIN course_tas ct ON ct.ta_id=u.user_id
                    LEFT JOIN user_profiles p ON p.user_id=u.user_id
-                   WHERE ct.course_id=?
-                   ORDER BY u.username""", (c["course_id"],)
+                   WHERE ct.course_id=? ORDER BY u.username""",
+                (c["course_id"],)
             ).fetchall()
+            sessions = db.execute(
+                """SELECT att.att_session_id, att.session_date, att.topic
+                   FROM attendance_sessions att
+                   WHERE att.course_id=?
+                   ORDER BY att.session_date DESC""",
+                (c["course_id"],)
+            ).fetchall()
+            # For each session get records
+            session_list = []
+            for s in sessions:
+                records = db.execute(
+                    """SELECT u.username, ar.status, p.roll_no
+                       FROM attendance_records ar
+                       JOIN users u ON u.user_id=ar.student_id
+                       LEFT JOIN user_profiles p ON p.user_id=u.user_id
+                       WHERE ar.att_session_id=?
+                       ORDER BY u.username""",
+                    (s["att_session_id"],)
+                ).fetchall()
+                session_list.append({
+                    "att_session_id": s["att_session_id"],
+                    "session_date":   s["session_date"],
+                    "topic":          s["topic"],
+                    "records":        [dict(r) for r in records]
+                })
             course_list.append({
                 "course_id": c["course_id"],
                 "name":      c["name"],
                 "code":      c["code"],
                 "students":  [dict(s) for s in students],
                 "tas":       [dict(t) for t in tas],
+                "sessions":  session_list,
             })
-
         result.append({
             "semester_id":   sem["semester_id"],
             "semester_name": sem["name"],

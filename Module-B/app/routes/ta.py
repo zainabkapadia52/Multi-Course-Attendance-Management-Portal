@@ -232,9 +232,42 @@ def archive():
                WHERE ct.ta_id=? AND c.semester_id=?""",
             (g.user["user_id"], sem["semester_id"])
         ).fetchall()
+
+        course_list = []
+        for c in courses:
+            sessions = db.execute(
+                """SELECT att.att_session_id, att.session_date, att.topic
+                   FROM attendance_sessions att
+                   WHERE att.course_id=?
+                   ORDER BY att.session_date DESC""",
+                (c["course_id"],)
+            ).fetchall()
+            session_list = []
+            for s in sessions:
+                records = db.execute(
+                    """SELECT u.username, ar.status, p.roll_no
+                       FROM attendance_records ar
+                       JOIN users u ON u.user_id=ar.student_id
+                       LEFT JOIN user_profiles p ON p.user_id=u.user_id
+                       WHERE ar.att_session_id=?
+                       ORDER BY u.username""",
+                    (s["att_session_id"],)
+                ).fetchall()
+                session_list.append({
+                    "att_session_id": s["att_session_id"],
+                    "session_date":   s["session_date"],
+                    "topic":          s["topic"],
+                    "records":        [dict(r) for r in records]
+                })
+            course_list.append({
+                "course_id": c["course_id"],
+                "name":      c["name"],
+                "code":      c["code"],
+                "sessions":  session_list,
+            })
         result.append({
             "semester_id":   sem["semester_id"],
             "semester_name": sem["name"],
-            "courses":       [dict(c) for c in courses]
+            "courses":       course_list
         })
     return jsonify(result)
