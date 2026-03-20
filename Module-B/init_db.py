@@ -20,6 +20,9 @@ import sqlite3
 import random
 from datetime import date, timedelta
 from werkzeug.security import generate_password_hash
+import os
+
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 DB_PATH     = "module_b.db"
 SCHEMA_PATH = "sql/schema.sql"
