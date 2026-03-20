@@ -31,10 +31,63 @@ def attendance_stats():
            FROM courses c JOIN course_enrollments ce ON ce.course_id=c.course_id
            WHERE ce.student_id=?""", (g.user["user_id"],)
     ).fetchall()
+    return jsonify(_build_stats(db, courses, g.user["user_id"]))
+
+
+@bp.get("/attendance-stats/current")
+@require_role("student")
+def attendance_stats_current():
+    """Only courses in the active semester."""
+    db      = get_db()
+    sem     = db.execute("SELECT semester_id FROM semesters WHERE is_active=1 LIMIT 1").fetchone()
+    if not sem:
+        return jsonify([])
+
+    courses = db.execute(
+        """SELECT c.course_id, c.name, c.code
+           FROM courses c
+           JOIN course_enrollments ce ON ce.course_id=c.course_id
+           WHERE ce.student_id=? AND c.semester_id=?""",
+        (g.user["user_id"], sem["semester_id"])
+    ).fetchall()
+
+    return jsonify(_build_stats(db, courses, g.user["user_id"]))
+
+@bp.get("/attendance-stats/archive")
+@require_role("student")
+def attendance_stats_archive():
+    """All past semesters this student has courses in."""
+    db   = get_db()
+    sems = db.execute(
+        """SELECT DISTINCT s.semester_id, s.name
+           FROM semesters s
+           JOIN courses c ON c.semester_id=s.semester_id
+           JOIN course_enrollments ce ON ce.course_id=c.course_id
+           WHERE ce.student_id=? AND s.is_active=0
+           ORDER BY s.semester_id DESC""",
+        (g.user["user_id"],)
+    ).fetchall()
 
     result = []
-    MIN_SESSIONS_TO_WARN = 5
+    for sem in sems:
+        courses = db.execute(
+            """SELECT c.course_id, c.name, c.code
+               FROM courses c
+               JOIN course_enrollments ce ON ce.course_id=c.course_id
+               WHERE ce.student_id=? AND c.semester_id=?""",
+            (g.user["user_id"], sem["semester_id"])
+        ).fetchall()
+        result.append({
+            "semester_id":   sem["semester_id"],
+            "semester_name": sem["name"],
+            "courses":       _build_stats(db, courses, g.user["user_id"], archive=True)
+        })
+    return jsonify(result)
 
+def _build_stats(db, courses, student_id, archive=False):
+    """Shared helper — builds per-course attendance stats."""
+    MIN_SESSIONS_TO_WARN = 5
+    result = []
     for course in courses:
         records = db.execute(
             """SELECT ar.record_id, ar.status, att.session_date, att.topic,
@@ -43,7 +96,7 @@ def attendance_stats():
                JOIN attendance_sessions att ON att.att_session_id=ar.att_session_id
                WHERE att.course_id=? AND ar.student_id=?
                ORDER BY att.session_date DESC""",
-            (course["course_id"], g.user["user_id"])
+            (course["course_id"], student_id)
         ).fetchall()
 
         total   = len(records)
@@ -52,21 +105,21 @@ def attendance_stats():
         absent  = sum(1 for r in records if r["status"] == "absent")
         pct     = round((present / total * 100) if total > 0 else 0, 1)
 
-        if total == 0:
-            colour  = "secondary"
-            warning = "no_sessions"
-        elif total < MIN_SESSIONS_TO_WARN:
-            colour  = "secondary"
-            warning = "too_early"
-        elif pct < 75:
-            colour  = "danger"
-            warning = "at_risk"
-        elif pct < 85:
-            colour  = "warning"
-            warning = "borderline"
+        if archive:
+            # Archive — just show percentage, no warning logic
+            colour  = "success" if pct >= 75 else "danger"
+            warning = "safe"    if pct >= 75 else "at_risk"
         else:
-            colour  = "success"
-            warning = "safe"
+            if total == 0:
+                colour, warning = "secondary", "no_sessions"
+            elif total < MIN_SESSIONS_TO_WARN:
+                colour, warning = "secondary", "too_early"
+            elif pct < 75:
+                colour, warning = "danger", "at_risk"
+            elif pct < 85:
+                colour, warning = "warning", "borderline"
+            else:
+                colour, warning = "success", "safe"
 
         result.append({
             "course_id":      course["course_id"],
@@ -81,8 +134,8 @@ def attendance_stats():
             "warning":        warning,
             "records":        [dict(r) for r in records]
         })
+    return result
 
-    return jsonify(result)
 
 @bp.get("/courses/<int:cid>/sessions")
 @require_role("student")

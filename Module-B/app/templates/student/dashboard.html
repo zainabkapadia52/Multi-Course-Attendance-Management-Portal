@@ -5,6 +5,7 @@
 <ul class="nav nav-tabs mb-4">
   <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-courses">My Courses</button></li>
   <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-attendance">Attendance</button></li>
+  <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-archive" onclick="loadAttArchive()">Past Semesters</button></li>
   <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-corrections">Correction Requests</button></li>
   <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-profile">Profile</button></li>
 </ul>
@@ -18,11 +19,22 @@
     </div>
   </div>
 
-  <!-- ATTENDANCE — course-wise accordions -->
+  <!-- ATTENDANCE — current semester only -->
   <div class="tab-pane fade" id="tab-attendance">
     <div id="attendance-container">
       <p class="text-muted">Loading…</p>
     </div>
+  </div>
+
+  <!-- PAST SEMESTERS — archive -->
+  <div class="tab-pane fade" id="tab-archive">
+    <div class="d-flex align-items-center gap-3 mb-3">
+      <label class="fw-semibold mb-0">Semester:</label>
+      <select id="archive-sem-select" class="form-select w-auto" onchange="showArchiveSemester()">
+        <option value="">Select…</option>
+      </select>
+    </div>
+    <div id="archive-courses-container"></div>
   </div>
 
   <!-- CORRECTIONS -->
@@ -84,32 +96,33 @@
 
 {% block scripts %}
 <script>
-let _statsData = [];
+let _statsData    = [];
+let _archiveData  = [];
 
+// ── courses tab ───────────────────────────────────────────────────────────────
 async function loadStats() {
-  const data = await api("GET", "/api/student/attendance-stats");
+  const data = await api("GET", "/api/student/attendance-stats/current");
   if (!data) return;
   _statsData = data;
 
-  // Courses tab — stats cards
   const con = document.getElementById("courses-stats-container");
-  if (!data.length) { con.innerHTML = '<p class="text-muted">Not enrolled in any courses.</p>'; return; }
+  if (!data.length) {
+    con.innerHTML = '<p class="text-muted">Not enrolled in any courses this semester.</p>';
+    buildAttendanceView([]);
+    return;
+  }
 
   con.innerHTML = data.map(c => {
-    const barColor = c.colour === "success"   ? "#198754"
-                  : c.colour === "warning"   ? "#ffc107"
-                  : c.colour === "danger"    ? "#dc3545"
-                  : "#6c757d"; // secondary/grey
+    const barColor = c.colour === "success"  ? "#198754"
+                   : c.colour === "warning"  ? "#ffc107"
+                   : c.colour === "danger"   ? "#dc3545"
+                   : "#6c757d";
 
     const warningBadge =
-      c.warning === "no_sessions"
-        ? '<div class="mt-2 text-muted" style="font-size:.82rem">No sessions held yet</div>'
-      : c.warning === "too_early"
-        ? `<div class="mt-2 text-muted" style="font-size:.82rem">Only ${c.total_sessions} session(s) held — too early to assess</div>`
-      : c.warning === "at_risk"
-        ? '<div class="mt-2 text-danger" style="font-size:.82rem">⚠ Attendance below 75% — at risk</div>'
-      : c.warning === "borderline"
-        ? '<div class="mt-2 text-warning" style="font-size:.82rem">Attendance between 75–85% — keep it up</div>'
+      c.warning === "no_sessions" ? '<div class="mt-2 text-muted" style="font-size:.82rem">No sessions held yet</div>'
+      : c.warning === "too_early" ? `<div class="mt-2 text-muted" style="font-size:.82rem">Only ${c.total_sessions} session(s) held — too early to assess</div>`
+      : c.warning === "at_risk"   ? '<div class="mt-2 text-danger" style="font-size:.82rem">⚠ Attendance below 75% — at risk</div>'
+      : c.warning === "borderline"? '<div class="mt-2 text-warning" style="font-size:.82rem">Attendance between 75–85% — keep it up</div>'
       : '';
 
     const pctBadge = c.warning === "no_sessions" || c.warning === "too_early"
@@ -139,31 +152,30 @@ async function loadStats() {
       </div>`;
   }).join("");
 
-  // Populate correction form dropdown
   document.getElementById("corr-course").innerHTML =
     '<option value="">Select course…</option>' +
     data.map(c => `<option value="${c.course_id}">${c.code} — ${c.name}</option>`).join("");
 
-  // Attendance tab — course-wise accordions
   buildAttendanceView(data);
 }
 
+// ── attendance tab — current semester ─────────────────────────────────────────
 function buildAttendanceView(data) {
   const con = document.getElementById("attendance-container");
-  if (!data.length) { con.innerHTML = '<p class="text-muted">No attendance records yet.</p>'; return; }
-
-  con.innerHTML = data.map((c, i) => `
+  if (!data.length) {
+    con.innerHTML = '<p class="text-muted">No attendance records for the current semester.</p>'; return;
+  }
+  con.innerHTML = data.map(c => `
     <div class="card mb-3">
       <div class="card-header d-flex justify-content-between align-items-center py-2"
            style="cursor:pointer" onclick="toggleAttCourse('att-${c.course_id}', this)">
         <div>
-
           <span class="badge bg-secondary me-2">${c.code}</span>
           <strong>${c.name}</strong>
           <span class="ms-2 badge bg-${
-            c.colour === 'success'  ? 'success' :
-            c.colour === 'warning'  ? 'warning text-dark' :
-            c.colour === 'danger'   ? 'danger' : 'secondary'}">
+            c.colour === 'success' ? 'success' :
+            c.colour === 'warning' ? 'warning text-dark' :
+            c.colour === 'danger'  ? 'danger' : 'secondary'}">
             ${c.warning === 'no_sessions' || c.warning === 'too_early' ? '—' : c.percentage + '%'}
           </span>
         </div>
@@ -175,9 +187,7 @@ function buildAttendanceView(data) {
         <div class="card-body p-0">
           ${c.records.length ? `
             <table class="table table-sm mb-0">
-              <thead class="table-light">
-                <tr><th>Date</th><th>Topic</th><th>Status</th></tr>
-              </thead>
+              <thead class="table-light"><tr><th>Date</th><th>Topic</th><th>Status</th></tr></thead>
               <tbody>
                 ${c.records.map(r => `
                   <tr>
@@ -191,8 +201,7 @@ function buildAttendanceView(data) {
           }
         </div>
       </div>
-    </div>`
-  ).join("");
+    </div>`).join("");
 }
 
 function toggleAttCourse(id, hdr) {
@@ -207,6 +216,81 @@ function toggleAttCourse(id, hdr) {
   }
 }
 
+// ── past semesters tab ────────────────────────────────────────────────────────
+async function loadAttArchive() {
+  if (_archiveData.length) return; // already loaded
+  const data = await api("GET", "/api/student/attendance-stats/archive");
+  if (!data) return;
+  _archiveData = data;
+
+  const sel = document.getElementById("archive-sem-select");
+  if (!data.length) {
+    sel.innerHTML = '<option value="">No past semesters</option>';
+    document.getElementById("archive-courses-container").innerHTML =
+      '<p class="text-muted">No past semester data found.</p>';
+    return;
+  }
+  sel.innerHTML = '<option value="">Select…</option>' +
+    data.map(s => `<option value="${s.semester_id}">${s.semester_name}</option>`).join("");
+}
+
+function showArchiveSemester() {
+  const sid = parseInt(document.getElementById("archive-sem-select").value);
+  const con = document.getElementById("archive-courses-container");
+  if (!sid) { con.innerHTML = ""; return; }
+
+  const sem = _archiveData.find(s => s.semester_id === sid);
+  if (!sem || !sem.courses.length) {
+    con.innerHTML = '<p class="text-muted">No courses found for this semester.</p>'; return;
+  }
+
+  con.innerHTML = sem.courses.map(c => `
+    <div class="card mb-3">
+      <div class="card-header d-flex justify-content-between align-items-center py-2"
+           style="cursor:pointer" onclick="toggleArchiveCourse('arch-${c.course_id}', this)">
+        <div>
+          <span class="badge bg-secondary me-2">${c.code}</span>
+          <strong>${c.name}</strong>
+          <span class="ms-2 badge bg-${c.colour === 'success' ? 'success' : 'danger'}">
+            ${c.total_sessions === 0 ? '—' : c.percentage + '%'}
+          </span>
+        </div>
+        <span id="arch-toggle-${c.course_id}" style="font-size:.85rem">
+          ▶ ${c.total_sessions} sessions
+        </span>
+      </div>
+      <div id="arch-${c.course_id}" class="d-none">
+        <div class="card-body p-0">
+          ${c.records.length ? `
+            <table class="table table-sm mb-0">
+              <thead class="table-light"><tr><th>Date</th><th>Topic</th><th>Status</th></tr></thead>
+              <tbody>
+                ${c.records.map(r => `
+                  <tr>
+                    <td>${r.session_date}</td>
+                    <td>${r.topic || '—'}</td>
+                    <td>${badge(r.status)}</td>
+                  </tr>`).join("")}
+              </tbody>
+            </table>` :
+            '<p class="text-muted p-3 mb-0">No sessions recorded.</p>'
+          }
+        </div>
+      </div>
+    </div>`).join("");
+}
+
+function toggleArchiveCourse(id, hdr) {
+  const panel  = document.getElementById(id);
+  const hidden = panel.classList.toggle("d-none");
+  const cid    = id.replace("arch-", "");
+  const label  = document.getElementById(`arch-toggle-${cid}`);
+  if (label) label.textContent = hidden
+    ? `▶ ${label.textContent.replace('▼','').replace('▶','').trim()}`
+    : `▼ ${label.textContent.replace('▼','').replace('▶','').trim()}`;
+}
+
+// ── corrections ───────────────────────────────────────────────────────────────
 async function loadEligibleSessions() {
   const cid  = document.getElementById("corr-course").value;
   const sel  = document.getElementById("corr-session");
