@@ -312,9 +312,36 @@ def archive():
                WHERE ci.instructor_id=? AND c.semester_id=?""",
             (g.user["user_id"], sem["semester_id"])
         ).fetchall()
+
+        course_list = []
+        for c in courses:
+            students = db.execute(
+                """SELECT u.username, p.roll_no, p.program, p.batch
+                   FROM users u
+                   JOIN course_enrollments ce ON ce.student_id=u.user_id
+                   LEFT JOIN user_profiles p ON p.user_id=u.user_id
+                   WHERE ce.course_id=?
+                   ORDER BY u.username""", (c["course_id"],)
+            ).fetchall()
+            tas = db.execute(
+                """SELECT u.username, p.department, p.designation
+                   FROM users u
+                   JOIN course_tas ct ON ct.ta_id=u.user_id
+                   LEFT JOIN user_profiles p ON p.user_id=u.user_id
+                   WHERE ct.course_id=?
+                   ORDER BY u.username""", (c["course_id"],)
+            ).fetchall()
+            course_list.append({
+                "course_id": c["course_id"],
+                "name":      c["name"],
+                "code":      c["code"],
+                "students":  [dict(s) for s in students],
+                "tas":       [dict(t) for t in tas],
+            })
+
         result.append({
             "semester_id":   sem["semester_id"],
             "semester_name": sem["name"],
-            "courses":       [dict(c) for c in courses]
+            "courses":       course_list
         })
     return jsonify(result)

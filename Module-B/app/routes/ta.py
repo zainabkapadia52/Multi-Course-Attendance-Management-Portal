@@ -203,7 +203,7 @@ def reject_correction(req_id):
 def profile():
     row = get_db().execute(
         """SELECT u.user_id, u.username, u.role, u.last_login,
-                  p.roll_no, p.program, p.batch, p.department
+                  p.roll_no, p.program, p.batch, p.designation
            FROM users u LEFT JOIN user_profiles p ON p.user_id=u.user_id
            WHERE u.user_id=?""", (g.user["user_id"],)
     ).fetchone()

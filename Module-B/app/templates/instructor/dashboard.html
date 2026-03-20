@@ -180,12 +180,78 @@ function showInstrArchiveSemester() {
 
   con.innerHTML = sem.courses.map(c => `
     <div class="card mb-3">
-      <div class="card-header py-2">
-        <span class="badge bg-secondary me-2">${c.code}</span>
-        <strong>${c.name}</strong>
+      <div class="card-header py-2 d-flex justify-content-between align-items-center">
+        <span>
+          <span class="badge bg-secondary me-2">${c.code}</span>
+          <strong>${c.name}</strong>
+        </span>
+        <div class="d-flex gap-2">
+          <button class="btn btn-sm btn-outline-secondary"
+            onclick="toggleInstrArchivePanel('ia-stu-${c.course_id}', this)">
+            ▶ Students <span class="badge bg-light text-dark ms-1">${c.students.length}</span>
+          </button>
+          <button class="btn btn-sm btn-outline-primary"
+            onclick="toggleInstrArchivePanel('ia-ta-${c.course_id}', this)">
+            ▶ TAs <span class="badge bg-light text-dark ms-1">${c.tas.length}</span>
+          </button>
+        </div>
       </div>
+
+      <!-- Students panel -->
+      <div id="ia-stu-${c.course_id}" class="d-none border-top">
+        <div class="p-3">
+          ${c.students.length ? `
+            <input class="form-control form-control-sm mb-2" placeholder="Search…"
+              oninput="filterRows('ia-stu-table-${c.course_id}', this.value)"
+              style="max-width:200px">
+            <div style="max-height:220px;overflow-y:auto">
+              <table class="table table-sm mb-0" id="ia-stu-table-${c.course_id}">
+                <thead class="table-light" style="position:sticky;top:0">
+                  <tr><th>#</th><th>Username</th><th>Roll No</th><th>Program</th><th>Batch</th></tr>
+                </thead>
+                <tbody>
+                  ${c.students.map((s, i) => `
+                    <tr>
+                      <td class="text-muted">${i + 1}</td>
+                      <td>${s.username}</td>
+                      <td>${s.roll_no  || '—'}</td>
+                      <td>${s.program  || '—'}</td>
+                      <td>${s.batch    || '—'}</td>
+                    </tr>`).join("")}
+                </tbody>
+              </table>
+            </div>` :
+            '<p class="text-muted mb-0" style="font-size:.85rem">No students enrolled.</p>'
+          }
+        </div>
+      </div>
+
+      <!-- TAs panel -->
+      <div id="ia-ta-${c.course_id}" class="d-none border-top">
+        <div class="p-3">
+          ${c.tas.length ? c.tas.map(t => `
+            <div class="py-1 border-bottom">
+              <div style="font-size:.84rem;font-weight:500">${t.username}</div>
+              <div class="text-muted" style="font-size:.75rem">
+                ${[t.department, t.designation].filter(Boolean).join(' · ') || '—'}
+              </div>
+            </div>`).join("") :
+            '<p class="text-muted mb-0" style="font-size:.85rem">No TAs assigned.</p>'
+          }
+        </div>
+      </div>
+
     </div>`).join("");
 }
+
+function toggleInstrArchivePanel(panelId, btn) {
+  const panel  = document.getElementById(panelId);
+  const hidden = panel.classList.toggle("d-none");
+  const label  = btn.textContent.replace('▶','').replace('▼','').trim();
+  btn.textContent = (hidden ? '▶ ' : '▼ ') + label;
+}
+
+
 
 async function loadCourses() {
   myCourses = await api("GET", "/api/instructor/courses");
