@@ -6,8 +6,16 @@
   <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-courses">My Courses</button></li>
   <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-sessions">Attendance Sessions</button></li>
   <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-corrections" onclick="loadCorrections()">Correction Requests</button></li>
+  <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-archive" onclick="loadInstrArchive()">Archive</button></li>
+  <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-profile" onclick="loadProfile()">Profile</button></li>
 </ul>
-
+<!-- PROFILE -->
+  <div class="tab-pane fade" id="tab-profile">
+    <div class="card" style="max-width:480px">
+      <div class="card-header">My Profile</div>
+      <div class="card-body" id="profile-body">Loading…</div>
+    </div>
+  </div>
 <div class="tab-content">
 
   <!-- COURSES -->
@@ -55,6 +63,17 @@
     <div id="corrections-by-course"></div>
   </div>
 
+  <!-- ARCHIVE — past courses semester wise -->
+  <div class="tab-pane fade" id="tab-archive">
+    <div class="d-flex align-items-center gap-3 mb-3">
+      <label class="fw-semibold mb-0">Semester:</label>
+      <select id="instr-archive-select" class="form-select w-auto" onchange="showInstrArchiveSemester()">
+        <option value="">Select…</option>
+      </select>
+    </div>
+    <div id="instr-archive-container"></div>
+  </div>
+
 </div>
 
 <!-- Create Session Modal -->
@@ -86,6 +105,18 @@
       </div>
     </div>
   </div>
+
+  <!-- ARCHIVE — past courses semester wise -->
+  <div class="tab-pane fade" id="tab-archive">
+    <div class="d-flex align-items-center gap-3 mb-3">
+      <label class="fw-semibold mb-0">Semester:</label>
+      <select id="instr-archive-select" class="form-select w-auto" onchange="showInstrArchiveSemester()">
+        <option value="">Select…</option>
+      </select>
+    </div>
+    <div id="instr-archive-container"></div>
+  </div>
+
 </div>
 {% endblock %}
 
@@ -105,6 +136,57 @@ function taInfo(t) {
 }
 
 // ── courses tab ───────────────────────────────────────────────────────────────
+async function loadProfile() {
+  const d = await api("GET", "/api/instructor/profile");
+  if (!d) return;
+  document.getElementById("profile-body").innerHTML = `
+    <table class="table mb-0">
+      <tr><th style="width:140px">Username</th><td>${d.username}</td></tr>
+      <tr><th>Role</th><td><span class="badge bg-secondary">${d.role}</span></td></tr>
+      <tr><th>Department</th><td>${d.department || '—'}</td></tr>
+      <tr><th>Designation</th><td>${d.designation || '—'}</td></tr>
+      <tr><th>Last Login</th><td>${d.last_login ? d.last_login.slice(0,19)+' UTC' : '—'}</td></tr>
+    </table>`;
+}
+
+let _instrArchiveData = [];
+
+async function loadInstrArchive() {
+  if (_instrArchiveData.length) return;
+  const data = await api("GET", "/api/instructor/archive");
+  if (!data) return;
+  _instrArchiveData = data;
+
+  const sel = document.getElementById("instr-archive-select");
+  if (!data.length) {
+    sel.innerHTML = '<option value="">No past semesters</option>';
+    document.getElementById("instr-archive-container").innerHTML =
+      '<p class="text-muted">No past semester data.</p>';
+    return;
+  }
+  sel.innerHTML = '<option value="">Select…</option>' +
+    data.map(s => `<option value="${s.semester_id}">${s.semester_name}</option>`).join("");
+}
+
+function showInstrArchiveSemester() {
+  const sid = parseInt(document.getElementById("instr-archive-select").value);
+  const con = document.getElementById("instr-archive-container");
+  if (!sid) { con.innerHTML = ""; return; }
+
+  const sem = _instrArchiveData.find(s => s.semester_id === sid);
+  if (!sem || !sem.courses.length) {
+    con.innerHTML = '<p class="text-muted">No courses found for this semester.</p>'; return;
+  }
+
+  con.innerHTML = sem.courses.map(c => `
+    <div class="card mb-3">
+      <div class="card-header py-2">
+        <span class="badge bg-secondary me-2">${c.code}</span>
+        <strong>${c.name}</strong>
+      </div>
+    </div>`).join("");
+}
+
 async function loadCourses() {
   myCourses = await api("GET", "/api/instructor/courses");
   if (!myCourses) return;

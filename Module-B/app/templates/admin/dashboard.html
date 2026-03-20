@@ -8,6 +8,7 @@
   <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-setup">Semester Setup</button></li>
   <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-users">Users</button></li>
   <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-attendance">Attendance Override</button></li>
+  <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-profile" onclick="loadProfile()">Profile</button></li>
 </ul>
 
 <div class="tab-content">
@@ -187,6 +188,15 @@
       </div>
     </div>
   </div>
+
+  <!-- PROFILE -->
+  <div class="tab-pane fade" id="tab-profile">
+    <div class="card" style="max-width:480px">
+      <div class="card-header">My Profile</div>
+      <div class="card-body" id="profile-body">Loading…</div>
+    </div>
+  </div>
+
 </div>
 {% endblock %}
 
@@ -335,6 +345,16 @@ async function loadActiveSemester() {
   con.innerHTML = courses.length
     ? courses.map(e => buildCourseCard(e, true)).join("")
     : '<p class="text-muted">No courses yet. Add them in Semester Setup.</p>';
+}
+async function loadProfile() {
+  const d = await api("GET", "/api/admin/profile");
+  if (!d) return;
+  document.getElementById("profile-body").innerHTML = `
+    <table class="table mb-0">
+      <tr><th style="width:140px">Username</th><td>${d.username}</td></tr>
+      <tr><th>Role</th><td><span class="badge bg-secondary">${d.role}</span></td></tr>
+      <tr><th>Last Login</th><td>${d.last_login ? d.last_login.slice(0,19)+' UTC' : '—'}</td></tr>
+    </table>`;
 }
 
 async function deleteSemester(sid, name) {

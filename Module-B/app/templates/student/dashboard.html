@@ -35,6 +35,7 @@
       </select>
     </div>
     <div id="archive-courses-container"></div>
+    <div id="archive-corrections-container"></div>
   </div>
 
   <!-- CORRECTIONS -->
@@ -71,10 +72,12 @@
       </div>
       <div class="col-lg-7">
         <div class="card">
-          <div class="card-header">My Requests</div>
+          <div class="card-header">My Requests — Current Semester</div>
           <div class="card-body p-0">
             <table class="table mb-0" id="req-table">
-              <thead class="table-light"><tr><th>Date</th><th>Course</th><th>Session</th><th>Status</th></tr></thead>
+              <thead class="table-light">
+                <tr><th>Date</th><th>Course</th><th>Session</th><th>Status</th></tr>
+              </thead>
               <tbody></tbody>
             </table>
           </div>
@@ -83,6 +86,7 @@
     </div>
   </div>
 
+  
   <!-- PROFILE -->
   <div class="tab-pane fade" id="tab-profile">
     <div class="card" style="max-width:480px">
@@ -96,8 +100,9 @@
 
 {% block scripts %}
 <script>
-let _statsData    = [];
-let _archiveData  = [];
+let _statsData   = [];
+let _archiveData = [];
+let _archiveCorrData = [];
 
 // ── courses tab ───────────────────────────────────────────────────────────────
 async function loadStats() {
@@ -113,9 +118,9 @@ async function loadStats() {
   }
 
   con.innerHTML = data.map(c => {
-    const barColor = c.colour === "success"  ? "#198754"
-                   : c.colour === "warning"  ? "#ffc107"
-                   : c.colour === "danger"   ? "#dc3545"
+    const barColor = c.colour === "success" ? "#198754"
+                   : c.colour === "warning" ? "#ffc107"
+                   : c.colour === "danger"  ? "#dc3545"
                    : "#6c757d";
 
     const warningBadge =
@@ -159,7 +164,7 @@ async function loadStats() {
   buildAttendanceView(data);
 }
 
-// ── attendance tab — current semester ─────────────────────────────────────────
+// ── attendance tab ────────────────────────────────────────────────────────────
 function buildAttendanceView(data) {
   const con = document.getElementById("attendance-container");
   if (!data.length) {
@@ -218,66 +223,107 @@ function toggleAttCourse(id, hdr) {
 
 // ── past semesters tab ────────────────────────────────────────────────────────
 async function loadAttArchive() {
-  if (_archiveData.length) return; // already loaded
-  const data = await api("GET", "/api/student/attendance-stats/archive");
-  if (!data) return;
-  _archiveData = data;
+  if (_archiveData.length && _archiveCorrData.length) return;
 
+  const [attData, corrData] = await Promise.all([
+    api("GET", "/api/student/attendance-stats/archive"),
+    api("GET", "/api/student/corrections/archive")
+  ]);
+
+  if (attData)  _archiveData     = attData;
+  if (corrData) _archiveCorrData = corrData;
+
+  // Build semester dropdown from attendance data
   const sel = document.getElementById("archive-sem-select");
-  if (!data.length) {
+  if (!_archiveData.length) {
     sel.innerHTML = '<option value="">No past semesters</option>';
     document.getElementById("archive-courses-container").innerHTML =
       '<p class="text-muted">No past semester data found.</p>';
     return;
   }
   sel.innerHTML = '<option value="">Select…</option>' +
-    data.map(s => `<option value="${s.semester_id}">${s.semester_name}</option>`).join("");
+    _archiveData.map(s => `<option value="${s.semester_id}">${s.semester_name}</option>`).join("");
 }
 
 function showArchiveSemester() {
-  const sid = parseInt(document.getElementById("archive-sem-select").value);
-  const con = document.getElementById("archive-courses-container");
-  if (!sid) { con.innerHTML = ""; return; }
+  const sid      = parseInt(document.getElementById("archive-sem-select").value);
+  const courseCon = document.getElementById("archive-courses-container");
+  const corrCon   = document.getElementById("archive-corrections-container");
 
+  if (!sid) { courseCon.innerHTML = ""; corrCon.innerHTML = ""; return; }
+
+  // ── Courses ──
   const sem = _archiveData.find(s => s.semester_id === sid);
   if (!sem || !sem.courses.length) {
-    con.innerHTML = '<p class="text-muted">No courses found for this semester.</p>'; return;
+    courseCon.innerHTML = '<p class="text-muted">No courses found for this semester.</p>';
+  } else {
+    courseCon.innerHTML = `<h6 class="fw-semibold mb-3 mt-1">Courses</h6>` +
+      sem.courses.map(c => `
+        <div class="card mb-3">
+          <div class="card-header d-flex justify-content-between align-items-center py-2"
+               style="cursor:pointer" onclick="toggleArchiveCourse('arch-${c.course_id}', this)">
+            <div>
+              <span class="badge bg-secondary me-2">${c.code}</span>
+              <strong>${c.name}</strong>
+              <span class="ms-2 badge bg-${c.colour === 'success' ? 'success' : 'danger'}">
+                ${c.total_sessions === 0 ? '—' : c.percentage + '%'}
+              </span>
+            </div>
+            <span id="arch-toggle-${c.course_id}" style="font-size:.85rem">
+              ▶ ${c.total_sessions} sessions
+            </span>
+          </div>
+          <div id="arch-${c.course_id}" class="d-none">
+            <div class="card-body p-0">
+              ${c.records.length ? `
+                <table class="table table-sm mb-0">
+                  <thead class="table-light"><tr><th>Date</th><th>Topic</th><th>Status</th></tr></thead>
+                  <tbody>
+                    ${c.records.map(r => `
+                      <tr>
+                        <td>${r.session_date}</td>
+                        <td>${r.topic || '—'}</td>
+                        <td>${badge(r.status)}</td>
+                      </tr>`).join("")}
+                  </tbody>
+                </table>` :
+                '<p class="text-muted p-3 mb-0">No sessions recorded.</p>'
+              }
+            </div>
+          </div>
+        </div>`).join("");
   }
 
-  con.innerHTML = sem.courses.map(c => `
-    <div class="card mb-3">
-      <div class="card-header d-flex justify-content-between align-items-center py-2"
-           style="cursor:pointer" onclick="toggleArchiveCourse('arch-${c.course_id}', this)">
-        <div>
-          <span class="badge bg-secondary me-2">${c.code}</span>
-          <strong>${c.name}</strong>
-          <span class="ms-2 badge bg-${c.colour === 'success' ? 'success' : 'danger'}">
-            ${c.total_sessions === 0 ? '—' : c.percentage + '%'}
-          </span>
-        </div>
-        <span id="arch-toggle-${c.course_id}" style="font-size:.85rem">
-          ▶ ${c.total_sessions} sessions
-        </span>
-      </div>
-      <div id="arch-${c.course_id}" class="d-none">
+  // ── Correction Requests ──
+  const corrSem = _archiveCorrData.find(s => s.semester_id === sid);
+  if (!corrSem || !corrSem.requests.length) {
+    corrCon.innerHTML = `
+      <h6 class="fw-semibold mb-3 mt-3">Correction Requests</h6>
+      <p class="text-muted">No correction requests for this semester.</p>`;
+  } else {
+    corrCon.innerHTML = `<h6 class="fw-semibold mb-3 mt-3">Correction Requests</h6>
+      <div class="card">
         <div class="card-body p-0">
-          ${c.records.length ? `
-            <table class="table table-sm mb-0">
-              <thead class="table-light"><tr><th>Date</th><th>Topic</th><th>Status</th></tr></thead>
-              <tbody>
-                ${c.records.map(r => `
-                  <tr>
-                    <td>${r.session_date}</td>
-                    <td>${r.topic || '—'}</td>
-                    <td>${badge(r.status)}</td>
-                  </tr>`).join("")}
-              </tbody>
-            </table>` :
-            '<p class="text-muted p-3 mb-0">No sessions recorded.</p>'
-          }
+          <table class="table mb-0">
+            <thead class="table-light">
+              <tr><th>Course</th><th>Session</th><th>Reason</th><th>Proof</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              ${corrSem.requests.map(r => `
+                <tr>
+                  <td>${r.course_name}</td>
+                  <td>${r.session_date}<br>
+                    <span class="text-muted" style="font-size:.78rem">${r.topic || ''}</span>
+                  </td>
+                  <td style="max-width:200px;word-break:break-word">${r.reason}</td>
+                  <td>${r.proof_url ? `<a href="${r.proof_url}" target="_blank">View</a>` : '—'}</td>
+                  <td>${badge(r.status)}</td>
+                </tr>`).join("")}
+            </tbody>
+          </table>
         </div>
-      </div>
-    </div>`).join("");
+      </div>`;
+  }
 }
 
 function toggleArchiveCourse(id, hdr) {
@@ -285,12 +331,13 @@ function toggleArchiveCourse(id, hdr) {
   const hidden = panel.classList.toggle("d-none");
   const cid    = id.replace("arch-", "");
   const label  = document.getElementById(`arch-toggle-${cid}`);
-  if (label) label.textContent = hidden
-    ? `▶ ${label.textContent.replace('▼','').replace('▶','').trim()}`
-    : `▼ ${label.textContent.replace('▼','').replace('▶','').trim()}`;
+  if (label) {
+    const txt = label.textContent.replace('▼','').replace('▶','').trim();
+    label.textContent = hidden ? `▶ ${txt}` : `▼ ${txt}`;
+  }
 }
 
-// ── corrections ───────────────────────────────────────────────────────────────
+// ── corrections (current semester) ───────────────────────────────────────────
 async function loadEligibleSessions() {
   const cid  = document.getElementById("corr-course").value;
   const sel  = document.getElementById("corr-session");
@@ -309,7 +356,7 @@ async function loadEligibleSessions() {
 }
 
 async function loadRequests() {
-  const data = await api("GET", "/api/student/corrections");
+  const data = await api("GET", "/api/student/corrections/current");
   if (!data) return;
   document.querySelector("#req-table tbody").innerHTML = data.map(r =>
     `<tr>
@@ -318,7 +365,7 @@ async function loadRequests() {
       <td>${r.session_date}</td>
       <td>${badge(r.status)}</td>
     </tr>`
-  ).join("") || '<tr><td colspan="4" class="text-center text-muted py-3">No requests yet</td></tr>';
+  ).join("") || '<tr><td colspan="4" class="text-center text-muted py-3">No requests this semester</td></tr>';
 }
 
 async function submitCorrection() {
@@ -349,6 +396,7 @@ async function submitCorrection() {
   }
 }
 
+// ── profile ───────────────────────────────────────────────────────────────────
 async function loadProfile() {
   const d = await api("GET", "/api/student/profile");
   if (!d) return;
@@ -356,9 +404,9 @@ async function loadProfile() {
     <table class="table mb-0">
       <tr><th style="width:130px">Username</th><td>${d.username}</td></tr>
       <tr><th>Role</th><td><span class="badge bg-secondary">${d.role}</span></td></tr>
-      <tr><th>Roll No</th><td>${d.roll_no||'—'}</td></tr>
-      <tr><th>Program</th><td>${d.program||'—'}</td></tr>
-      <tr><th>Batch</th><td>${d.batch||'—'}</td></tr>
+      <tr><th>Roll No</th><td>${d.roll_no || '—'}</td></tr>
+      <tr><th>Program</th><td>${d.program || '—'}</td></tr>
+      <tr><th>Batch</th><td>${d.batch || '—'}</td></tr>
       <tr><th>Last Login</th><td>${d.last_login ? d.last_login.slice(0,19)+' UTC' : '—'}</td></tr>
     </table>`;
 }
@@ -366,8 +414,13 @@ async function loadProfile() {
 loadStats(); loadRequests(); loadProfile();
 
 window._realtimeHandlers = {
-  correction_resolved() { loadStats(); loadRequests(); showToast("A correction request was resolved.", "info"); },
-  attendance_updated()  { loadStats(); },
+  correction_resolved() {
+    loadRequests();
+    // Reset archive cache so it reloads fresh next time
+    _archiveCorrData = [];
+    showToast("A correction request was resolved.", "info");
+  },
+  attendance_updated()         { loadStats(); },
   attendance_session_created() { loadStats(); loadEligibleSessions(); },
 };
 </script>

@@ -393,3 +393,15 @@ def update_record(rid):
     })
     audit_log("ADMIN_ATT_OVERRIDE", f"/api/admin/records/{rid}", g.user["user_id"], f"status={status}")
     return jsonify({"message": "Record updated"})
+
+
+@bp.get("/profile")
+@require_role("admin")
+def profile():
+    row = get_db().execute(
+        """SELECT u.user_id, u.username, u.role, u.last_login,
+                  p.department, p.designation
+           FROM users u LEFT JOIN user_profiles p ON p.user_id=u.user_id
+           WHERE u.user_id=?""", (g.user["user_id"],)
+    ).fetchone()
+    return jsonify(dict(row))

@@ -5,6 +5,7 @@
 <ul class="nav nav-tabs mb-4">
   <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-current">Current Semester</button></li>
   <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-archive" onclick="loadArchiveDropdown()">Archive</button></li>
+  <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-profile" onclick="loadProfile()">Profile</button></li>
 </ul>
 
 <div class="tab-content">
@@ -22,6 +23,14 @@
       </select>
     </div>
     <div id="dean-archive-courses"></div>
+  </div>
+
+  <!-- PROFILE -->
+  <div class="tab-pane fade" id="tab-profile">
+    <div class="card" style="max-width:480px">
+      <div class="card-header">My Profile</div>
+      <div class="card-body" id="profile-body">Loading…</div>
+    </div>
   </div>
 
 </div>
@@ -138,6 +147,19 @@ function filterDeanStudents(uid, query) {
   rows.forEach(row => {
     row.style.display = row.textContent.toLowerCase().includes(q) ? "" : "none";
   });
+}
+
+async function loadProfile() {
+  const d = await api("GET", "/api/dean/profile");
+  if (!d) return;
+  document.getElementById("profile-body").innerHTML = `
+    <table class="table mb-0">
+      <tr><th style="width:140px">Username</th><td>${d.username}</td></tr>
+      <tr><th>Role</th><td><span class="badge bg-secondary">${d.role}</span></td></tr>
+      <tr><th>Department</th><td>${d.department || '—'}</td></tr>
+      <tr><th>Designation</th><td>${d.designation || '—'}</td></tr>
+      <tr><th>Last Login</th><td>${d.last_login ? d.last_login.slice(0,19)+' UTC' : '—'}</td></tr>
+    </table>`;
 }
 
 async function loadActiveSemester() {

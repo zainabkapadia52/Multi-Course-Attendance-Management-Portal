@@ -34,6 +34,59 @@ def attendance_stats():
     return jsonify(_build_stats(db, courses, g.user["user_id"]))
 
 
+@bp.get("/corrections/current")
+@require_role("student")
+def corrections_current():
+    """Only correction requests for courses in the active semester."""
+    db  = get_db()
+    sem = db.execute("SELECT semester_id FROM semesters WHERE is_active=1 LIMIT 1").fetchone()
+    if not sem:
+        return jsonify([])
+    rows = db.execute(
+        """SELECT cr.*, c.name AS course_name, att.session_date, att.topic
+           FROM correction_requests cr
+           JOIN courses c ON c.course_id=cr.course_id
+           JOIN attendance_sessions att ON att.att_session_id=cr.att_session_id
+           WHERE cr.student_id=? AND c.semester_id=?
+           ORDER BY cr.created_at DESC""",
+        (g.user["user_id"], sem["semester_id"])
+    ).fetchall()
+    return jsonify([dict(r) for r in rows])
+
+@bp.get("/corrections/archive")
+@require_role("student")
+def corrections_archive():
+    """Correction requests grouped by past semester."""
+    db   = get_db()
+    sems = db.execute(
+        """SELECT DISTINCT s.semester_id, s.name
+           FROM semesters s
+           JOIN courses c ON c.semester_id=s.semester_id
+           JOIN correction_requests cr ON cr.course_id=c.course_id
+           WHERE cr.student_id=? AND s.is_active=0
+           ORDER BY s.semester_id DESC""",
+        (g.user["user_id"],)
+    ).fetchall()
+
+    result = []
+    for sem in sems:
+        rows = db.execute(
+            """SELECT cr.*, c.name AS course_name, att.session_date, att.topic
+               FROM correction_requests cr
+               JOIN courses c ON c.course_id=cr.course_id
+               JOIN attendance_sessions att ON att.att_session_id=cr.att_session_id
+               WHERE cr.student_id=? AND c.semester_id=?
+               ORDER BY cr.created_at DESC""",
+            (g.user["user_id"], sem["semester_id"])
+        ).fetchall()
+        if rows:
+            result.append({
+                "semester_id":   sem["semester_id"],
+                "semester_name": sem["name"],
+                "requests":      [dict(r) for r in rows]
+            })
+    return jsonify(result)
+
 @bp.get("/attendance-stats/current")
 @require_role("student")
 def attendance_stats_current():

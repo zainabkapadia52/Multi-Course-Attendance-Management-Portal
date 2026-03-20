@@ -105,16 +105,21 @@ def session_records(sid):
 @bp.get("/corrections")
 @require_role("instructor")
 def list_corrections():
-    rows = get_db().execute(
-        """SELECT cr.*,u.username AS student_name,c.name AS course_name,
-                  att.session_date,att.topic
+    db  = get_db()
+    sem = db.execute("SELECT semester_id FROM semesters WHERE is_active=1 LIMIT 1").fetchone()
+    if not sem:
+        return jsonify([])
+    rows = db.execute(
+        """SELECT cr.*, u.username AS student_name, c.name AS course_name,
+                  att.session_date, att.topic
            FROM correction_requests cr
            JOIN users u ON u.user_id=cr.student_id
            JOIN courses c ON c.course_id=cr.course_id
            JOIN attendance_sessions att ON att.att_session_id=cr.att_session_id
            JOIN course_instructors ci ON ci.course_id=cr.course_id
-           WHERE ci.instructor_id=?
-           ORDER BY (cr.status='pending') DESC, cr.created_at DESC""", (g.user["user_id"],)
+           WHERE ci.instructor_id=? AND c.semester_id=?
+           ORDER BY (cr.status='pending') DESC, cr.created_at DESC""",
+        (g.user["user_id"], sem["semester_id"])
     ).fetchall()
     return jsonify([dict(r) for r in rows])
 
@@ -249,3 +254,45 @@ def remove_ta(cid, tid):
     db.commit()
     audit_log("INSTR_REMOVE_TA", f"/api/instructor/courses/{cid}/tas/{tid}", g.user["user_id"])
     return jsonify({"message": "TA removed"})
+
+
+@bp.get("/profile")
+@require_role("instructor")
+def profile():
+    row = get_db().execute(
+        """SELECT u.user_id, u.username, u.role, u.last_login,
+                  p.department, p.designation
+           FROM users u LEFT JOIN user_profiles p ON p.user_id=u.user_id
+           WHERE u.user_id=?""", (g.user["user_id"],)
+    ).fetchone()
+    return jsonify(dict(row))
+
+@bp.get("/archive")
+@require_role("instructor")
+def archive():
+    db   = get_db()
+    sems = db.execute(
+        """SELECT DISTINCT s.semester_id, s.name
+           FROM semesters s
+           JOIN courses c ON c.semester_id=s.semester_id
+           JOIN course_instructors ci ON ci.course_id=c.course_id
+           WHERE ci.instructor_id=? AND s.is_active=0
+           ORDER BY s.semester_id DESC""",
+        (g.user["user_id"],)
+    ).fetchall()
+
+    result = []
+    for sem in sems:
+        courses = db.execute(
+            """SELECT c.course_id, c.name, c.code
+               FROM courses c
+               JOIN course_instructors ci ON ci.course_id=c.course_id
+               WHERE ci.instructor_id=? AND c.semester_id=?""",
+            (g.user["user_id"], sem["semester_id"])
+        ).fetchall()
+        result.append({
+            "semester_id":   sem["semester_id"],
+            "semester_name": sem["name"],
+            "courses":       [dict(c) for c in courses]
+        })
+    return jsonify(result)

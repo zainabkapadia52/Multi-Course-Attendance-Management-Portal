@@ -48,3 +48,15 @@ def semester_courses(sid):
             "students":    [dict(s) for s in students],
         })
     return jsonify(result)
+
+
+@bp.get("/profile")
+@require_role("dean")
+def profile():
+    row = get_db().execute(
+        """SELECT u.user_id, u.username, u.role, u.last_login,
+                  p.department, p.designation
+           FROM users u LEFT JOIN user_profiles p ON p.user_id=u.user_id
+           WHERE u.user_id=?""", (g.user["user_id"],)
+    ).fetchone()
+    return jsonify(dict(row))
