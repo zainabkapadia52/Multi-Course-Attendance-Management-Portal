@@ -69,7 +69,7 @@ def create_semester():
     acad_year   = str(d.get("acad_year", "")).strip()
     start_date  = d.get("start_date", "").strip()
     end_date    = d.get("end_date", "").strip()
-    is_active   = int(d.get("is_active", 0))
+    is_active   = 1
 
     # Validate fields
     if sem_number not in ("1", "2"):
@@ -103,6 +103,21 @@ def create_semester():
     db.commit()
     audit_log("CREATE_SEMESTER", "/api/admin/semesters", g.user["user_id"], f"name={name}")
     return jsonify({"message": f"Semester '{name}' created"}), 201
+
+@bp.delete("/semesters/<int:sid>")
+@require_role("admin")
+def delete_semester(sid):
+    db  = get_db()
+    sem = db.execute("SELECT * FROM semesters WHERE semester_id=?", (sid,)).fetchone()
+    if not sem:
+        return jsonify({"error": "Semester not found"}), 404
+    if sem["is_active"]:
+        return jsonify({"error": "Cannot delete the active semester. Deactivate it first by creating a new semester."}), 400
+    db.execute("DELETE FROM semesters WHERE semester_id=?", (sid,))
+    db.commit()
+    audit_log("DELETE_SEMESTER", f"/api/admin/semesters/{sid}", g.user["user_id"], f"name={sem['name']}")
+    return jsonify({"message": f"Semester '{sem['name']}' deleted"})
+
 
 @bp.get("/semesters/<int:sid>/courses")
 @require_role("admin")

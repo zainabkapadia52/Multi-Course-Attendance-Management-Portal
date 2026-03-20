@@ -20,11 +20,23 @@
 
   <!-- ARCHIVE -->
   <div class="tab-pane fade" id="tab-archive">
-    <div class="d-flex align-items-center gap-3 mb-3">
-      <label class="fw-semibold mb-0">Past Semester:</label>
-      <select id="archive-sem-select" class="form-select w-auto" onchange="loadArchiveSemester()">
-        <option value="">Select…</option>
-      </select>
+    <div class="row g-4 mb-3">
+      <div class="col-md-6">
+        <div class="d-flex align-items-center gap-3">
+          <label class="fw-semibold mb-0">View semester:</label>
+          <select id="archive-sem-select" class="form-select w-auto" onchange="loadArchiveSemester()">
+            <option value="">Select…</option>
+          </select>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header py-2" style="font-size:.9rem">Delete Past Semester</div>
+          <div class="card-body py-2" id="archive-delete-list">
+            <p class="text-muted mb-0" style="font-size:.85rem">Loading…</p>
+          </div>
+        </div>
+      </div>
     </div>
     <div id="archive-courses-container"></div>
   </div>
@@ -63,10 +75,6 @@
                 <label class="form-label fw-semibold" style="font-size:.85rem">End Date</label>
                 <input id="sem-end" class="form-control" type="date">
               </div>
-            </div>
-            <div class="form-check mb-3">
-              <input id="sem-active" class="form-check-input" type="checkbox">
-              <label class="form-check-label" for="sem-active">Set as active semester</label>
             </div>
             <button class="btn btn-dark w-100" onclick="createSemester()">Create Semester</button>
           </div>
@@ -327,6 +335,21 @@ async function loadActiveSemester() {
     : '<p class="text-muted">No courses yet. Add them in Semester Setup.</p>';
 }
 
+async function deleteSemester(sid, name) {
+  if (!confirm(`Delete semester "${name}"? This will remove all its courses, sessions and records permanently.`)) return;
+  const res = await fetch(`/api/admin/semesters/${sid}`, {
+    method: "DELETE", headers: _sessionHeaders()
+  });
+  const d = await res.json();
+  if (res.ok) {
+    showToast(d.message, "success");
+    loadArchive();
+    loadSetupDropdowns();
+  } else {
+    showToast(d.error, "danger");
+  }
+}
+
 // ── archive ───────────────────────────────────────────────────────────────────
 async function loadArchive() {
   const sems = await api("GET", "/api/admin/semesters");
@@ -334,6 +357,17 @@ async function loadArchive() {
   const sel  = document.getElementById("archive-sem-select");
   sel.innerHTML = `<option value="">Select…</option>` +
     past.map(s => `<option value="${s.semester_id}">${s.name}</option>`).join("");
+
+  // Show delete buttons next to each past semester in the dropdown area
+  const delCon = document.getElementById("archive-delete-list");
+  if (!delCon) return;
+  delCon.innerHTML = past.length ? past.map(s => `
+    <div class="d-flex justify-content-between align-items-center py-1 border-bottom">
+      <span style="font-size:.9rem">${s.name}</span>
+      <button class="btn btn-sm btn-outline-danger"
+        onclick="deleteSemester(${s.semester_id}, '${s.name}')">Delete</button>
+    </div>`).join("") :
+    '<p class="text-muted mb-0" style="font-size:.85rem">No past semesters.</p>';
 }
 
 async function loadArchiveSemester() {
@@ -395,7 +429,6 @@ async function createSemester() {
   const acad_year  = document.getElementById("sem-year").value.trim();
   const start_date = document.getElementById("sem-start").value;
   const end_date   = document.getElementById("sem-end").value;
-  const is_active  = document.getElementById("sem-active").checked ? 1 : 0;
 
   // Frontend validation
   if (!sem_number) {
@@ -414,7 +447,7 @@ async function createSemester() {
   const res = await fetch("/api/admin/semesters", {
     method: "POST",
     headers: _sessionHeaders(),
-    body: JSON.stringify({ sem_number, acad_year, start_date, end_date, is_active })
+    body: JSON.stringify({ sem_number, acad_year, start_date, end_date })
   });
   const d = await res.json();
 
