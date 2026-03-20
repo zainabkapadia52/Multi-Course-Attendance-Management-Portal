@@ -1,0 +1,368 @@
+{
+  "phase": "after",
+  "timestamp": "2026-03-20T22:42:45.489422",
+  "queries": {
+    "student_my_courses": {
+      "name": "student_my_courses",
+      "min": 0.020799998310394585,
+      "max": 0.450699997600168,
+      "mean": 0.03603000028912599,
+      "median": 0.021200001356191933,
+      "stdev": 0.07833203437904124,
+      "rows": 0,
+      "iterations": 30,
+      "total_time": 1.0809000086737797,
+      "explain_plan": [
+        {
+          "id": 11,
+          "parent": 0,
+          "notused": 62,
+          "detail": "SEARCH ce USING INDEX idx_course_enrollments_student_id (student_id=?)"
+        },
+        {
+          "id": 18,
+          "parent": 0,
+          "notused": 45,
+          "detail": "SEARCH c USING INTEGER PRIMARY KEY (rowid=?)"
+        },
+        {
+          "id": 21,
+          "parent": 0,
+          "notused": 45,
+          "detail": "SEARCH s USING INTEGER PRIMARY KEY (rowid=?)"
+        },
+        {
+          "id": 24,
+          "parent": 0,
+          "notused": 56,
+          "detail": "SEARCH ci USING COVERING INDEX sqlite_autoindex_course_instructors_1 (course_id=?) LEFT-JOIN"
+        },
+        {
+          "id": 30,
+          "parent": 0,
+          "notused": 45,
+          "detail": "SEARCH u USING INTEGER PRIMARY KEY (rowid=?) LEFT-JOIN"
+        },
+        {
+          "id": 35,
+          "parent": 0,
+          "notused": 0,
+          "detail": "USE TEMP B-TREE FOR GROUP BY"
+        }
+      ],
+      "category": "student"
+    },
+    "instructor_my_courses": {
+      "name": "instructor_my_courses",
+      "min": 0.021100000594742596,
+      "max": 0.08260000322479755,
+      "mean": 0.0286600004377154,
+      "median": 0.021899999410379678,
+      "stdev": 0.016285547471877743,
+      "rows": 0,
+      "iterations": 30,
+      "total_time": 0.859800013131462,
+      "explain_plan": [
+        {
+          "id": 5,
+          "parent": 0,
+          "notused": 62,
+          "detail": "SEARCH ci USING INDEX idx_course_instructors_instructor_id (instructor_id=?)"
+        },
+        {
+          "id": 12,
+          "parent": 0,
+          "notused": 45,
+          "detail": "SEARCH c USING INTEGER PRIMARY KEY (rowid=?)"
+        },
+        {
+          "id": 15,
+          "parent": 0,
+          "notused": 45,
+          "detail": "SEARCH s USING INTEGER PRIMARY KEY (rowid=?)"
+        }
+      ],
+      "category": "instructor"
+    },
+    "student_my_attendance": {
+      "name": "student_my_attendance",
+      "min": 0.021699997887481004,
+      "max": 0.09210000280290842,
+      "mean": 0.026423333474667743,
+      "median": 0.022849999368190765,
+      "stdev": 0.012849518834407452,
+      "rows": 0,
+      "iterations": 30,
+      "total_time": 0.7927000042400323,
+      "explain_plan": [
+        {
+          "id": 6,
+          "parent": 0,
+          "notused": 61,
+          "detail": "SEARCH ar USING INDEX idx_attendance_records_student_id (student_id=?)"
+        },
+        {
+          "id": 13,
+          "parent": 0,
+          "notused": 45,
+          "detail": "SEARCH att USING INTEGER PRIMARY KEY (rowid=?)"
+        },
+        {
+          "id": 16,
+          "parent": 0,
+          "notused": 45,
+          "detail": "SEARCH c USING INTEGER PRIMARY KEY (rowid=?)"
+        },
+        {
+          "id": 27,
+          "parent": 0,
+          "notused": 0,
+          "detail": "USE TEMP B-TREE FOR ORDER BY"
+        }
+      ],
+      "category": "student"
+    },
+    "instructor_corrections": {
+      "name": "instructor_corrections",
+      "min": 0.020699997548945248,
+      "max": 0.13180000678403303,
+      "mean": 0.034416666555140786,
+      "median": 0.030700000934302807,
+      "stdev": 0.019911478493790977,
+      "rows": 0,
+      "iterations": 30,
+      "total_time": 1.0324999966542237,
+      "explain_plan": [
+        {
+          "id": 9,
+          "parent": 0,
+          "notused": 62,
+          "detail": "SEARCH ci USING INDEX idx_course_instructors_instructor_id (instructor_id=?)"
+        },
+        {
+          "id": 16,
+          "parent": 0,
+          "notused": 45,
+          "detail": "SEARCH c USING INTEGER PRIMARY KEY (rowid=?)"
+        },
+        {
+          "id": 22,
+          "parent": 0,
+          "notused": 61,
+          "detail": "SEARCH cr USING INDEX idx_correction_requests_course_id (course_id=?)"
+        },
+        {
+          "id": 35,
+          "parent": 0,
+          "notused": 45,
+          "detail": "SEARCH u USING INTEGER PRIMARY KEY (rowid=?)"
+        },
+        {
+          "id": 38,
+          "parent": 0,
+          "notused": 45,
+          "detail": "SEARCH att USING INTEGER PRIMARY KEY (rowid=?)"
+        },
+        {
+          "id": 61,
+          "parent": 0,
+          "notused": 0,
+          "detail": "USE TEMP B-TREE FOR ORDER BY"
+        }
+      ],
+      "category": "instructor"
+    },
+    "admin_list_users": {
+      "name": "admin_list_users",
+      "min": 0.11889999586855993,
+      "max": 0.2286000017193146,
+      "mean": 0.12598999940867847,
+      "median": 0.12010000136797316,
+      "stdev": 0.020033616131994555,
+      "rows": 74,
+      "iterations": 30,
+      "total_time": 3.779699982260354,
+      "explain_plan": [
+        {
+          "id": 5,
+          "parent": 0,
+          "notused": 212,
+          "detail": "SCAN u USING INDEX idx_users_role"
+        },
+        {
+          "id": 8,
+          "parent": 0,
+          "notused": 45,
+          "detail": "SEARCH p USING INTEGER PRIMARY KEY (rowid=?) LEFT-JOIN"
+        },
+        {
+          "id": 35,
+          "parent": 0,
+          "notused": 0,
+          "detail": "USE TEMP B-TREE FOR LAST TERM OF ORDER BY"
+        }
+      ],
+      "category": "admin"
+    },
+    "admin_course_students": {
+      "name": "admin_course_students",
+      "min": 0.02130000211764127,
+      "max": 0.05830000009154901,
+      "mean": 0.024436666717519984,
+      "median": 0.02175000190618448,
+      "stdev": 0.0075766643466667625,
+      "rows": 3,
+      "iterations": 30,
+      "total_time": 0.7331000015255995,
+      "explain_plan": [
+        {
+          "id": 4,
+          "parent": 0,
+          "notused": 56,
+          "detail": "SEARCH ce USING COVERING INDEX sqlite_autoindex_course_enrollments_1 (course_id=?)"
+        },
+        {
+          "id": 10,
+          "parent": 0,
+          "notused": 45,
+          "detail": "SEARCH u USING INTEGER PRIMARY KEY (rowid=?)"
+        },
+        {
+          "id": 13,
+          "parent": 0,
+          "notused": 45,
+          "detail": "SEARCH p USING INTEGER PRIMARY KEY (rowid=?) LEFT-JOIN"
+        }
+      ],
+      "category": "admin"
+    },
+    "instructor_session_records": {
+      "name": "instructor_session_records",
+      "min": 0.021699997887481004,
+      "max": 0.06399999983841553,
+      "mean": 0.023759999506485958,
+      "median": 0.022050000552553684,
+      "stdev": 0.007654955746887439,
+      "rows": 3,
+      "iterations": 30,
+      "total_time": 0.7127999851945788,
+      "explain_plan": [
+        {
+          "id": 5,
+          "parent": 0,
+          "notused": 61,
+          "detail": "SEARCH ar USING INDEX idx_attendance_records_att_session_id (att_session_id=?)"
+        },
+        {
+          "id": 12,
+          "parent": 0,
+          "notused": 45,
+          "detail": "SEARCH u USING INTEGER PRIMARY KEY (rowid=?)"
+        },
+        {
+          "id": 21,
+          "parent": 0,
+          "notused": 0,
+          "detail": "USE TEMP B-TREE FOR ORDER BY"
+        }
+      ],
+      "category": "instructor"
+    },
+    "student_course_sessions": {
+      "name": "student_course_sessions",
+      "min": 0.01920000067912042,
+      "max": 0.05499999679159373,
+      "mean": 0.021133333696828533,
+      "median": 0.019599996448960155,
+      "stdev": 0.006574366280712635,
+      "rows": 0,
+      "iterations": 30,
+      "total_time": 0.634000010904856,
+      "explain_plan": [
+        {
+          "id": 5,
+          "parent": 0,
+          "notused": 61,
+          "detail": "SEARCH ar USING INDEX idx_attendance_records_student_id (student_id=?)"
+        },
+        {
+          "id": 14,
+          "parent": 0,
+          "notused": 45,
+          "detail": "SEARCH att USING INTEGER PRIMARY KEY (rowid=?)"
+        },
+        {
+          "id": 26,
+          "parent": 0,
+          "notused": 0,
+          "detail": "USE TEMP B-TREE FOR ORDER BY"
+        }
+      ],
+      "category": "student"
+    },
+    "instructor_sessions": {
+      "name": "instructor_sessions",
+      "min": 0.01930000144056976,
+      "max": 0.06620000203838572,
+      "mean": 0.02143666715710424,
+      "median": 0.019700004486367106,
+      "stdev": 0.00847818657453766,
+      "rows": 0,
+      "iterations": 30,
+      "total_time": 0.6431000147131272,
+      "explain_plan": [
+        {
+          "id": 7,
+          "parent": 0,
+          "notused": 62,
+          "detail": "SEARCH ci USING INDEX idx_course_instructors_instructor_id (instructor_id=?)"
+        },
+        {
+          "id": 14,
+          "parent": 0,
+          "notused": 45,
+          "detail": "SEARCH c USING INTEGER PRIMARY KEY (rowid=?)"
+        },
+        {
+          "id": 20,
+          "parent": 0,
+          "notused": 61,
+          "detail": "SEARCH att USING INDEX idx_attendance_sessions_course_id (course_id=?)"
+        },
+        {
+          "id": 43,
+          "parent": 0,
+          "notused": 0,
+          "detail": "USE TEMP B-TREE FOR ORDER BY"
+        }
+      ],
+      "category": "instructor"
+    },
+    "admin_list_courses": {
+      "name": "admin_list_courses",
+      "min": 0.027999994927085936,
+      "max": 0.06320000102277845,
+      "mean": 0.030326666455948725,
+      "median": 0.028449998353607953,
+      "stdev": 0.006430473735547899,
+      "rows": 13,
+      "iterations": 30,
+      "total_time": 0.9097999936784618,
+      "explain_plan": [
+        {
+          "id": 3,
+          "parent": 0,
+          "notused": 216,
+          "detail": "SCAN c"
+        },
+        {
+          "id": 5,
+          "parent": 0,
+          "notused": 45,
+          "detail": "SEARCH s USING INTEGER PRIMARY KEY (rowid=?)"
+        }
+      ],
+      "category": "admin"
+    }
+  }
+}

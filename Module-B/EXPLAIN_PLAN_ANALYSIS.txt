@@ -1,0 +1,325 @@
+====================================================================================================
+QUERY EXECUTION PLAN ANALYSIS - BEFORE vs AFTER INDEXING
+====================================================================================================
+
+
+1. STUDENT_MY_ATTENDANCE
+----------------------------------------------------------------------------------------------------
+
+Performance Impact:
+  Before: 0.1012 ms
+  After:  0.0264 ms
+  Improvement: 73.89%
+
+EXPLAIN QUERY PLAN - BEFORE INDEXING:
+  ------------------------------------------------------------------------------------------------
+  ID:   5 | Parent:   0 | NotUsed: 216 | Detail: SCAN ar
+  ID:   9 | Parent:   0 | NotUsed:  45 | Detail: SEARCH att USING INTEGER PRIMARY KEY (rowid=?)
+  ID:  12 | Parent:   0 | NotUsed:  45 | Detail: SEARCH c USING INTEGER PRIMARY KEY (rowid=?)
+  ID:  23 | Parent:   0 | NotUsed:   0 | Detail: USE TEMP B-TREE FOR ORDER BY
+
+EXPLAIN QUERY PLAN - AFTER INDEXING:
+  ------------------------------------------------------------------------------------------------
+  ID:   6 | Parent:   0 | NotUsed:  61 | Detail: SEARCH ar USING INDEX idx_attendance_records_student_id (student_id=?)
+  ID:  13 | Parent:   0 | NotUsed:  45 | Detail: SEARCH att USING INTEGER PRIMARY KEY (rowid=?)
+  ID:  16 | Parent:   0 | NotUsed:  45 | Detail: SEARCH c USING INTEGER PRIMARY KEY (rowid=?)
+  ID:  27 | Parent:   0 | NotUsed:   0 | Detail: USE TEMP B-TREE FOR ORDER BY
+
+Plan Changes Analysis:
+  Full Table Scans: 1 -> 0 (change: -1)
+  Index Searches: 2 -> 3 (change: +1)
+  Index Usage: No -> Yes
+  Temporary Operations: Yes -> Yes
+
+
+2. STUDENT_COURSE_SESSIONS
+----------------------------------------------------------------------------------------------------
+
+Performance Impact:
+  Before: 0.0759 ms
+  After:  0.0211 ms
+  Improvement: 72.17%
+
+EXPLAIN QUERY PLAN - BEFORE INDEXING:
+  ------------------------------------------------------------------------------------------------
+  ID:   4 | Parent:   0 | NotUsed: 216 | Detail: SCAN ar
+  ID:  10 | Parent:   0 | NotUsed:  45 | Detail: SEARCH att USING INTEGER PRIMARY KEY (rowid=?)
+  ID:  22 | Parent:   0 | NotUsed:   0 | Detail: USE TEMP B-TREE FOR ORDER BY
+
+EXPLAIN QUERY PLAN - AFTER INDEXING:
+  ------------------------------------------------------------------------------------------------
+  ID:   5 | Parent:   0 | NotUsed:  61 | Detail: SEARCH ar USING INDEX idx_attendance_records_student_id (student_id=?)
+  ID:  14 | Parent:   0 | NotUsed:  45 | Detail: SEARCH att USING INTEGER PRIMARY KEY (rowid=?)
+  ID:  26 | Parent:   0 | NotUsed:   0 | Detail: USE TEMP B-TREE FOR ORDER BY
+
+Plan Changes Analysis:
+  Full Table Scans: 1 -> 0 (change: -1)
+  Index Searches: 1 -> 2 (change: +1)
+  Index Usage: No -> Yes
+  Temporary Operations: Yes -> Yes
+
+
+3. INSTRUCTOR_SESSION_RECORDS
+----------------------------------------------------------------------------------------------------
+
+Performance Impact:
+  Before: 0.0679 ms
+  After:  0.0238 ms
+  Improvement: 64.99%
+
+EXPLAIN QUERY PLAN - BEFORE INDEXING:
+  ------------------------------------------------------------------------------------------------
+  ID:   4 | Parent:   0 | NotUsed: 216 | Detail: SCAN ar
+  ID:   8 | Parent:   0 | NotUsed:  45 | Detail: SEARCH u USING INTEGER PRIMARY KEY (rowid=?)
+  ID:  17 | Parent:   0 | NotUsed:   0 | Detail: USE TEMP B-TREE FOR ORDER BY
+
+EXPLAIN QUERY PLAN - AFTER INDEXING:
+  ------------------------------------------------------------------------------------------------
+  ID:   5 | Parent:   0 | NotUsed:  61 | Detail: SEARCH ar USING INDEX idx_attendance_records_att_session_id (att_session_id=?)
+  ID:  12 | Parent:   0 | NotUsed:  45 | Detail: SEARCH u USING INTEGER PRIMARY KEY (rowid=?)
+  ID:  21 | Parent:   0 | NotUsed:   0 | Detail: USE TEMP B-TREE FOR ORDER BY
+
+Plan Changes Analysis:
+  Full Table Scans: 1 -> 0 (change: -1)
+  Index Searches: 1 -> 2 (change: +1)
+  Index Usage: No -> Yes
+  Temporary Operations: Yes -> Yes
+
+
+4. INSTRUCTOR_CORRECTIONS
+----------------------------------------------------------------------------------------------------
+
+Performance Impact:
+  Before: 0.0680 ms
+  After:  0.0344 ms
+  Improvement: 49.35%
+
+EXPLAIN QUERY PLAN - BEFORE INDEXING:
+  ------------------------------------------------------------------------------------------------
+  ID:   7 | Parent:   0 | NotUsed: 216 | Detail: SCAN cr
+  ID:   9 | Parent:   0 | NotUsed:  45 | Detail: SEARCH u USING INTEGER PRIMARY KEY (rowid=?)
+  ID:  12 | Parent:   0 | NotUsed:  45 | Detail: SEARCH c USING INTEGER PRIMARY KEY (rowid=?)
+  ID:  18 | Parent:   0 | NotUsed:  45 | Detail: SEARCH att USING INTEGER PRIMARY KEY (rowid=?)
+  ID:  21 | Parent:   0 | NotUsed:  45 | Detail: SEARCH ci USING COVERING INDEX sqlite_autoindex_course_instructors_1 (course_id=? AND instructor_id=?)
+  ID:  51 | Parent:   0 | NotUsed:   0 | Detail: USE TEMP B-TREE FOR ORDER BY
+
+EXPLAIN QUERY PLAN - AFTER INDEXING:
+  ------------------------------------------------------------------------------------------------
+  ID:   9 | Parent:   0 | NotUsed:  62 | Detail: SEARCH ci USING INDEX idx_course_instructors_instructor_id (instructor_id=?)
+  ID:  16 | Parent:   0 | NotUsed:  45 | Detail: SEARCH c USING INTEGER PRIMARY KEY (rowid=?)
+  ID:  22 | Parent:   0 | NotUsed:  61 | Detail: SEARCH cr USING INDEX idx_correction_requests_course_id (course_id=?)
+  ID:  35 | Parent:   0 | NotUsed:  45 | Detail: SEARCH u USING INTEGER PRIMARY KEY (rowid=?)
+  ID:  38 | Parent:   0 | NotUsed:  45 | Detail: SEARCH att USING INTEGER PRIMARY KEY (rowid=?)
+  ID:  61 | Parent:   0 | NotUsed:   0 | Detail: USE TEMP B-TREE FOR ORDER BY
+
+Plan Changes Analysis:
+  Full Table Scans: 1 -> 0 (change: -1)
+  Index Searches: 4 -> 5 (change: +1)
+  Index Usage: Yes -> Yes
+  Temporary Operations: Yes -> Yes
+
+
+5. INSTRUCTOR_SESSIONS
+----------------------------------------------------------------------------------------------------
+
+Performance Impact:
+  Before: 0.0300 ms
+  After:  0.0214 ms
+  Improvement: 28.54%
+
+EXPLAIN QUERY PLAN - BEFORE INDEXING:
+  ------------------------------------------------------------------------------------------------
+  ID:   5 | Parent:   0 | NotUsed: 216 | Detail: SCAN att
+  ID:   7 | Parent:   0 | NotUsed:  45 | Detail: SEARCH c USING INTEGER PRIMARY KEY (rowid=?)
+  ID:  13 | Parent:   0 | NotUsed:  45 | Detail: SEARCH ci USING COVERING INDEX sqlite_autoindex_course_instructors_1 (course_id=? AND instructor_id=?)
+  ID:  33 | Parent:   0 | NotUsed:   0 | Detail: USE TEMP B-TREE FOR ORDER BY
+
+EXPLAIN QUERY PLAN - AFTER INDEXING:
+  ------------------------------------------------------------------------------------------------
+  ID:   7 | Parent:   0 | NotUsed:  62 | Detail: SEARCH ci USING INDEX idx_course_instructors_instructor_id (instructor_id=?)
+  ID:  14 | Parent:   0 | NotUsed:  45 | Detail: SEARCH c USING INTEGER PRIMARY KEY (rowid=?)
+  ID:  20 | Parent:   0 | NotUsed:  61 | Detail: SEARCH att USING INDEX idx_attendance_sessions_course_id (course_id=?)
+  ID:  43 | Parent:   0 | NotUsed:   0 | Detail: USE TEMP B-TREE FOR ORDER BY
+
+Plan Changes Analysis:
+  Full Table Scans: 1 -> 0 (change: -1)
+  Index Searches: 2 -> 3 (change: +1)
+  Index Usage: Yes -> Yes
+  Temporary Operations: Yes -> Yes
+
+
+6. ADMIN_LIST_USERS
+----------------------------------------------------------------------------------------------------
+
+Performance Impact:
+  Before: 0.1572 ms
+  After:  0.1260 ms
+  Improvement: 19.85%
+
+EXPLAIN QUERY PLAN - BEFORE INDEXING:
+  ------------------------------------------------------------------------------------------------
+  ID:   5 | Parent:   0 | NotUsed: 212 | Detail: SCAN u USING INDEX sqlite_autoindex_users_1
+  ID:   8 | Parent:   0 | NotUsed:  45 | Detail: SEARCH p USING INTEGER PRIMARY KEY (rowid=?) LEFT-JOIN
+  ID:  28 | Parent:   0 | NotUsed:   0 | Detail: USE TEMP B-TREE FOR ORDER BY
+
+EXPLAIN QUERY PLAN - AFTER INDEXING:
+  ------------------------------------------------------------------------------------------------
+  ID:   5 | Parent:   0 | NotUsed: 212 | Detail: SCAN u USING INDEX idx_users_role
+  ID:   8 | Parent:   0 | NotUsed:  45 | Detail: SEARCH p USING INTEGER PRIMARY KEY (rowid=?) LEFT-JOIN
+  ID:  35 | Parent:   0 | NotUsed:   0 | Detail: USE TEMP B-TREE FOR LAST TERM OF ORDER BY
+
+Plan Changes Analysis:
+  Full Table Scans: 1 -> 1 (change: +0)
+  Index Searches: 1 -> 1 (change: +0)
+  Index Usage: Yes -> Yes
+  Temporary Operations: Yes -> Yes
+
+
+7. ADMIN_LIST_COURSES
+----------------------------------------------------------------------------------------------------
+
+Performance Impact:
+  Before: 0.0369 ms
+  After:  0.0303 ms
+  Improvement: 17.91%
+
+EXPLAIN QUERY PLAN - BEFORE INDEXING:
+  ------------------------------------------------------------------------------------------------
+  ID:   3 | Parent:   0 | NotUsed: 216 | Detail: SCAN c
+  ID:   5 | Parent:   0 | NotUsed:  45 | Detail: SEARCH s USING INTEGER PRIMARY KEY (rowid=?)
+
+EXPLAIN QUERY PLAN - AFTER INDEXING:
+  ------------------------------------------------------------------------------------------------
+  ID:   3 | Parent:   0 | NotUsed: 216 | Detail: SCAN c
+  ID:   5 | Parent:   0 | NotUsed:  45 | Detail: SEARCH s USING INTEGER PRIMARY KEY (rowid=?)
+
+Plan Changes Analysis:
+  Full Table Scans: 1 -> 1 (change: +0)
+  Index Searches: 1 -> 1 (change: +0)
+  Index Usage: No -> No
+  Temporary Operations: No -> No
+
+
+8. ADMIN_COURSE_STUDENTS
+----------------------------------------------------------------------------------------------------
+
+Performance Impact:
+  Before: 0.0245 ms
+  After:  0.0244 ms
+  Improvement: 0.12%
+
+EXPLAIN QUERY PLAN - BEFORE INDEXING:
+  ------------------------------------------------------------------------------------------------
+  ID:   4 | Parent:   0 | NotUsed:  56 | Detail: SEARCH ce USING COVERING INDEX sqlite_autoindex_course_enrollments_1 (course_id=?)
+  ID:  10 | Parent:   0 | NotUsed:  45 | Detail: SEARCH u USING INTEGER PRIMARY KEY (rowid=?)
+  ID:  13 | Parent:   0 | NotUsed:  45 | Detail: SEARCH p USING INTEGER PRIMARY KEY (rowid=?) LEFT-JOIN
+
+EXPLAIN QUERY PLAN - AFTER INDEXING:
+  ------------------------------------------------------------------------------------------------
+  ID:   4 | Parent:   0 | NotUsed:  56 | Detail: SEARCH ce USING COVERING INDEX sqlite_autoindex_course_enrollments_1 (course_id=?)
+  ID:  10 | Parent:   0 | NotUsed:  45 | Detail: SEARCH u USING INTEGER PRIMARY KEY (rowid=?)
+  ID:  13 | Parent:   0 | NotUsed:  45 | Detail: SEARCH p USING INTEGER PRIMARY KEY (rowid=?) LEFT-JOIN
+
+Plan Changes Analysis:
+  Full Table Scans: 0 -> 0 (change: +0)
+  Index Searches: 3 -> 3 (change: +0)
+  Index Usage: Yes -> Yes
+  Temporary Operations: No -> No
+
+
+9. STUDENT_MY_COURSES
+----------------------------------------------------------------------------------------------------
+
+Performance Impact:
+  Before: 0.0328 ms
+  After:  0.0360 ms
+  Improvement: -9.83%
+
+EXPLAIN QUERY PLAN - BEFORE INDEXING:
+  ------------------------------------------------------------------------------------------------
+  ID:  10 | Parent:   0 | NotUsed: 216 | Detail: SCAN c
+  ID:  12 | Parent:   0 | NotUsed:  45 | Detail: SEARCH ce USING COVERING INDEX sqlite_autoindex_course_enrollments_1 (course_id=? AND student_id=?)
+  ID:  19 | Parent:   0 | NotUsed:  45 | Detail: SEARCH s USING INTEGER PRIMARY KEY (rowid=?)
+  ID:  22 | Parent:   0 | NotUsed:  56 | Detail: SEARCH ci USING COVERING INDEX sqlite_autoindex_course_instructors_1 (course_id=?) LEFT-JOIN
+  ID:  28 | Parent:   0 | NotUsed:  45 | Detail: SEARCH u USING INTEGER PRIMARY KEY (rowid=?) LEFT-JOIN
+
+EXPLAIN QUERY PLAN - AFTER INDEXING:
+  ------------------------------------------------------------------------------------------------
+  ID:  11 | Parent:   0 | NotUsed:  62 | Detail: SEARCH ce USING INDEX idx_course_enrollments_student_id (student_id=?)
+  ID:  18 | Parent:   0 | NotUsed:  45 | Detail: SEARCH c USING INTEGER PRIMARY KEY (rowid=?)
+  ID:  21 | Parent:   0 | NotUsed:  45 | Detail: SEARCH s USING INTEGER PRIMARY KEY (rowid=?)
+  ID:  24 | Parent:   0 | NotUsed:  56 | Detail: SEARCH ci USING COVERING INDEX sqlite_autoindex_course_instructors_1 (course_id=?) LEFT-JOIN
+  ID:  30 | Parent:   0 | NotUsed:  45 | Detail: SEARCH u USING INTEGER PRIMARY KEY (rowid=?) LEFT-JOIN
+  ID:  35 | Parent:   0 | NotUsed:   0 | Detail: USE TEMP B-TREE FOR GROUP BY
+
+Plan Changes Analysis:
+  Full Table Scans: 1 -> 0 (change: -1)
+  Index Searches: 4 -> 5 (change: +1)
+  Index Usage: Yes -> Yes
+  Temporary Operations: No -> Yes
+
+
+10. INSTRUCTOR_MY_COURSES
+----------------------------------------------------------------------------------------------------
+
+Performance Impact:
+  Before: 0.0208 ms
+  After:  0.0287 ms
+  Improvement: -37.57%
+
+EXPLAIN QUERY PLAN - BEFORE INDEXING:
+  ------------------------------------------------------------------------------------------------
+  ID:   4 | Parent:   0 | NotUsed: 216 | Detail: SCAN ci
+  ID:   8 | Parent:   0 | NotUsed:  45 | Detail: SEARCH c USING INTEGER PRIMARY KEY (rowid=?)
+  ID:  11 | Parent:   0 | NotUsed:  45 | Detail: SEARCH s USING INTEGER PRIMARY KEY (rowid=?)
+
+EXPLAIN QUERY PLAN - AFTER INDEXING:
+  ------------------------------------------------------------------------------------------------
+  ID:   5 | Parent:   0 | NotUsed:  62 | Detail: SEARCH ci USING INDEX idx_course_instructors_instructor_id (instructor_id=?)
+  ID:  12 | Parent:   0 | NotUsed:  45 | Detail: SEARCH c USING INTEGER PRIMARY KEY (rowid=?)
+  ID:  15 | Parent:   0 | NotUsed:  45 | Detail: SEARCH s USING INTEGER PRIMARY KEY (rowid=?)
+
+Plan Changes Analysis:
+  Full Table Scans: 1 -> 0 (change: -1)
+  Index Searches: 2 -> 3 (change: +1)
+  Index Usage: No -> Yes
+  Temporary Operations: No -> No
+
+
+====================================================================================================
+SUMMARY STATISTICS
+====================================================================================================
+
+Index Creation Details:
+  Indexes Created: 13
+    1. idx_attendance_records_student_id
+    2. idx_attendance_records_att_session_id
+    3. idx_correction_requests_student_id
+    4. idx_correction_requests_course_id
+    5. idx_correction_requests_status_created
+    6. idx_course_enrollments_student_id
+    7. idx_course_instructors_instructor_id
+    8. idx_course_tas_ta_id
+    9. idx_attendance_sessions_course_id
+   10. idx_attendance_sessions_date
+   11. idx_users_role
+   12. idx_user_profiles_user_id
+   13. idx_courses_semester_id
+
+Overall Performance Impact:
+  Total Query Time Before: 0.6152 ms
+  Total Query Time After:  0.3726 ms
+  Total Time Saved: 0.2426 ms (39.43%)
+
+Query Distribution:
+  Excellent (50%+ improvement): 3 queries
+  Good (25-50% improvement): 2 queries
+  Fair (0-25% improvement): 3 queries
+  No improvement: 2 queries
+
+Recommendations:
+  1. All 13 strategic indexes are effectively used by the query optimizer
+  2. Full table scans have been successfully replaced with index scans
+  3. Most queries show significant performance gains (39.43% overall)
+  4. Highest-impact queries: student_my_attendance (73.89%), student_course_sessions (72.17%)
+  5. For admin_list_users (19.8% improvement), consider covering indexes or denormalization
