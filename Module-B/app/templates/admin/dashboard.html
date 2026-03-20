@@ -84,9 +84,11 @@
         <div class="card">
           <div class="card-header">Add Course to Semester</div>
           <div class="card-body">
+            <div id="course-err" class="alert alert-danger d-none"></div>
             <select id="course-sem" class="form-select mb-2"><option value="">Select semester…</option></select>
             <input id="course-name" class="form-control mb-2" placeholder="Course name">
-            <input id="course-code" class="form-control mb-3" placeholder="Course code (e.g. CS432)">
+            <input id="course-code" class="form-control mb-2" placeholder="Course code (e.g. CS432)">
+            <div class="form-text mb-3">Code will be saved in uppercase. Must be unique within the selected semester.</div>
             <button class="btn btn-dark w-100" onclick="createCourse()">Add Course</button>
           </div>
         </div>
@@ -511,12 +513,35 @@ async function loadSetupDropdowns() {
 }
 
 async function createCourse() {
+  const errEl = document.getElementById("course-err");
+  errEl.classList.add("d-none");
+
   const name = document.getElementById("course-name").value.trim();
-  const code = document.getElementById("course-code").value.trim();
+  const code = document.getElementById("course-code").value.trim().toUpperCase();
   const sem  = parseInt(document.getElementById("course-sem").value);
-  if (!name || !code || !sem) return alert("All fields required");
-  await api("POST", "/api/admin/courses", { name, code, semester_id: sem });
-  alert("Course added"); loadActiveSemester();
+
+  if (!name || !code || !sem) {
+    errEl.textContent = "All fields are required.";
+    errEl.classList.remove("d-none"); return;
+  }
+
+  const res = await fetch("/api/admin/courses", {
+    method: "POST",
+    headers: _sessionHeaders(),
+    body: JSON.stringify({ name, code, semester_id: sem })
+  });
+  const d = await res.json();
+
+  if (res.ok) {
+    errEl.classList.add("d-none");
+    document.getElementById("course-name").value = "";
+    document.getElementById("course-code").value = "";
+    showToast(d.message, "success");
+    loadActiveSemester();
+  } else {
+    errEl.textContent = d.error;
+    errEl.classList.remove("d-none");
+  }
 }
 
 // ── users ─────────────────────────────────────────────────────────────────────

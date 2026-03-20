@@ -143,15 +143,33 @@ def list_courses():
 @bp.post("/courses")
 @require_role("admin")
 def create_course():
-    d   = request.json or {}
-    name, code, semester_id = d.get("name","").strip(), d.get("code","").strip(), d.get("semester_id")
+    d           = request.json or {}
+    name        = d.get("name", "").strip()
+    code        = d.get("code", "").strip().upper()
+    semester_id = d.get("semester_id")
+
     if not name or not code or not semester_id:
         return jsonify({"error": "name, code, semester_id required"}), 400
+
     db = get_db()
+
+    # Check if this semester is the active one
+    sem = db.execute("SELECT is_active FROM semesters WHERE semester_id=?", (semester_id,)).fetchone()
+    if not sem:
+        return jsonify({"error": "Semester not found"}), 404
+
+    # Duplicate code check within the same semester
+    exists = db.execute(
+        "SELECT 1 FROM courses WHERE LOWER(code)=LOWER(?) AND semester_id=?",
+        (code, semester_id)
+    ).fetchone()
+    if exists:
+        return jsonify({"error": f"Course code '{code}' already exists in this semester"}), 409
+
     db.execute("INSERT INTO courses (name,code,semester_id) VALUES (?,?,?)", (name, code, semester_id))
     db.commit()
     audit_log("CREATE_COURSE", "/api/admin/courses", g.user["user_id"], f"code={code}")
-    return jsonify({"message": "Course created"}), 201
+    return jsonify({"message": f"Course '{code} — {name}' added"}), 201
 
 @bp.delete("/courses/<int:cid>")
 @require_role("admin")
