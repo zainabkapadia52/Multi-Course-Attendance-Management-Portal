@@ -9,12 +9,17 @@ bp = Blueprint("ta", __name__)
 @bp.get("/courses")
 @require_role("ta")
 def my_courses():
-    rows = get_db().execute(
+    db  = get_db()
+    sem = db.execute("SELECT semester_id FROM semesters WHERE is_active=1 LIMIT 1").fetchone()
+    if not sem:
+        return jsonify([])
+    rows = db.execute(
         """SELECT c.course_id, c.name, c.code, s.name AS semester
            FROM courses c
            JOIN course_tas ct ON ct.course_id=c.course_id
            JOIN semesters s ON s.semester_id=c.semester_id
-           WHERE ct.ta_id=?""", (g.user["user_id"],)
+           WHERE ct.ta_id=? AND c.semester_id=?""",
+        (g.user["user_id"], sem["semester_id"])
     ).fetchall()
     return jsonify([dict(r) for r in rows])
 
@@ -35,10 +40,21 @@ def course_students(cid):
 @bp.get("/courses/<int:cid>/sessions")
 @require_role("ta")
 def course_sessions(cid):
-    db = get_db()
-    if not db.execute("SELECT 1 FROM course_tas WHERE course_id=? AND ta_id=?",
-                      (cid, g.user["user_id"])).fetchone():
+    db  = get_db()
+    sem = db.execute("SELECT semester_id FROM semesters WHERE is_active=1 LIMIT 1").fetchone()
+    if not sem:
+        return jsonify([])
+    if not db.execute(
+        "SELECT 1 FROM course_tas WHERE course_id=? AND ta_id=?",
+        (cid, g.user["user_id"])
+    ).fetchone():
         return jsonify({"error": "Forbidden"}), 403
+    course = db.execute(
+        "SELECT 1 FROM courses WHERE course_id=? AND semester_id=?",
+        (cid, sem["semester_id"])
+    ).fetchone()
+    if not course:
+        return jsonify({"error": "Course not in active semester"}), 403
     rows = db.execute(
         "SELECT att_session_id, session_date, topic FROM attendance_sessions "
         "WHERE course_id=? ORDER BY session_date DESC", (cid,)
@@ -55,10 +71,20 @@ def create_session():
     records      = d.get("records", [])
     if not course_id or not session_date:
         return jsonify({"error": "course_id and session_date required"}), 400
-    db = get_db()
-    if not db.execute("SELECT 1 FROM course_tas WHERE course_id=? AND ta_id=?",
-                      (course_id, g.user["user_id"])).fetchone():
+    db  = get_db()
+    sem = db.execute("SELECT semester_id FROM semesters WHERE is_active=1 LIMIT 1").fetchone()
+    if not sem:
+        return jsonify({"error": "No active semester"}), 400
+    if not db.execute(
+        "SELECT 1 FROM course_tas WHERE course_id=? AND ta_id=?",
+        (course_id, g.user["user_id"])
+    ).fetchone():
         return jsonify({"error": "Forbidden"}), 403
+    if not db.execute(
+        "SELECT 1 FROM courses WHERE course_id=? AND semester_id=?",
+        (course_id, sem["semester_id"])
+    ).fetchone():
+        return jsonify({"error": "Course not in active semester"}), 403
     cur = db.execute(
         "INSERT INTO attendance_sessions (course_id,session_date,topic,created_by) VALUES (?,?,?,?)",
         (course_id, session_date, topic, g.user["user_id"])
@@ -67,8 +93,10 @@ def create_session():
     for rec in records:
         s, st = rec.get("student_id"), rec.get("status", "absent")
         if s and st in ("present", "absent"):
-            db.execute("INSERT INTO attendance_records (att_session_id,student_id,status) VALUES (?,?,?)",
-                       (sid, s, st))
+            db.execute(
+                "INSERT INTO attendance_records (att_session_id,student_id,status) VALUES (?,?,?)",
+                (sid, s, st)
+            )
     db.commit()
     broadcast("attendance_session_created", {"course_id": course_id, "att_session_id": sid})
     audit_log("TA_CREATE_SESSION", "/api/ta/attendance-sessions", g.user["user_id"])

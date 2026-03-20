@@ -9,12 +9,17 @@ bp = Blueprint("instructor", __name__)
 @bp.get("/courses")
 @require_role("instructor")
 def my_courses():
-    rows = get_db().execute(
-        """SELECT c.course_id,c.name,c.code,s.name AS semester
+    db  = get_db()
+    sem = db.execute("SELECT semester_id FROM semesters WHERE is_active=1 LIMIT 1").fetchone()
+    if not sem:
+        return jsonify([])
+    rows = db.execute(
+        """SELECT c.course_id, c.name, c.code, s.name AS semester
            FROM courses c
            JOIN course_instructors ci ON ci.course_id=c.course_id
            JOIN semesters s ON s.semester_id=c.semester_id
-           WHERE ci.instructor_id=?""", (g.user["user_id"],)
+           WHERE ci.instructor_id=? AND c.semester_id=?""",
+        (g.user["user_id"], sem["semester_id"])
     ).fetchall()
     return jsonify([dict(r) for r in rows])
 
@@ -71,12 +76,18 @@ def create_session():
 @bp.get("/attendance-sessions")
 @require_role("instructor")
 def list_sessions():
-    rows = get_db().execute(
-        """SELECT att.*,c.name AS course_name
+    db  = get_db()
+    sem = db.execute("SELECT semester_id FROM semesters WHERE is_active=1 LIMIT 1").fetchone()
+    if not sem:
+        return jsonify([])
+    rows = db.execute(
+        """SELECT att.*, c.name AS course_name
            FROM attendance_sessions att
            JOIN courses c ON c.course_id=att.course_id
            JOIN course_instructors ci ON ci.course_id=att.course_id
-           WHERE ci.instructor_id=? ORDER BY att.session_date DESC""", (g.user["user_id"],)
+           WHERE ci.instructor_id=? AND c.semester_id=?
+           ORDER BY att.session_date DESC""",
+        (g.user["user_id"], sem["semester_id"])
     ).fetchall()
     return jsonify([dict(r) for r in rows])
 
@@ -180,14 +191,25 @@ def reject_correction(req_id):
 @bp.get("/courses/<int:cid>/sessions")
 @require_role("instructor")
 def course_sessions(cid):
-    db = get_db()
-    if not db.execute("SELECT 1 FROM course_instructors WHERE course_id=? AND instructor_id=?",
-                      (cid, g.user["user_id"])).fetchone():
+    db  = get_db()
+    sem = db.execute("SELECT semester_id FROM semesters WHERE is_active=1 LIMIT 1").fetchone()
+    if not sem:
+        return jsonify([])
+    if not db.execute(
+        "SELECT 1 FROM course_instructors WHERE course_id=? AND instructor_id=?",
+        (cid, g.user["user_id"])
+    ).fetchone():
         return jsonify({"error": "Forbidden"}), 403
+    # Also verify this course belongs to active semester
+    course = db.execute(
+        "SELECT 1 FROM courses WHERE course_id=? AND semester_id=?",
+        (cid, sem["semester_id"])
+    ).fetchone()
+    if not course:
+        return jsonify({"error": "Course not in active semester"}), 403
     rows = db.execute(
         """SELECT att_session_id, session_date, topic
-           FROM attendance_sessions
-           WHERE course_id=?
+           FROM attendance_sessions WHERE course_id=?
            ORDER BY session_date DESC""", (cid,)
     ).fetchall()
     return jsonify([dict(r) for r in rows])
