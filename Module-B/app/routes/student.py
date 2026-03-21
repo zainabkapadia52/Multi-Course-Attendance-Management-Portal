@@ -255,11 +255,11 @@ def submit_correction():
                       (course_id, g.user["user_id"])).fetchone():
         return jsonify({"error": "Not enrolled"}), 403
     try:
-        db.execute(
-            "INSERT INTO correction_requests (student_id,course_id,att_session_id,reason,proof_url) "
-            "VALUES (?,?,?,?,?)",
+        cur = db.execute(
+            "INSERT INTO correction_requests (student_id,course_id,att_session_id,reason,proof_url) VALUES (?,?,?,?,?)",
             (g.user["user_id"], course_id, att_session_id, reason, proof_url)
         )
+        req_id = cur.lastrowid
         db.commit()
     except Exception:
         return jsonify({"error": "You already submitted a request for this session"}), 409
@@ -267,7 +267,19 @@ def submit_correction():
         "course_id": course_id, "att_session_id": att_session_id,
         "student_id": g.user["user_id"]
     })
-    audit_log("SUBMIT_CORRECTION", "/api/student/corrections", g.user["user_id"])
+    audit_log(
+        "SUBMIT_CORRECTION",
+        "/api/student/corrections",
+        g.user["user_id"],
+        details=f"req_id={req_id}",
+        old_value=None,
+        new_value={
+            "req_id":        req_id,
+            "course_id":     course_id,
+            "att_session_id": att_session_id,
+            "reason":        reason
+        }
+    )
     return jsonify({"message": "Correction request submitted"}), 201
 
 @bp.get("/profile")

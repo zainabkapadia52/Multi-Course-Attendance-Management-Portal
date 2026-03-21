@@ -93,3 +93,12 @@ CREATE TABLE IF NOT EXISTS correction_logs (
     role     TEXT    NOT NULL,
     acted_at TEXT    NOT NULL DEFAULT (datetime('now'))
 );
+
+CREATE TABLE IF NOT EXISTS raw_changes (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    table_name  TEXT NOT NULL,
+    record_id   INTEGER NOT NULL,
+    old_value   TEXT,
+    new_value   TEXT,
+    changed_at  DATETIME DEFAULT (datetime('now'))
+);
