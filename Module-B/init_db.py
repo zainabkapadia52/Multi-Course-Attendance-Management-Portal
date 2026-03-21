@@ -12,6 +12,7 @@ Generates:
   • ~120 attendance sessions
   • ~2400+ attendance records
   • ~40  correction requests
+  • correction_logs for every accepted/rejected correction
 
 All passwords: password123
 """
@@ -21,7 +22,6 @@ import random
 from datetime import date, timedelta
 from werkzeug.security import generate_password_hash
 import os
-# from db import get_db, DB_PATH
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -63,6 +63,7 @@ def weighted_status():
 # ── static people data ────────────────────────────────────────────────────────
 
 INSTRUCTOR_DATA = [
+    # (username, department, designation)
     ("prof_singh",  "Computer Science",       "Associate Professor"),
     ("prof_rao",    "Mathematics",            "Assistant Professor"),
     ("prof_mehta",  "Electronics",            "Professor"),
@@ -70,11 +71,13 @@ INSTRUCTOR_DATA = [
     ("prof_jain",   "Mechanical Engineering", "Associate Professor"),
 ]
 
+# TAs are M.Tech students — full profiles including roll_no, program, batch
 TA_DATA = [
-    ("ta_amit",  "Computer Science"),
-    ("ta_priya", "Mathematics"),
-    ("ta_ravi",  "Electronics"),
-    ("ta_sneha", "Computer Science"),
+    # (username, department, program, batch, roll_no, designation)
+    ("ta_amit",  "Computer Science", "M.Tech CSE", "2023", "2311TA001", "Teaching Assistant"),
+    ("ta_priya", "Mathematics",      "M.Tech CSE", "2023", "2311TA002", "Teaching Assistant"),
+    ("ta_ravi",  "Electronics",      "M.Tech EE",  "2022", "2211TA003", "Teaching Assistant"),
+    ("ta_sneha", "Computer Science", "M.Tech CSE", "2022", "2211TA004", "Teaching Assistant"),
 ]
 
 FIRST_NAMES = [
@@ -166,24 +169,30 @@ CORRECTION_REASONS = [
 # ── main seed function ────────────────────────────────────────────────────────
 
 def init():
-    # Always start fresh — remove stale DB so no duplicates accumulate
-    if os.path.exists(DB_PATH):
-        os.remove(DB_PATH)
-        print(f"  ✓  Removed existing {DB_PATH}")
-
     conn = sqlite3.connect(DB_PATH)
     conn.execute("PRAGMA foreign_keys = ON")
+    conn.row_factory = sqlite3.Row
 
     # ── schema ────────────────────────────────────────────────────────────────
     with open(SCHEMA_PATH) as f:
         conn.executescript(f.read())
     print("  ✓  Schema loaded from", SCHEMA_PATH)
 
-    # ── admin & dean ──────────────────────────────────────────────────────────
-    insert_user(conn, "admin", "admin")
+    # ── admin ─────────────────────────────────────────────────────────────────
+    admin_id = insert_user(conn, "admin", "admin")
+    conn.execute(
+        """INSERT OR IGNORE INTO user_profiles
+           (user_id, department, designation)
+           VALUES (?,?,?)""",
+        (admin_id, "Administration", "System Administrator")
+    )
+
+    # ── dean ──────────────────────────────────────────────────────────────────
     dean_id = insert_user(conn, "dean_joshi", "dean")
     conn.execute(
-        "INSERT OR IGNORE INTO user_profiles (user_id, department, designation) VALUES (?,?,?)",
+        """INSERT OR IGNORE INTO user_profiles
+           (user_id, department, designation)
+           VALUES (?,?,?)""",
         (dean_id, "Administration", "Dean of Academics")
     )
 
@@ -192,19 +201,24 @@ def init():
     for uname, dept, desig in INSTRUCTOR_DATA:
         uid = insert_user(conn, uname, "instructor")
         conn.execute(
-            "INSERT OR IGNORE INTO user_profiles (user_id, department, designation) VALUES (?,?,?)",
+            """INSERT OR IGNORE INTO user_profiles
+               (user_id, department, designation)
+               VALUES (?,?,?)""",
             (uid, dept, desig)
         )
         instructor_ids[uname] = uid
     print(f"  ✓  {len(instructor_ids)} instructors inserted")
 
     # ── TAs ───────────────────────────────────────────────────────────────────
+    # TAs are M.Tech students — full profile including roll_no, program, batch
     ta_ids = {}
-    for uname, dept in TA_DATA:
+    for uname, dept, program, batch, roll_no, desig in TA_DATA:
         uid = insert_user(conn, uname, "ta")
         conn.execute(
-            "INSERT OR IGNORE INTO user_profiles (user_id, department, designation) VALUES (?,?,?)",
-            (uid, dept, "Teaching Assistant")
+            """INSERT OR IGNORE INTO user_profiles
+               (user_id, roll_no, program, batch, department, designation)
+               VALUES (?,?,?,?,?,?)""",
+            (uid, roll_no, program, batch, dept, desig)
         )
         ta_ids[uname] = uid
     print(f"  ✓  {len(ta_ids)} TAs inserted")
@@ -221,13 +235,15 @@ def init():
         while roll in used_rolls:
             roll = roll[:-3] + str(random.randint(100, 999))
         used_rolls.add(roll)
-        dept = ("Computer Science"       if "CSE" in program else
-                "Electronics"           if "EE"  in program else
+        dept = ("Computer Science"        if "CSE" in program else
+                "Electronics"            if "EE"  in program else
                 "Mechanical Engineering")
         uid = insert_user(conn, uname, "student")
         conn.execute(
-            "INSERT OR IGNORE INTO user_profiles (user_id, roll_no, program, batch, department) VALUES (?,?,?,?,?)",
-            (uid, roll, program, batch, dept)
+            """INSERT OR IGNORE INTO user_profiles
+               (user_id, roll_no, program, batch, department, designation)
+               VALUES (?,?,?,?,?,?)""",
+            (uid, roll, program, batch, dept, "Student")
         )
         student_ids.append((uid, program, dept))
     print(f"  ✓  {len(student_ids)} students inserted")
@@ -246,7 +262,8 @@ def init():
         sem_ids.append(sid)
 
     # ── courses ───────────────────────────────────────────────────────────────
-    course_ids = {}
+    course_ids   = {}
+    course_instr = {}   # code → instructor_id (needed for correction_logs)
     for name, code, sem_idx, instr_uname in COURSE_DEFS:
         cur = conn.execute(
             "INSERT OR IGNORE INTO courses (name, code, semester_id) VALUES (?,?,?)",
@@ -255,13 +272,17 @@ def init():
         cid = cur.lastrowid or conn.execute(
             "SELECT course_id FROM courses WHERE code = ?", (code,)
         ).fetchone()[0]
-        course_ids[code] = cid
+        course_ids[code]   = cid
+        course_instr[code] = instructor_ids[instr_uname]
         conn.execute("INSERT OR IGNORE INTO course_instructors VALUES (?,?)",
                      (cid, instructor_ids[instr_uname]))
         if code in COURSE_TA:
             conn.execute("INSERT OR IGNORE INTO course_tas VALUES (?,?)",
                          (cid, ta_ids[COURSE_TA[code]]))
     print(f"  ✓  {len(course_ids)} courses inserted")
+
+    # reverse map: course_id → instructor_id (for correction_logs)
+    cid_to_instr = {course_ids[code]: course_instr[code] for code in course_ids}
 
     # ── enrollments ───────────────────────────────────────────────────────────
     cs_codes = ["CS432","CS301","CS303","CS302","CS501","CS401"]
@@ -270,8 +291,8 @@ def init():
 
     enrollments = set()
     for uid, program, dept in student_ids:
-        pool = cs_codes if "CSE" in program else (ee_codes if "EE" in program else me_codes)
-        extra = [c for c in cs_codes if c not in pool]
+        pool     = cs_codes if "CSE" in program else (ee_codes if "EE" in program else me_codes)
+        extra    = [c for c in cs_codes if c not in pool]
         combined = pool + extra
         for code in combined[:random.randint(3, 5)]:
             enrollments.add((course_ids[code], uid))
@@ -280,7 +301,6 @@ def init():
     print(f"  ✓  {len(enrollments)} enrolments inserted")
 
     # ── attendance sessions ───────────────────────────────────────────────────
-    # list of (att_session_id, code) for building records
     all_sessions = []
     for name, code, sem_idx, instr_uname in COURSE_DEFS:
         cid   = course_ids[code]
@@ -290,7 +310,7 @@ def init():
         dates  = list(daterange(start, end))[:len(topics)]
         for d, topic in zip(dates, topics):
             cur = conn.execute(
-                "INSERT OR IGNORE INTO attendance_sessions (course_id, session_date, topic, created_by) VALUES (?,?,?,?)",
+                "INSERT INTO attendance_sessions (course_id, session_date, topic, created_by) VALUES (?,?,?,?)",
                 (cid, d.isoformat(), topic, instr)
             )
             all_sessions.append((cur.lastrowid, code))
@@ -311,17 +331,10 @@ def init():
         "INSERT OR IGNORE INTO attendance_records (att_session_id, student_id, status) VALUES (?,?,?)",
         records
     )
-    print(f"  ✓  {len(records)} attendance records inserted  ← main table")
+    print(f"  ✓  {len(records)} attendance records inserted")
 
-    # ── correction requests ───────────────────────────────────────────────────
-    absent_list = [
-        (sess_id, stu_id, course_ids[code])
-        for sess_id, code in all_sessions
-        for stu_id in enrolled_map.get(course_ids[code], [])
-        if (sess_id, stu_id, "absent") in {(r[0], r[1], r[2]) for r in records}
-    ]
-    # Fast set lookup
-    absent_set = {(r[0], r[1]) for r in records if r[2] == "absent"}
+    # ── correction requests + correction_logs ─────────────────────────────────
+    absent_set  = {(r[0], r[1]) for r in records if r[2] == "absent"}
     absent_list = [
         (sess_id, stu_id, course_ids[code])
         for sess_id, code in all_sessions
@@ -329,126 +342,129 @@ def init():
         if (sess_id, stu_id) in absent_set
     ]
 
-    sample = random.sample(absent_list, min(40, len(absent_list)))
+    sample      = random.sample(absent_list, min(40, len(absent_list)))
     cr_statuses = ["pending","pending","pending","accepted","rejected"]
     inserted_cr = 0
+    inserted_cl = 0
+
     for sess_id, stu_id, cid in sample:
+        status = random.choice(cr_statuses)
         try:
-            conn.execute(
+            cur = conn.execute(
                 """INSERT OR IGNORE INTO correction_requests
                    (student_id, course_id, att_session_id, reason, status)
                    VALUES (?,?,?,?,?)""",
                 (stu_id, cid, sess_id,
                  random.choice(CORRECTION_REASONS),
-                 random.choice(cr_statuses))
+                 status)
             )
+            req_id = cur.lastrowid
+            if not req_id:
+                continue
+
             inserted_cr += 1
+
+            # For every accepted or rejected request write a correction_log entry.
+            # acted_by = the instructor responsible for that course.
+            # No trigger on correction_logs — it is append-only by design.
+            if status in ("accepted", "rejected"):
+                acted_by = cid_to_instr.get(cid)
+                if acted_by:
+                    conn.execute(
+                        """INSERT INTO correction_logs
+                           (req_id, action, acted_by, role, acted_at)
+                           VALUES (?,?,?,?,datetime('now'))""",
+                        (req_id, status, acted_by, "instructor")
+                    )
+                    inserted_cl += 1
+
+                # If accepted also mark attendance as present
+                if status == "accepted":
+                    conn.execute(
+                        """UPDATE attendance_records
+                           SET status = 'present'
+                           WHERE att_session_id = ? AND student_id = ?""",
+                        (sess_id, stu_id)
+                    )
+
         except sqlite3.IntegrityError:
             pass
+
     print(f"  ✓  {inserted_cr} correction requests inserted")
+    print(f"  ✓  {inserted_cl} correction_logs entries inserted")
 
     first_student = conn.execute(
-    "SELECT username FROM users WHERE role='student' ORDER BY user_id LIMIT 1"
+        "SELECT username FROM users WHERE role='student' ORDER BY user_id LIMIT 1"
     ).fetchone()[0]
 
-    # Drop existing triggers first so re-running doesn't error
+    # ── triggers ──────────────────────────────────────────────────────────────
+    # correction_logs has NO trigger intentionally — it is append-only.
+    # Only the system writes to it on accept/reject. No unauthorized modification
+    # is possible through normal usage so tracking it adds noise with no value.
+
     conn.execute("DROP TRIGGER IF EXISTS trg_attendance_records_insert")
     conn.execute("DROP TRIGGER IF EXISTS trg_attendance_records_update")
     conn.execute("DROP TRIGGER IF EXISTS trg_attendance_records_delete")
 
-    # INSERT — someone marks a student's attendance for the first time
     conn.execute("""
         CREATE TRIGGER trg_attendance_records_insert
-        AFTER INSERT ON attendance_records
-        FOR EACH ROW
+        AFTER INSERT ON attendance_records FOR EACH ROW
         BEGIN
             INSERT INTO raw_changes (table_name, record_id, old_value, new_value, changed_at)
-            VALUES (
-                'attendance_records',
-                NEW.record_id,
-                NULL,
-                json_object(
-                    'att_session_id', NEW.att_session_id,
-                    'student_id',     NEW.student_id,
-                    'status',         NEW.status
-                ),
-                datetime('now')
-            );
+            VALUES ('attendance_records', NEW.record_id, NULL,
+                json_object('att_session_id', NEW.att_session_id,
+                            'student_id',     NEW.student_id,
+                            'status',         NEW.status),
+                datetime('now'));
         END
     """)
 
-    # UPDATE — TA changes a student's status (absent → present etc.)
     conn.execute("""
         CREATE TRIGGER trg_attendance_records_update
-        AFTER UPDATE ON attendance_records
-        FOR EACH ROW
+        AFTER UPDATE ON attendance_records FOR EACH ROW
         BEGIN
             INSERT INTO raw_changes (table_name, record_id, old_value, new_value, changed_at)
-            VALUES (
-                'attendance_records',
-                OLD.record_id,
-                json_object(
-                    'att_session_id', OLD.att_session_id,
-                    'student_id',     OLD.student_id,
-                    'status',         OLD.status
-                ),
-                json_object(
-                    'att_session_id', NEW.att_session_id,
-                    'student_id',     NEW.student_id,
-                    'status',         NEW.status
-                ),
-                datetime('now')
-            );
+            VALUES ('attendance_records', OLD.record_id,
+                json_object('att_session_id', OLD.att_session_id,
+                            'student_id',     OLD.student_id,
+                            'status',         OLD.status),
+                json_object('att_session_id', NEW.att_session_id,
+                            'student_id',     NEW.student_id,
+                            'status',         NEW.status),
+                datetime('now'));
         END
     """)
 
-    # DELETE — someone removes an attendance record entirely
     conn.execute("""
         CREATE TRIGGER trg_attendance_records_delete
-        AFTER DELETE ON attendance_records
-        FOR EACH ROW
+        AFTER DELETE ON attendance_records FOR EACH ROW
         BEGIN
             INSERT INTO raw_changes (table_name, record_id, old_value, new_value, changed_at)
-            VALUES (
-                'attendance_records',
-                OLD.record_id,
-                json_object(
-                    'att_session_id', OLD.att_session_id,
-                    'student_id',     OLD.student_id,
-                    'status',         OLD.status
-                ),
-                NULL,
-                datetime('now')
-            );
+            VALUES ('attendance_records', OLD.record_id,
+                json_object('att_session_id', OLD.att_session_id,
+                            'student_id',     OLD.student_id,
+                            'status',         OLD.status),
+                NULL, datetime('now'));
         END
     """)
 
     conn.execute("DROP TRIGGER IF EXISTS trg_attendance_sessions_insert")
-
     conn.execute("""
         CREATE TRIGGER trg_attendance_sessions_insert
-        AFTER INSERT ON attendance_sessions
-        FOR EACH ROW
+        AFTER INSERT ON attendance_sessions FOR EACH ROW
         BEGIN
             INSERT INTO raw_changes (table_name, record_id, old_value, new_value, changed_at)
-            VALUES (
-                'attendance_sessions',
-                NEW.att_session_id,
-                NULL,
-                json_object(
-                    'course_id',    NEW.course_id,
-                    'session_date', NEW.session_date,
-                    'topic',        NEW.topic,
-                    'created_by',   NEW.created_by
-                ),
-                datetime('now')
-            );
+            VALUES ('attendance_sessions', NEW.att_session_id, NULL,
+                json_object('course_id',    NEW.course_id,
+                            'session_date', NEW.session_date,
+                            'topic',        NEW.topic,
+                            'created_by',   NEW.created_by),
+                datetime('now'));
         END
     """)
 
-
-    # ── semesters ─────────────────────────────────────────────────────────────────
     conn.execute("DROP TRIGGER IF EXISTS trg_semesters_insert")
+    conn.execute("DROP TRIGGER IF EXISTS trg_semesters_delete")
     conn.execute("""
         CREATE TRIGGER trg_semesters_insert
         AFTER INSERT ON semesters FOR EACH ROW
@@ -459,8 +475,6 @@ def init():
                 datetime('now'));
         END
     """)
-    
-    conn.execute("DROP TRIGGER IF EXISTS trg_semesters_delete")
     conn.execute("""
         CREATE TRIGGER trg_semesters_delete
         AFTER DELETE ON semesters FOR EACH ROW
@@ -471,9 +485,9 @@ def init():
                 NULL, datetime('now'));
         END
     """)
-    
-    # ── courses ───────────────────────────────────────────────────────────────────
+
     conn.execute("DROP TRIGGER IF EXISTS trg_courses_insert")
+    conn.execute("DROP TRIGGER IF EXISTS trg_courses_delete")
     conn.execute("""
         CREATE TRIGGER trg_courses_insert
         AFTER INSERT ON courses FOR EACH ROW
@@ -484,8 +498,6 @@ def init():
                 datetime('now'));
         END
     """)
-    
-    conn.execute("DROP TRIGGER IF EXISTS trg_courses_delete")
     conn.execute("""
         CREATE TRIGGER trg_courses_delete
         AFTER DELETE ON courses FOR EACH ROW
@@ -496,9 +508,9 @@ def init():
                 NULL, datetime('now'));
         END
     """)
-    
-    # ── course_instructors ────────────────────────────────────────────────────────
+
     conn.execute("DROP TRIGGER IF EXISTS trg_course_instructors_insert")
+    conn.execute("DROP TRIGGER IF EXISTS trg_course_instructors_delete")
     conn.execute("""
         CREATE TRIGGER trg_course_instructors_insert
         AFTER INSERT ON course_instructors FOR EACH ROW
@@ -509,8 +521,6 @@ def init():
                 datetime('now'));
         END
     """)
-    
-    conn.execute("DROP TRIGGER IF EXISTS trg_course_instructors_delete")
     conn.execute("""
         CREATE TRIGGER trg_course_instructors_delete
         AFTER DELETE ON course_instructors FOR EACH ROW
@@ -521,9 +531,9 @@ def init():
                 NULL, datetime('now'));
         END
     """)
-    
-    # ── course_tas ────────────────────────────────────────────────────────────────
+
     conn.execute("DROP TRIGGER IF EXISTS trg_course_tas_insert")
+    conn.execute("DROP TRIGGER IF EXISTS trg_course_tas_delete")
     conn.execute("""
         CREATE TRIGGER trg_course_tas_insert
         AFTER INSERT ON course_tas FOR EACH ROW
@@ -534,8 +544,6 @@ def init():
                 datetime('now'));
         END
     """)
-    
-    conn.execute("DROP TRIGGER IF EXISTS trg_course_tas_delete")
     conn.execute("""
         CREATE TRIGGER trg_course_tas_delete
         AFTER DELETE ON course_tas FOR EACH ROW
@@ -546,9 +554,9 @@ def init():
                 NULL, datetime('now'));
         END
     """)
-    
-    # ── course_enrollments ────────────────────────────────────────────────────────
+
     conn.execute("DROP TRIGGER IF EXISTS trg_course_enrollments_insert")
+    conn.execute("DROP TRIGGER IF EXISTS trg_course_enrollments_delete")
     conn.execute("""
         CREATE TRIGGER trg_course_enrollments_insert
         AFTER INSERT ON course_enrollments FOR EACH ROW
@@ -559,8 +567,6 @@ def init():
                 datetime('now'));
         END
     """)
-    
-    conn.execute("DROP TRIGGER IF EXISTS trg_course_enrollments_delete")
     conn.execute("""
         CREATE TRIGGER trg_course_enrollments_delete
         AFTER DELETE ON course_enrollments FOR EACH ROW
@@ -571,9 +577,9 @@ def init():
                 NULL, datetime('now'));
         END
     """)
-    
-    # ── users ─────────────────────────────────────────────────────────────────────
+
     conn.execute("DROP TRIGGER IF EXISTS trg_users_insert")
+    conn.execute("DROP TRIGGER IF EXISTS trg_users_delete")
     conn.execute("""
         CREATE TRIGGER trg_users_insert
         AFTER INSERT ON users FOR EACH ROW
@@ -584,8 +590,6 @@ def init():
                 datetime('now'));
         END
     """)
-    
-    conn.execute("DROP TRIGGER IF EXISTS trg_users_delete")
     conn.execute("""
         CREATE TRIGGER trg_users_delete
         AFTER DELETE ON users FOR EACH ROW
@@ -596,9 +600,9 @@ def init():
                 NULL, datetime('now'));
         END
     """)
-    
-    # ── correction_requests ───────────────────────────────────────────────────────
+
     conn.execute("DROP TRIGGER IF EXISTS trg_correction_requests_insert")
+    conn.execute("DROP TRIGGER IF EXISTS trg_correction_requests_update")
     conn.execute("""
         CREATE TRIGGER trg_correction_requests_insert
         AFTER INSERT ON correction_requests FOR EACH ROW
@@ -610,8 +614,6 @@ def init():
                 datetime('now'));
         END
     """)
-    
-    conn.execute("DROP TRIGGER IF EXISTS trg_correction_requests_update")
     conn.execute("""
         CREATE TRIGGER trg_correction_requests_update
         AFTER UPDATE ON correction_requests FOR EACH ROW
@@ -624,7 +626,7 @@ def init():
         END
     """)
 
-    print("All triggers created.")
+    print("  ✓  All triggers created (correction_logs intentionally excluded)")
 
     conn.commit()
     conn.close()
@@ -640,23 +642,11 @@ def init():
     print("  dean_joshi   (dean)")
     print("  prof_singh   (instructor)")
     print("  prof_mehta   (instructor)")
-    print("  ta_amit      (ta)")
-    # print("  aarav_patel0 (student — first one)")
+    print("  ta_amit      (ta)  — roll: 2311TA001, M.Tech CSE 2023")
+    print("  ta_priya     (ta)  — roll: 2311TA002, M.Tech CSE 2023")
     print(f"  {first_student} (student — first one)")
     print("═" * 55)
 
 
-# def setup_triggers():
-#     conn = get_db()
-
-    
-
-#     conn.commit()
-#     conn.close()
-#     print("Triggers created on attendance_records.")
-
-
-
 if __name__ == "__main__":
     init()
-    # setup_triggers()
