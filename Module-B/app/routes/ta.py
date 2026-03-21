@@ -86,21 +86,49 @@ def create_session():
     ).fetchone():
         return jsonify({"error": "Course not in active semester"}), 403
     cur = db.execute(
-        "INSERT INTO attendance_sessions (course_id,session_date,topic,created_by) VALUES (?,?,?,?)",
+        "INSERT INTO attendance_sessions (course_id, session_date, topic, created_by) VALUES (?,?,?,?)",
         (course_id, session_date, topic, g.user["user_id"])
     )
     sid = cur.lastrowid
+
+    inserted_records = []
     for rec in records:
-        s, st = rec.get("student_id"), rec.get("status", "absent")
-        if s and st in ("present", "absent"):
+        s  = rec.get("student_id")
+        st = rec.get("status", "absent")
+        if s and st in ("present", "absent", "late"):
             db.execute(
-                "INSERT INTO attendance_records (att_session_id,student_id,status) VALUES (?,?,?)",
+                "INSERT INTO attendance_records (att_session_id, student_id, status) VALUES (?,?,?)",
                 (sid, s, st)
             )
+            inserted_records.append({"student_id": s, "status": st})
+
     db.commit()
-    broadcast("attendance_session_created", {"course_id": course_id, "att_session_id": sid})
-    audit_log("TA_CREATE_SESSION", "/api/ta/attendance-sessions", g.user["user_id"])
+
+    broadcast("attendance_session_created", {
+        "course_id":      course_id,
+        "att_session_id": sid,
+        "session_date":   session_date,
+    })
+
+    # Log the session creation with full details
+    audit_log(
+        action="TA_CREATE_SESSION",
+        endpoint="/api/ta/attendance-sessions",
+        user_id=g.user["user_id"],
+        details=f"att_session_id={sid}",
+        old_value=None,
+        new_value={
+            "att_session_id": sid,
+            "course_id":      course_id,
+            "session_date":   session_date,
+            "topic":          topic,
+            "created_by":     g.user["user_id"],
+            "records":        inserted_records   # all students marked in this session
+        }
+    )
+
     return jsonify({"message": "Session created", "att_session_id": sid}), 201
+    
 
 @bp.get("/attendance-sessions/<int:sid>/records")
 @require_role("ta")
@@ -112,17 +140,73 @@ def session_records(sid):
     ).fetchall()
     return jsonify([dict(r) for r in rows])
 
+# @bp.put("/records/<int:rid>")
+# @require_role("ta")
+# def update_record(rid):
+#     status = (request.json or {}).get("status")
+#     if status not in ("present","absent","late"):
+#         return jsonify({"error": "Invalid status"}), 400
+#     db = get_db()
+#     db.execute("UPDATE attendance_records SET status=? WHERE record_id=?", (status, rid))
+#     db.commit()
+#     broadcast("attendance_updated", {
+#         "record_id": rid,
+#         "status":    status,
+#     })
+#     audit_log("TA_UPDATE_ATT", f"/api/ta/records/{rid}", g.user["user_id"], f"status={status}")
+#     return jsonify({"message": "Record updated"})
+
 @bp.put("/records/<int:rid>")
 @require_role("ta")
 def update_record(rid):
     status = (request.json or {}).get("status")
     if status not in ("present", "absent"):
         return jsonify({"error": "Invalid status"}), 400
+
     db = get_db()
-    db.execute("UPDATE attendance_records SET status=? WHERE record_id=?", (status, rid))
+
+    # Fetch old value BEFORE making the change
+    row = db.execute(
+        "SELECT status, student_id, att_session_id FROM attendance_records WHERE record_id = ?",
+        (rid,)
+    ).fetchone()
+
+    if not row:
+        return jsonify({"error": "Record not found"}), 404
+
+    old_status = row["status"]
+
+    # Make the change — trigger fires here → raw_changes gets an entry
+    db.execute(
+        "UPDATE attendance_records SET status = ? WHERE record_id = ?",
+        (status, rid)
+    )
     db.commit()
-    broadcast("attendance_updated", {"record_id": rid, "status": status})
-    audit_log("TA_UPDATE_ATT", f"/api/ta/records/{rid}", g.user["user_id"])
+    broadcast("attendance_updated", {
+        "record_id": rid,
+        "status":    status,
+    })
+
+    # Write to audit.log — this is the API fingerprint
+    audit_log(
+        action="TA_UPDATE_ATT",
+        endpoint=f"/api/ta/records/{rid}",
+        user_id=g.user["user_id"],
+        details=f"record_id={rid}",
+        old_value={
+            "record_id":     rid,
+            "student_id":    row["student_id"],
+            "att_session_id": row["att_session_id"],
+            "status":        old_status
+        },
+        new_value={
+            "record_id":     rid,
+            "student_id":    row["student_id"],
+            "att_session_id": row["att_session_id"],
+            "status":        status
+        }
+    )
+
     return jsonify({"message": "Record updated"})
 
 # ── Corrections (shared with instructor — same table, shared status) ──────────

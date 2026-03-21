@@ -96,13 +96,21 @@ def create_semester():
 
     if is_active:
         db.execute("UPDATE semesters SET is_active=0")
-    db.execute(
+    cur = db.execute(
         "INSERT INTO semesters (name,start_date,end_date,is_active) VALUES (?,?,?,?)",
-        (name, start_date, end_date, is_active)
+        (name, d.get("start_date",""), d.get("end_date",""), is_active)
     )
+    semester_id = cur.lastrowid
     db.commit()
-    audit_log("CREATE_SEMESTER", "/api/admin/semesters", g.user["user_id"], f"name={name}")
-    return jsonify({"message": f"Semester '{name}' created"}), 201
+    audit_log(
+        "CREATE_SEMESTER",
+        "/api/admin/semesters",
+        g.user["user_id"],
+        details=f"record_id={semester_id}",
+        old_value=None,
+        new_value={"semester_id": semester_id, "name": name, "is_active": is_active}
+    )
+    return jsonify({"message": "Semester created"}), 201
 
 @bp.delete("/semesters/<int:sid>")
 @require_role("admin")
@@ -166,21 +174,39 @@ def create_course():
     if exists:
         return jsonify({"error": f"Course code '{code}' already exists in this semester"}), 409
 
-    db.execute("INSERT INTO courses (name,code,semester_id) VALUES (?,?,?)", (name, code, semester_id))
+    cur = db.execute(
+        "INSERT INTO courses (name,code,semester_id) VALUES (?,?,?)",
+        (name, code, semester_id)
+    )
+    course_id = cur.lastrowid
     db.commit()
-    audit_log("CREATE_COURSE", "/api/admin/courses", g.user["user_id"], f"code={code}")
-    return jsonify({"message": f"Course '{code} — {name}' added"}), 201
+    audit_log(
+        "CREATE_COURSE",
+        "/api/admin/courses",
+        g.user["user_id"],
+        details=f"record_id={course_id}",
+        old_value=None,
+        new_value={"course_id": course_id, "name": name, "code": code, "semester_id": semester_id}
+    )
+    return jsonify({"message": "Course created"}), 201
 
 @bp.delete("/courses/<int:cid>")
 @require_role("admin")
 def delete_course(cid):
     db     = get_db()
-    course = db.execute("SELECT code FROM courses WHERE course_id=?", (cid,)).fetchone()
+    course = db.execute("SELECT * FROM courses WHERE course_id=?", (cid,)).fetchone()
     if not course:
         return jsonify({"error": "Course not found"}), 404
     db.execute("DELETE FROM courses WHERE course_id=?", (cid,))
     db.commit()
-    audit_log("DELETE_COURSE", f"/api/admin/courses/{cid}", g.user["user_id"], f"code={course['code']}")
+    audit_log(
+        "DELETE_COURSE",
+        f"/api/admin/courses/{cid}",
+        g.user["user_id"],
+        details=f"record_id={cid}",
+        old_value={"course_id": cid, "name": course["name"], "code": course["code"]},
+        new_value=None
+    )
     return jsonify({"message": f"Course {course['code']} deleted"})
 
 # ── Instructor / TA / Student assignment ──────────────────────────────────────
@@ -197,7 +223,14 @@ def assign_instructor(cid):
         db.commit()
     except Exception:
         return jsonify({"error": "Already assigned"}), 409
-    audit_log("ASSIGN_INSTRUCTOR", f"/api/admin/courses/{cid}/instructors", g.user["user_id"])
+    audit_log(
+        "ASSIGN_INSTRUCTOR",
+        f"/api/admin/courses/{cid}/instructors",
+        g.user["user_id"],
+        details=f"record_id={cid}",
+        old_value=None,
+        new_value={"course_id": cid, "instructor_id": iid}
+    )
     return jsonify({"message": "Instructor assigned"}), 201
 
 @bp.delete("/courses/<int:cid>/instructors/<int:iid>")
@@ -206,7 +239,14 @@ def remove_instructor(cid, iid):
     db = get_db()
     db.execute("DELETE FROM course_instructors WHERE course_id=? AND instructor_id=?", (cid, iid))
     db.commit()
-    audit_log("REMOVE_INSTRUCTOR", f"/api/admin/courses/{cid}/instructors/{iid}", g.user["user_id"])
+    audit_log(
+        "REMOVE_INSTRUCTOR",
+        f"/api/admin/courses/{cid}/instructors/{iid}",
+        g.user["user_id"],
+        details=f"record_id={cid}",
+        old_value={"course_id": cid, "instructor_id": iid},
+        new_value=None
+    )
     return jsonify({"message": "Instructor removed"})
 
 @bp.post("/courses/<int:cid>/tas")
@@ -221,7 +261,14 @@ def assign_ta(cid):
         db.commit()
     except Exception:
         return jsonify({"error": "Already assigned"}), 409
-    audit_log("ASSIGN_TA", f"/api/admin/courses/{cid}/tas", g.user["user_id"])
+    audit_log(
+        "ASSIGN_TA",
+        f"/api/admin/courses/{cid}/tas",
+        g.user["user_id"],
+        details=f"record_id={cid}",
+        old_value=None,
+        new_value={"course_id": cid, "ta_id": tid}
+    )
     return jsonify({"message": "TA assigned"}), 201
 
 @bp.delete("/courses/<int:cid>/tas/<int:tid>")
@@ -230,7 +277,14 @@ def remove_ta(cid, tid):
     db = get_db()
     db.execute("DELETE FROM course_tas WHERE course_id=? AND ta_id=?", (cid, tid))
     db.commit()
-    audit_log("REMOVE_TA", f"/api/admin/courses/{cid}/tas/{tid}", g.user["user_id"])
+    audit_log(
+        "REMOVE_TA",
+        f"/api/admin/courses/{cid}/tas/{tid}",
+        g.user["user_id"],
+        details=f"record_id={cid}",
+        old_value={"course_id": cid, "ta_id": tid},
+        new_value=None
+    )
     return jsonify({"message": "TA removed"})
 
 @bp.post("/courses/<int:cid>/enrollments")
@@ -245,7 +299,14 @@ def enroll_student(cid):
         db.commit()
     except Exception:
         return jsonify({"error": "Already enrolled"}), 409
-    audit_log("ENROLL_STUDENT", f"/api/admin/courses/{cid}/enrollments", g.user["user_id"])
+    audit_log(
+        "ENROLL_STUDENT",
+        f"/api/admin/courses/{cid}/enrollments",
+        g.user["user_id"],
+        details=f"record_id={cid}",
+        old_value=None,
+        new_value={"course_id": cid, "student_id": sid}
+    )
     return jsonify({"message": "Student enrolled"}), 201
 
 @bp.delete("/courses/<int:cid>/enrollments/<int:sid>")
@@ -254,7 +315,14 @@ def remove_enrollment(cid, sid):
     db = get_db()
     db.execute("DELETE FROM course_enrollments WHERE course_id=? AND student_id=?", (cid, sid))
     db.commit()
-    audit_log("REMOVE_ENROLLMENT", f"/api/admin/courses/{cid}/enrollments/{sid}", g.user["user_id"])
+    audit_log(
+        "REMOVE_ENROLLMENT",
+        f"/api/admin/courses/{cid}/enrollments/{sid}",
+        g.user["user_id"],
+        details=f"record_id={cid}",
+        old_value={"course_id": cid, "student_id": sid},
+        new_value=None
+    )
     return jsonify({"message": "Student removed"})
 
 # ── Users ─────────────────────────────────────────────────────────────────────
@@ -305,7 +373,14 @@ def create_user():
         db.commit()
     except Exception:
         return jsonify({"error": "Username already exists"}), 409
-    audit_log("CREATE_USER", "/api/admin/users", g.user["user_id"], f"created={username} role={role}")
+    audit_log(
+        "CREATE_USER",
+        "/api/admin/users",
+        g.user["user_id"],
+        details=f"record_id={user_id}",
+        old_value=None,
+        new_value={"user_id": user_id, "username": username, "role": role}
+    )
     return jsonify({"message": f"User {username} created"}), 201
 
 @bp.delete("/users/<int:uid>")
@@ -321,10 +396,17 @@ def delete_user(uid):
             return jsonify({"error": "Cannot delete the last admin account"}), 400
     db.execute("DELETE FROM users WHERE user_id=?", (uid,))
     db.commit()
-    audit_log("DELETE_USER", f"/api/admin/users/{uid}", g.user["user_id"], f"deleted={user['username']}")
+    audit_log(
+        "DELETE_USER",
+        f"/api/admin/users/{uid}",
+        g.user["user_id"],
+        details=f"record_id={uid}",
+        old_value={"user_id": uid, "username": user["username"], "role": user["role"]},
+        new_value=None
+    )
     return jsonify({"message": "User permanently deleted"})
 
-# ── Dropdown helpers ──────────────────────────────────────────────────────────
+# ── Dropdown helpers (read-only, no logging needed) ───────────────────────────
 
 @bp.get("/instructors")
 @require_role("admin")
@@ -384,14 +466,25 @@ def update_record(rid):
     status = (request.json or {}).get("status")
     if status not in ("present","absent"):
         return jsonify({"error": "Invalid status"}), 400
-    db = get_db()
+    db  = get_db()
+    row = db.execute(
+        "SELECT status, student_id, att_session_id FROM attendance_records WHERE record_id=?",
+        (rid,)
+    ).fetchone()
+    if not row:
+        return jsonify({"error": "Record not found"}), 404
+    old_status = row["status"]
     db.execute("UPDATE attendance_records SET status=? WHERE record_id=?", (status, rid))
     db.commit()
-    broadcast("attendance_updated", {
-        "record_id": rid,
-        "status":    status,
-    })
-    audit_log("ADMIN_ATT_OVERRIDE", f"/api/admin/records/{rid}", g.user["user_id"], f"status={status}")
+    broadcast("attendance_updated", {"record_id": rid, "status": status})
+    audit_log(
+        "ADMIN_ATT_OVERRIDE",
+        f"/api/admin/records/{rid}",
+        g.user["user_id"],
+        details=f"record_id={rid}",
+        old_value={"record_id": rid, "student_id": row["student_id"], "att_session_id": row["att_session_id"], "status": old_status},
+        new_value={"record_id": rid, "student_id": row["student_id"], "att_session_id": row["att_session_id"], "status": status}
+    )
     return jsonify({"message": "Record updated"})
 
 

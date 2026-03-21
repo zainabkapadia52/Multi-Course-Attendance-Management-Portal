@@ -2479,3 +2479,30 @@
 127.0.0.1 - - [22/Mar/2026 00:39:44] "GET /api/instructor/archive HTTP/1.1" 200 -
 127.0.0.1 - - [22/Mar/2026 00:39:44] "GET /api/instructor/corrections HTTP/1.1" 200 -
 127.0.0.1 - - [22/Mar/2026 00:39:49] "GET /api/instructor/corrections HTTP/1.1" 200 -
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5050
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 829-757-822
+127.0.0.1 - - [22/Mar/2026 01:27:42] "[31m[1mGET /stream?session_id=5118e308-947e-4009-897c-aaa37a2dfcaa&mac=7d1ed242d7a2043b5981f88356eafdf9f8b91cd8baec466791ffed9aef8efc88 HTTP/1.1[0m" 401 -
+127.0.0.1 - - [22/Mar/2026 01:27:45] "GET /ta HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 01:27:45] "[31m[1mGET /isAuth HTTP/1.1[0m" 401 -
+2026-03-21T19:57:45.770596 | ACTION=UNAUTHORIZED | USER=None | ENDPOINT=/api/ta/courses | 
+127.0.0.1 - - [22/Mar/2026 01:27:45] "[31m[1mGET /isAuth HTTP/1.1[0m" 401 -
+127.0.0.1 - - [22/Mar/2026 01:27:45] "[31m[1mGET /stream?session_id=5118e308-947e-4009-897c-aaa37a2dfcaa&mac=7d1ed242d7a2043b5981f88356eafdf9f8b91cd8baec466791ffed9aef8efc88 HTTP/1.1[0m" 401 -
+127.0.0.1 - - [22/Mar/2026 01:27:45] "[31m[1mGET /api/ta/courses HTTP/1.1[0m" 401 -
+127.0.0.1 - - [22/Mar/2026 01:27:45] "GET /login HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 01:27:45] "GET /login HTTP/1.1" 200 -
+2026-03-21T19:57:53.463750 | ACTION=LOGIN_OK | USER=8 | ENDPOINT=/login | username=ta_amit
+127.0.0.1 - - [22/Mar/2026 01:27:53] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 01:27:53] "GET /ta HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 01:27:53] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 01:27:53] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 01:27:53] "GET /stream?session_id=dabe3094-3501-43b2-a9c2-37dd737f5425&mac=ea38567d0532a80449486f19b6f8b20136d95aebf0649318f61d12112fb99d02 HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 01:27:53] "GET /api/ta/courses HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 01:27:53] "GET /api/ta/courses/1/sessions HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 01:27:55] "GET /api/ta/archive HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 01:27:55] "GET /api/ta/corrections HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 01:27:58] "GET /api/ta/corrections/25/logs HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 01:28:00] "GET /api/ta/profile HTTP/1.1" 200 -

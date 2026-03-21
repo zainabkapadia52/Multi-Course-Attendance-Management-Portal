@@ -1,0 +1,7 @@
+=== Database Log Export — 2026-03-21T18:47:50.593996 ===
+
+2026-03-21 18:46:31 | TABLE=correction_requests | ROWID=1 | OLD={"req_id":1,"status":"pending"} | NEW={"req_id":1,"status":"accepted"}
+2026-03-21 18:46:31 | TABLE=attendance_records | ROWID=260 | OLD={"att_session_id":10,"student_id":19,"status":"absent"} | NEW={"att_session_id":10,"student_id":19,"status":"present"}
+2026-03-21 18:46:33 | TABLE=correction_requests | ROWID=16 | OLD={"req_id":16,"status":"pending"} | NEW={"req_id":16,"status":"rejected"}
+2026-03-21 18:46:36 | TABLE=correction_requests | ROWID=40 | OLD={"req_id":40,"status":"pending"} | NEW={"req_id":40,"status":"accepted"}
+2026-03-21 18:46:36 | TABLE=attendance_records | ROWID=282 | OLD={"att_session_id":11,"student_id":15,"status":"absent"} | NEW={"att_session_id":11,"student_id":15,"status":"present"}
