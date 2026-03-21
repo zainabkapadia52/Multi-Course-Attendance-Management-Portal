@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, g
+from flask import Blueprint, request, jsonify, g   # fixed: was 'afrom'
 from ..db import get_db
 from ..middleware import require_role
 from ..logger import audit_log
@@ -60,17 +60,35 @@ def create_session():
         (course_id, session_date, topic, g.user["user_id"])
     )
     sid = cur.lastrowid
+    inserted_records = []
     for rec in records:
         s, st = rec.get("student_id"), rec.get("status","absent")
-        if s and st in ("present","absent"):
-            db.execute("INSERT INTO attendance_records (att_session_id,student_id,status) VALUES (?,?,?)", (sid, s, st))
+        if s and st in ("present","absent","late"):
+            db.execute(
+                "INSERT INTO attendance_records (att_session_id,student_id,status) VALUES (?,?,?)",
+                (sid, s, st)
+            )
+            inserted_records.append({"student_id": s, "status": st})
     db.commit()
     broadcast("attendance_session_created", {
-        "course_id":    course_id,
+        "course_id":      course_id,
         "att_session_id": sid,
-        "session_date": session_date,
+        "session_date":   session_date,
     })
-    audit_log("CREATE_ATT_SESSION", "/api/instructor/attendance-sessions", g.user["user_id"], f"course={course_id}")
+    audit_log(
+        "CREATE_ATT_SESSION",
+        "/api/instructor/attendance-sessions",
+        g.user["user_id"],
+        details=f"att_session_id={sid}",
+        old_value=None,
+        new_value={
+            "att_session_id": sid,
+            "course_id":      course_id,
+            "session_date":   session_date,
+            "topic":          topic,
+            "records":        inserted_records
+        }
+    )
     return jsonify({"message": "Session created", "att_session_id": sid}), 201
 
 @bp.get("/attendance-sessions")
@@ -148,9 +166,18 @@ def accept_correction(req_id):
         return jsonify({"error": "Not found or forbidden"}), 404
     if req["status"] != "pending":
         return jsonify({"error": "Already resolved"}), 400
+
+    # Fetch old attendance status before updating
+    att_row = db.execute(
+        "SELECT record_id, status FROM attendance_records WHERE att_session_id=? AND student_id=?",
+        (req["att_session_id"], req["student_id"])
+    ).fetchone()
+
     db.execute("UPDATE correction_requests SET status='accepted' WHERE req_id=?", (req_id,))
-    db.execute("UPDATE attendance_records SET status='present' WHERE att_session_id=? AND student_id=?",
-               (req["att_session_id"], req["student_id"]))
+    db.execute(
+        "UPDATE attendance_records SET status='present' WHERE att_session_id=? AND student_id=?",
+        (req["att_session_id"], req["student_id"])
+    )
     db.commit()
     db.execute(
         "INSERT INTO correction_logs (req_id, action, acted_by, role) VALUES (?,?,?,?)",
@@ -163,8 +190,24 @@ def accept_correction(req_id):
         "student_id": req["student_id"],
         "course_id":  req["course_id"],
     })
-
-    audit_log("ACCEPT_CORRECTION", f"/api/instructor/corrections/{req_id}/accept", g.user["user_id"])
+    audit_log(
+        "ACCEPT_CORRECTION",
+        f"/api/instructor/corrections/{req_id}/accept",
+        g.user["user_id"],
+        details=f"req_id={req_id} record_id={att_row['record_id'] if att_row else 'unknown'}",
+        old_value={
+            "req_id":        req_id,
+            "req_status":    "pending",
+            "record_id":     att_row["record_id"] if att_row else None,
+            "record_status": att_row["status"] if att_row else None
+        },
+        new_value={
+            "req_id":        req_id,
+            "req_status":    "accepted",
+            "record_id":     att_row["record_id"] if att_row else None,
+            "record_status": "present"
+        }
+    )
     return jsonify({"message": "Accepted; attendance updated"})
 
 @bp.post("/corrections/<int:req_id>/reject")
@@ -189,13 +232,20 @@ def reject_correction(req_id):
     )
     db.commit()
     broadcast("correction_resolved", {
-        "req_id":    req_id,
-        "status":    "accepted",
+        "req_id":     req_id,
+        "status":     "rejected",   # fixed: was "accepted" in original
         "student_id": req["student_id"],
         "course_id":  req["course_id"],
     })
 
-    audit_log("REJECT_CORRECTION", f"/api/instructor/corrections/{req_id}/reject", g.user["user_id"])
+    audit_log(
+        "REJECT_CORRECTION",
+        f"/api/instructor/corrections/{req_id}/reject",
+        g.user["user_id"],
+        details=f"req_id={req_id}",
+        old_value={"req_id": req_id, "status": "pending"},
+        new_value={"req_id": req_id, "status": "rejected"}
+    )
     return jsonify({"message": "Rejected"})
 
 @bp.get("/courses/<int:cid>/sessions")
