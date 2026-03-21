@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS attendance_records (
     record_id      INTEGER PRIMARY KEY AUTOINCREMENT,
     att_session_id INTEGER NOT NULL REFERENCES attendance_sessions(att_session_id) ON DELETE CASCADE,
     student_id     INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
-    status         TEXT    CHECK(status IN ('present','absent','late')) NOT NULL DEFAULT 'absent'
+    status         TEXT    CHECK(status IN ('present','absent')) NOT NULL DEFAULT 'absent'
 );
 
 CREATE TABLE IF NOT EXISTS correction_requests (

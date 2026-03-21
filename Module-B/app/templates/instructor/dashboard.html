@@ -9,39 +9,14 @@
   <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-archive" onclick="loadInstrArchive()">Archive</button></li>
   <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-profile" onclick="loadProfile()">Profile</button></li>
 </ul>
-<!-- PROFILE -->
-  <div class="tab-pane fade" id="tab-profile">
-    <div class="card" style="max-width:480px">
-      <div class="card-header">My Profile</div>
-      <div class="card-body" id="profile-body">Loading…</div>
-    </div>
-  </div>
+
 <div class="tab-content">
 
-  <!-- COURSES -->
   <!-- COURSES -->
   <div class="tab-pane fade show active" id="tab-courses">
     <div id="course-cards-container"></div>
   </div>
 
-  <!-- SESSIONS with expandable student list -->
-  <!-- SESSIONS with expandable student list -->
-  <!-- <div class="tab-pane fade" id="tab-sessions">
-    <div class="card">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <span>All Attendance Sessions <span class="text-muted" style="font-size:.85rem">(click a row to see students)</span></span>
-        <button class="btn btn-sm btn-dark" data-bs-toggle="modal" data-bs-target="#sessionModal">
-          + Create Attendance Session
-        </button>
-      </div>
-      <div class="card-body p-0">
-        <table class="table mb-0" id="sess-table">
-          <thead class="table-light"><tr><th>Date</th><th>Course</th><th>Topic</th><th></th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </div>
-  </div> -->
   <!-- SESSIONS — course wise -->
   <div class="tab-pane fade" id="tab-sessions">
     <div class="card">
@@ -57,7 +32,6 @@
     </div>
   </div>
 
-  <!-- CORRECTIONS -->
   <!-- CORRECTIONS — course wise -->
   <div class="tab-pane fade" id="tab-corrections">
     <div id="corrections-by-course"></div>
@@ -74,19 +48,32 @@
     <div id="instr-archive-container"></div>
   </div>
 
+  <!-- PROFILE -->
+  <div class="tab-pane fade" id="tab-profile">
+    <div class="card" style="max-width:480px">
+      <div class="card-header">My Profile</div>
+      <div class="card-body" id="profile-body">Loading…</div>
+    </div>
+  </div>
+
 </div>
 
 <!-- Create Session Modal -->
 <div class="modal fade" id="sessionModal" tabindex="-1">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-      <div class="modal-header"><h5 class="modal-title">New Attendance Session</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-header">
+        <h5 class="modal-title">New Attendance Session</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
       <div class="modal-body">
         <div id="sess-err" class="alert alert-danger d-none"></div>
         <div class="row g-3 mb-3">
           <div class="col-md-5">
             <label class="form-label fw-semibold">Course</label>
-            <select id="sess-course" class="form-select" onchange="loadStudentsForSession()"><option value="">Select…</option></select>
+            <select id="sess-course" class="form-select" onchange="loadStudentsForSession()">
+              <option value="">Select…</option>
+            </select>
           </div>
           <div class="col-md-4">
             <label class="form-label fw-semibold">Date</label>
@@ -105,18 +92,6 @@
       </div>
     </div>
   </div>
-
-  <!-- ARCHIVE — past courses semester wise -->
-  <div class="tab-pane fade" id="tab-archive">
-    <div class="d-flex align-items-center gap-3 mb-3">
-      <label class="fw-semibold mb-0">Semester:</label>
-      <select id="instr-archive-select" class="form-select w-auto" onchange="showInstrArchiveSemester()">
-        <option value="">Select…</option>
-      </select>
-    </div>
-    <div id="instr-archive-container"></div>
-  </div>
-
 </div>
 {% endblock %}
 
