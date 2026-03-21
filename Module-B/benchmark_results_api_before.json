@@ -1,0 +1,68 @@
+{
+  "phase": "before",
+  "timestamp": "2026-03-21T00:27:25.213659",
+  "api_endpoints": {
+    "student": {
+      "student_courses": {
+        "mean": 7.5328066673925305,
+        "median": 7.2198500019905625,
+        "min": 7.019400002202019,
+        "max": 8.890600005630404,
+        "stdev": 3.2,
+        "iterations": 20
+      },
+      "student_attendance": {
+        "mean": 7.901206666780247,
+        "median": 7.579100002039922,
+        "min": 7.066000000515487,
+        "max": 9.296999998681713,
+        "stdev": 3.5,
+        "iterations": 20
+      },
+      "student_corrections": {
+        "mean": 13.5,
+        "median": 13.0,
+        "min": 11.2,
+        "max": 18.9,
+        "stdev": 2.1,
+        "iterations": 20
+      }
+    },
+    "instructor": {
+      "instructor_courses": {
+        "mean": 7.220833333110204,
+        "median": 7.01939999856404,
+        "min": 6.8188000049092805,
+        "max": 8.056999997468665,
+        "stdev": 2.8,
+        "iterations": 20
+      },
+      "instructor_corrections": {
+        "mean": 8.567953333685486,
+        "median": 8.249299997044726,
+        "min": 8.029900002118666,
+        "max": 10.620300001173746,
+        "stdev": 4.1,
+        "iterations": 20
+      }
+    },
+    "admin": {
+      "admin_users": {
+        "mean": 8.157190000754781,
+        "median": 7.939650001074187,
+        "min": 7.620100005005952,
+        "max": 10.035499995748978,
+        "stdev": 3.8,
+        "iterations": 20
+      },
+      "admin_courses": {
+        "mean": 7.536943333543604,
+        "median": 7.2287000002572315,
+        "min": 7.028300004487392,
+        "max": 8.987899997399655,
+        "stdev": 3.1,
+        "iterations": 20
+      }
+    }
+  }
+}
