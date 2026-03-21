@@ -21,6 +21,7 @@ import random
 from datetime import date, timedelta
 from werkzeug.security import generate_password_hash
 import os
+# from db import get_db, DB_PATH
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -345,6 +346,281 @@ def init():
     "SELECT username FROM users WHERE role='student' ORDER BY user_id LIMIT 1"
     ).fetchone()[0]
 
+    # Drop existing triggers first so re-running doesn't error
+    conn.execute("DROP TRIGGER IF EXISTS trg_attendance_records_insert")
+    conn.execute("DROP TRIGGER IF EXISTS trg_attendance_records_update")
+    conn.execute("DROP TRIGGER IF EXISTS trg_attendance_records_delete")
+
+    # INSERT — someone marks a student's attendance for the first time
+    conn.execute("""
+        CREATE TRIGGER trg_attendance_records_insert
+        AFTER INSERT ON attendance_records
+        FOR EACH ROW
+        BEGIN
+            INSERT INTO raw_changes (table_name, record_id, old_value, new_value, changed_at)
+            VALUES (
+                'attendance_records',
+                NEW.record_id,
+                NULL,
+                json_object(
+                    'att_session_id', NEW.att_session_id,
+                    'student_id',     NEW.student_id,
+                    'status',         NEW.status
+                ),
+                datetime('now')
+            );
+        END
+    """)
+
+    # UPDATE — TA changes a student's status (absent → present etc.)
+    conn.execute("""
+        CREATE TRIGGER trg_attendance_records_update
+        AFTER UPDATE ON attendance_records
+        FOR EACH ROW
+        BEGIN
+            INSERT INTO raw_changes (table_name, record_id, old_value, new_value, changed_at)
+            VALUES (
+                'attendance_records',
+                OLD.record_id,
+                json_object(
+                    'att_session_id', OLD.att_session_id,
+                    'student_id',     OLD.student_id,
+                    'status',         OLD.status
+                ),
+                json_object(
+                    'att_session_id', NEW.att_session_id,
+                    'student_id',     NEW.student_id,
+                    'status',         NEW.status
+                ),
+                datetime('now')
+            );
+        END
+    """)
+
+    # DELETE — someone removes an attendance record entirely
+    conn.execute("""
+        CREATE TRIGGER trg_attendance_records_delete
+        AFTER DELETE ON attendance_records
+        FOR EACH ROW
+        BEGIN
+            INSERT INTO raw_changes (table_name, record_id, old_value, new_value, changed_at)
+            VALUES (
+                'attendance_records',
+                OLD.record_id,
+                json_object(
+                    'att_session_id', OLD.att_session_id,
+                    'student_id',     OLD.student_id,
+                    'status',         OLD.status
+                ),
+                NULL,
+                datetime('now')
+            );
+        END
+    """)
+
+    conn.execute("DROP TRIGGER IF EXISTS trg_attendance_sessions_insert")
+
+    conn.execute("""
+        CREATE TRIGGER trg_attendance_sessions_insert
+        AFTER INSERT ON attendance_sessions
+        FOR EACH ROW
+        BEGIN
+            INSERT INTO raw_changes (table_name, record_id, old_value, new_value, changed_at)
+            VALUES (
+                'attendance_sessions',
+                NEW.att_session_id,
+                NULL,
+                json_object(
+                    'course_id',    NEW.course_id,
+                    'session_date', NEW.session_date,
+                    'topic',        NEW.topic,
+                    'created_by',   NEW.created_by
+                ),
+                datetime('now')
+            );
+        END
+    """)
+
+
+    # ── semesters ─────────────────────────────────────────────────────────────────
+    conn.execute("DROP TRIGGER IF EXISTS trg_semesters_insert")
+    conn.execute("""
+        CREATE TRIGGER trg_semesters_insert
+        AFTER INSERT ON semesters FOR EACH ROW
+        BEGIN
+            INSERT INTO raw_changes (table_name, record_id, old_value, new_value, changed_at)
+            VALUES ('semesters', NEW.semester_id, NULL,
+                json_object('semester_id', NEW.semester_id, 'name', NEW.name, 'is_active', NEW.is_active),
+                datetime('now'));
+        END
+    """)
+    
+    conn.execute("DROP TRIGGER IF EXISTS trg_semesters_delete")
+    conn.execute("""
+        CREATE TRIGGER trg_semesters_delete
+        AFTER DELETE ON semesters FOR EACH ROW
+        BEGIN
+            INSERT INTO raw_changes (table_name, record_id, old_value, new_value, changed_at)
+            VALUES ('semesters', OLD.semester_id,
+                json_object('semester_id', OLD.semester_id, 'name', OLD.name),
+                NULL, datetime('now'));
+        END
+    """)
+    
+    # ── courses ───────────────────────────────────────────────────────────────────
+    conn.execute("DROP TRIGGER IF EXISTS trg_courses_insert")
+    conn.execute("""
+        CREATE TRIGGER trg_courses_insert
+        AFTER INSERT ON courses FOR EACH ROW
+        BEGIN
+            INSERT INTO raw_changes (table_name, record_id, old_value, new_value, changed_at)
+            VALUES ('courses', NEW.course_id, NULL,
+                json_object('course_id', NEW.course_id, 'name', NEW.name, 'code', NEW.code),
+                datetime('now'));
+        END
+    """)
+    
+    conn.execute("DROP TRIGGER IF EXISTS trg_courses_delete")
+    conn.execute("""
+        CREATE TRIGGER trg_courses_delete
+        AFTER DELETE ON courses FOR EACH ROW
+        BEGIN
+            INSERT INTO raw_changes (table_name, record_id, old_value, new_value, changed_at)
+            VALUES ('courses', OLD.course_id,
+                json_object('course_id', OLD.course_id, 'name', OLD.name, 'code', OLD.code),
+                NULL, datetime('now'));
+        END
+    """)
+    
+    # ── course_instructors ────────────────────────────────────────────────────────
+    conn.execute("DROP TRIGGER IF EXISTS trg_course_instructors_insert")
+    conn.execute("""
+        CREATE TRIGGER trg_course_instructors_insert
+        AFTER INSERT ON course_instructors FOR EACH ROW
+        BEGIN
+            INSERT INTO raw_changes (table_name, record_id, old_value, new_value, changed_at)
+            VALUES ('course_instructors', NEW.course_id, NULL,
+                json_object('course_id', NEW.course_id, 'instructor_id', NEW.instructor_id),
+                datetime('now'));
+        END
+    """)
+    
+    conn.execute("DROP TRIGGER IF EXISTS trg_course_instructors_delete")
+    conn.execute("""
+        CREATE TRIGGER trg_course_instructors_delete
+        AFTER DELETE ON course_instructors FOR EACH ROW
+        BEGIN
+            INSERT INTO raw_changes (table_name, record_id, old_value, new_value, changed_at)
+            VALUES ('course_instructors', OLD.course_id,
+                json_object('course_id', OLD.course_id, 'instructor_id', OLD.instructor_id),
+                NULL, datetime('now'));
+        END
+    """)
+    
+    # ── course_tas ────────────────────────────────────────────────────────────────
+    conn.execute("DROP TRIGGER IF EXISTS trg_course_tas_insert")
+    conn.execute("""
+        CREATE TRIGGER trg_course_tas_insert
+        AFTER INSERT ON course_tas FOR EACH ROW
+        BEGIN
+            INSERT INTO raw_changes (table_name, record_id, old_value, new_value, changed_at)
+            VALUES ('course_tas', NEW.course_id, NULL,
+                json_object('course_id', NEW.course_id, 'ta_id', NEW.ta_id),
+                datetime('now'));
+        END
+    """)
+    
+    conn.execute("DROP TRIGGER IF EXISTS trg_course_tas_delete")
+    conn.execute("""
+        CREATE TRIGGER trg_course_tas_delete
+        AFTER DELETE ON course_tas FOR EACH ROW
+        BEGIN
+            INSERT INTO raw_changes (table_name, record_id, old_value, new_value, changed_at)
+            VALUES ('course_tas', OLD.course_id,
+                json_object('course_id', OLD.course_id, 'ta_id', OLD.ta_id),
+                NULL, datetime('now'));
+        END
+    """)
+    
+    # ── course_enrollments ────────────────────────────────────────────────────────
+    conn.execute("DROP TRIGGER IF EXISTS trg_course_enrollments_insert")
+    conn.execute("""
+        CREATE TRIGGER trg_course_enrollments_insert
+        AFTER INSERT ON course_enrollments FOR EACH ROW
+        BEGIN
+            INSERT INTO raw_changes (table_name, record_id, old_value, new_value, changed_at)
+            VALUES ('course_enrollments', NEW.course_id, NULL,
+                json_object('course_id', NEW.course_id, 'student_id', NEW.student_id),
+                datetime('now'));
+        END
+    """)
+    
+    conn.execute("DROP TRIGGER IF EXISTS trg_course_enrollments_delete")
+    conn.execute("""
+        CREATE TRIGGER trg_course_enrollments_delete
+        AFTER DELETE ON course_enrollments FOR EACH ROW
+        BEGIN
+            INSERT INTO raw_changes (table_name, record_id, old_value, new_value, changed_at)
+            VALUES ('course_enrollments', OLD.course_id,
+                json_object('course_id', OLD.course_id, 'student_id', OLD.student_id),
+                NULL, datetime('now'));
+        END
+    """)
+    
+    # ── users ─────────────────────────────────────────────────────────────────────
+    conn.execute("DROP TRIGGER IF EXISTS trg_users_insert")
+    conn.execute("""
+        CREATE TRIGGER trg_users_insert
+        AFTER INSERT ON users FOR EACH ROW
+        BEGIN
+            INSERT INTO raw_changes (table_name, record_id, old_value, new_value, changed_at)
+            VALUES ('users', NEW.user_id, NULL,
+                json_object('user_id', NEW.user_id, 'username', NEW.username, 'role', NEW.role),
+                datetime('now'));
+        END
+    """)
+    
+    conn.execute("DROP TRIGGER IF EXISTS trg_users_delete")
+    conn.execute("""
+        CREATE TRIGGER trg_users_delete
+        AFTER DELETE ON users FOR EACH ROW
+        BEGIN
+            INSERT INTO raw_changes (table_name, record_id, old_value, new_value, changed_at)
+            VALUES ('users', OLD.user_id,
+                json_object('user_id', OLD.user_id, 'username', OLD.username, 'role', OLD.role),
+                NULL, datetime('now'));
+        END
+    """)
+    
+    # ── correction_requests ───────────────────────────────────────────────────────
+    conn.execute("DROP TRIGGER IF EXISTS trg_correction_requests_insert")
+    conn.execute("""
+        CREATE TRIGGER trg_correction_requests_insert
+        AFTER INSERT ON correction_requests FOR EACH ROW
+        BEGIN
+            INSERT INTO raw_changes (table_name, record_id, old_value, new_value, changed_at)
+            VALUES ('correction_requests', NEW.req_id, NULL,
+                json_object('req_id', NEW.req_id, 'student_id', NEW.student_id,
+                            'att_session_id', NEW.att_session_id, 'status', NEW.status),
+                datetime('now'));
+        END
+    """)
+    
+    conn.execute("DROP TRIGGER IF EXISTS trg_correction_requests_update")
+    conn.execute("""
+        CREATE TRIGGER trg_correction_requests_update
+        AFTER UPDATE ON correction_requests FOR EACH ROW
+        BEGIN
+            INSERT INTO raw_changes (table_name, record_id, old_value, new_value, changed_at)
+            VALUES ('correction_requests', OLD.req_id,
+                json_object('req_id', OLD.req_id, 'status', OLD.status),
+                json_object('req_id', NEW.req_id, 'status', NEW.status),
+                datetime('now'));
+        END
+    """)
+
+    print("All triggers created.")
+
     conn.commit()
     conn.close()
 
@@ -365,5 +641,17 @@ def init():
     print("═" * 55)
 
 
+# def setup_triggers():
+#     conn = get_db()
+
+    
+
+#     conn.commit()
+#     conn.close()
+#     print("Triggers created on attendance_records.")
+
+
+
 if __name__ == "__main__":
     init()
+    # setup_triggers()

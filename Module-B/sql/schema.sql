@@ -84,3 +84,12 @@ CREATE TABLE IF NOT EXISTS correction_requests (
     created_at     TEXT    DEFAULT (datetime('now')),
     UNIQUE (student_id, att_session_id)
 );
+
+CREATE TABLE IF NOT EXISTS raw_changes (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    table_name  TEXT NOT NULL,
+    record_id   INTEGER NOT NULL,
+    old_value   TEXT,
+    new_value   TEXT,
+    changed_at  DATETIME DEFAULT (datetime('now'))
+);
