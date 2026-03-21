@@ -4,6 +4,72 @@
 
 A centralized database-driven system for managing attendance across multiple courses, semesters, and instructors within an academic institution. The system addresses challenges of manual attendance tracking by providing a structured, normalized relational database with enforced integrity constraints.
 
+## Quick Start
+
+### Automated Setup (Recommended)
+
+#### For Mac/Linux Users:
+```bash
+# Clone the repository
+git clone <your-repo-url>
+cd Multi-Course-Attendance-Management-Portal
+
+# Run setup script (creates venv, installs dependencies, initializes database)
+./setup.sh
+
+# Start the application
+./start.sh
+```
+
+#### For Windows Users:
+```cmd
+# Clone the repository
+git clone <your-repo-url>
+cd Multi-Course-Attendance-Management-Portal
+
+# Run setup script (creates venv, installs dependencies, initializes database)
+setup.bat
+
+# Start the application
+start.bat
+```
+
+### Manual Setup
+
+If you prefer manual setup:
+
+```bash
+# 1. Create virtual environment
+python3 -m venv venv
+
+# 2. Activate virtual environment
+# On Mac/Linux:
+source venv/bin/activate
+# On Windows:
+venv\Scripts\activate.bat
+
+# 3. Install dependencies
+cd Module-B
+pip install -r requirements.txt
+
+# 4. Initialize database
+python init_db.py
+
+# 5. Run the application
+python run.py
+```
+
+### Access the Application
+
+Once started, open your browser and visit: **http://localhost:5050**
+
+**Default Credentials:**
+- **Admin:** `admin` / `password123`
+- **Dean:** `dean_joshi` / `password123`
+- **Instructor:** `prof_singh` / `password123`
+- **TA:** `ta_amit` / `password123`
+- **Student:** `aarav_verma0` / `password123`
+
 ## Database Statistics
 
 - **Total Tables:** 12
