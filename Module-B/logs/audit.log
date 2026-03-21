@@ -2506,3 +2506,53 @@
 127.0.0.1 - - [22/Mar/2026 01:27:55] "GET /api/ta/corrections HTTP/1.1" 200 -
 127.0.0.1 - - [22/Mar/2026 01:27:58] "GET /api/ta/corrections/25/logs HTTP/1.1" 200 -
 127.0.0.1 - - [22/Mar/2026 01:28:00] "GET /api/ta/profile HTTP/1.1" 200 -
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5050
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 120-581-597
+127.0.0.1 - - [22/Mar/2026 02:03:51] "[32mGET / HTTP/1.1[0m" 302 -
+127.0.0.1 - - [22/Mar/2026 02:03:51] "GET /login HTTP/1.1" 200 -
+2026-03-21T20:33:56.622938 | ACTION=LOGIN_OK | USER=1 | ENDPOINT=/login | username=admin
+127.0.0.1 - - [22/Mar/2026 02:03:56] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 02:03:56] "GET /admin HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 02:03:56] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 02:03:56] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 02:03:56] "GET /api/admin/active-semester HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 02:03:56] "GET /api/admin/semesters HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 02:03:56] "GET /api/admin/users HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 02:03:56] "GET /stream?session_id=346e143f-03a4-4a63-b960-52d5bba90c9e&mac=053eb70b8e202dc96d45e67ea74d9ac2878dcd77d1008c5e882af86e814968d6 HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 02:03:56] "GET /api/admin/profile HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 02:03:56] "GET /api/admin/courses HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 02:03:56] "GET /api/admin/semesters/1/courses HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 02:04:00] "GET /api/admin/profile HTTP/1.1" 200 -
+2026-03-21T20:34:22.560927 | ACTION=LOGOUT | USER=None | ENDPOINT=/logout | 
+127.0.0.1 - - [22/Mar/2026 02:04:22] "POST /logout HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 02:04:22] "GET /login HTTP/1.1" 200 -
+2026-03-21T20:35:22.174621 | ACTION=LOGOUT | USER=None | ENDPOINT=/logout | 
+127.0.0.1 - - [22/Mar/2026 02:05:22] "POST /logout HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 02:05:22] "GET /login HTTP/1.1" 200 -
+2026-03-21T20:35:27.921862 | ACTION=LOGIN_OK | USER=1 | ENDPOINT=/login | username=admin
+127.0.0.1 - - [22/Mar/2026 02:05:27] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 02:05:27] "GET /admin HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 02:05:27] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 02:05:27] "GET /api/admin/semesters HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 02:05:27] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 02:05:27] "GET /api/admin/active-semester HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 02:05:27] "GET /api/admin/profile HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 02:05:27] "GET /stream?session_id=97f72cf0-a57f-479d-9038-1b347b9cb5f1&mac=bcacef422c4d84f24f082263fe3a977d82f3faf4cd0c11fcfca68f83ffe38b31 HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 02:05:27] "GET /api/admin/courses HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 02:05:27] "GET /api/admin/users HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 02:05:27] "GET /api/admin/semesters/1/courses HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 02:05:39] "GET /api/admin/semesters HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 02:05:42] "GET /api/admin/profile HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 02:05:49] "GET /api/admin/semesters HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 02:05:51] "GET /api/admin/profile HTTP/1.1" 200 -
+2026-03-21T20:35:58.459132 | ACTION=LOGOUT | USER=None | ENDPOINT=/logout | 
+127.0.0.1 - - [22/Mar/2026 02:05:58] "POST /logout HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 02:05:58] "GET /login HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 02:07:10] "[32mGET / HTTP/1.1[0m" 302 -
+127.0.0.1 - - [22/Mar/2026 02:07:10] "GET /login HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 02:08:06] "[32mGET / HTTP/1.1[0m" 302 -
+127.0.0.1 - - [22/Mar/2026 02:08:06] "GET /login HTTP/1.1" 200 -
