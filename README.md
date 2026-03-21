@@ -101,6 +101,7 @@ Once started, open your browser and visit: **http://localhost:5050**
 - **COURSE** - Course catalog (CourseID, CourseCode, CourseName, Credits)
 - **SEMESTER** - Academic terms (SemesterID, Term, Year, StartDate, EndDate)
 - **ATTENDANCE_SESSION** - Individual class meetings (SessionID, SessionDate, StartTime, EndTime)
+- **CORRECTION_REQUEST** - Attendance correction request made by the student
 
 ### Weak Entity
 - **COURSE_OFFERING** - Course instances per semester/section (OfferingID, Section)
@@ -113,8 +114,7 @@ Once started, open your browser and visit: **http://localhost:5050**
 5. HAS (COURSE_OFFERING → ATTENDANCE_SESSION) - 1:M
 6. CREATES (INSTRUCTOR → ATTENDANCE_SESSION) - 1:M
 7. ATTENDS (STUDENT ↔ ATTENDANCE_SESSION) - M:N
-8. REQUESTS_CORRECTION (STUDENT → ATTENDS) - N:1
-9. REVIEWS (INSTRUCTOR → REQUESTS_CORRECTION) - 1:M
+8. REVIEWS (INSTRUCTOR → REQUESTS_CORRECTION) - 1:M
 
 ## Constraints Implemented
 
@@ -124,4 +124,3 @@ Once started, open your browser and visit: **http://localhost:5050**
 - UNIQUE constraints (RollNo, CourseCode, Username)
 - CHECK constraints (Status validation, date/time logic)
 - Logical constraints (EndTime > StartTime, session dates within semester bounds)
-
