@@ -165,6 +165,11 @@ CORRECTION_REASONS = [
 # ── main seed function ────────────────────────────────────────────────────────
 
 def init():
+    # Always start fresh — remove stale DB so no duplicates accumulate
+    if os.path.exists(DB_PATH):
+        os.remove(DB_PATH)
+        print(f"  ✓  Removed existing {DB_PATH}")
+
     conn = sqlite3.connect(DB_PATH)
     conn.execute("PRAGMA foreign_keys = ON")
 
@@ -284,7 +289,7 @@ def init():
         dates  = list(daterange(start, end))[:len(topics)]
         for d, topic in zip(dates, topics):
             cur = conn.execute(
-                "INSERT INTO attendance_sessions (course_id, session_date, topic, created_by) VALUES (?,?,?,?)",
+                "INSERT OR IGNORE INTO attendance_sessions (course_id, session_date, topic, created_by) VALUES (?,?,?,?)",
                 (cid, d.isoformat(), topic, instr)
             )
             all_sessions.append((cur.lastrowid, code))

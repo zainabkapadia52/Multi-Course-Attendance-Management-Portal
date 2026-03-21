@@ -2397,3 +2397,85 @@
 127.0.0.1 - - [20/Mar/2026 23:48:01] "GET /api/admin/courses HTTP/1.1" 200 -
 127.0.0.1 - - [20/Mar/2026 23:48:01] "GET /stream?session_id=5f8f5591-8cb8-4e9e-b480-207df1e20145&mac=849f05fb17839966406cdeb8edab07b61af69fe706fe37f7cf253cfb7b212340 HTTP/1.1" 200 -
 127.0.0.1 - - [20/Mar/2026 23:48:01] "GET /api/admin/semesters/1/courses HTTP/1.1" 200 -
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5050
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 131-635-008
+127.0.0.1 - - [22/Mar/2026 00:16:00] "[31m[1mGET /stream?session_id=3def179a-510f-45dc-abbc-d20a4bdffb15&mac=8558b25830d6e366b64067daecb88de1706a59ecf6334aa81f0e8ef7241fa806 HTTP/1.1[0m" 401 -
+127.0.0.1 - - [22/Mar/2026 00:16:04] "GET /instructor HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 00:16:04] "[31m[1mGET /isAuth HTTP/1.1[0m" 401 -
+127.0.0.1 - - [22/Mar/2026 00:16:04] "[31m[1mGET /isAuth HTTP/1.1[0m" 401 -
+2026-03-21T18:46:04.244625 | ACTION=UNAUTHORIZED | USER=None | ENDPOINT=/api/instructor/courses | 
+127.0.0.1 - - [22/Mar/2026 00:16:04] "[31m[1mGET /stream?session_id=3def179a-510f-45dc-abbc-d20a4bdffb15&mac=8558b25830d6e366b64067daecb88de1706a59ecf6334aa81f0e8ef7241fa806 HTTP/1.1[0m" 401 -
+127.0.0.1 - - [22/Mar/2026 00:16:04] "[31m[1mGET /api/instructor/courses HTTP/1.1[0m" 401 -
+127.0.0.1 - - [22/Mar/2026 00:16:04] "GET /login HTTP/1.1" 200 -
+2026-03-21T18:46:10.233247 | ACTION=LOGIN_OK | USER=3 | ENDPOINT=/login | username=prof_singh
+127.0.0.1 - - [22/Mar/2026 00:16:10] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 00:16:10] "GET /instructor HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 00:16:10] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 00:16:10] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 00:16:10] "GET /api/instructor/courses HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 00:16:10] "GET /stream?session_id=8bae1e0a-bf21-4851-9831-c5d7d73ec231&mac=cb484156af01a689ce987037c296265d1f12f1cd0aa9cc2b26f9f3f5a16f740f HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 00:16:13] "GET /api/instructor/courses/1/students HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 00:16:14] "GET /api/instructor/courses/1/tas HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 00:16:14] "GET /api/instructor/available-tas/1 HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 00:16:16] "GET /api/instructor/corrections HTTP/1.1" 200 -
+2026-03-21T18:46:18.193762 | ACTION=ACCEPT_CORRECTION | USER=3 | ENDPOINT=/api/instructor/corrections/41/accept | 
+127.0.0.1 - - [22/Mar/2026 00:16:18] "POST /api/instructor/corrections/41/accept HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 00:16:18] "GET /api/instructor/corrections HTTP/1.1" 200 -
+2026-03-21T18:46:19.909700 | ACTION=ACCEPT_CORRECTION | USER=3 | ENDPOINT=/api/instructor/corrections/1/accept | 
+127.0.0.1 - - [22/Mar/2026 00:16:19] "POST /api/instructor/corrections/1/accept HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 00:16:19] "GET /api/instructor/corrections HTTP/1.1" 200 -
+2026-03-21T18:46:20.959032 | ACTION=ACCEPT_CORRECTION | USER=3 | ENDPOINT=/api/instructor/corrections/16/accept | 
+127.0.0.1 - - [22/Mar/2026 00:16:20] "POST /api/instructor/corrections/16/accept HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 00:16:20] "GET /api/instructor/corrections HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 00:16:27] "GET /api/instructor/corrections/41/logs HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 00:16:30] "GET /api/instructor/corrections/1/logs HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 00:16:32] "GET /api/instructor/corrections/40/logs HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 00:16:34] "GET /api/instructor/archive HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 00:16:35] "GET /api/instructor/profile HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 00:17:14] "[31m[1mGET /stream?session_id=64ddf052-6e3e-4529-9afd-8b4f439bf476&mac=9cfa23cb8487973370720c0556f99ba56944d16b8bedcf0f12c89ae015b1f15b HTTP/1.1[0m" 401 -
+127.0.0.1 - - [22/Mar/2026 00:24:21] "GET /instructor HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 00:24:21] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 00:24:21] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 00:24:21] "GET /stream?session_id=8bae1e0a-bf21-4851-9831-c5d7d73ec231&mac=cb484156af01a689ce987037c296265d1f12f1cd0aa9cc2b26f9f3f5a16f740f HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 00:24:21] "GET /api/instructor/courses HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 00:24:23] "GET /api/instructor/archive HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 00:24:33] "GET /api/instructor/corrections HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 00:24:39] "GET /api/instructor/corrections HTTP/1.1" 200 -
+ * Detected change in '/Users/zainab/Multi-Course-Attendance-Management-Portal/Module-B/init_db.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 131-635-008
+127.0.0.1 - - [22/Mar/2026 00:37:55] "GET /stream?session_id=8bae1e0a-bf21-4851-9831-c5d7d73ec231&mac=cb484156af01a689ce987037c296265d1f12f1cd0aa9cc2b26f9f3f5a16f740f HTTP/1.1" 200 -
+ * Detected change in '/Users/zainab/Multi-Course-Attendance-Management-Portal/Module-B/init_db.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 131-635-008
+127.0.0.1 - - [22/Mar/2026 00:38:33] "GET /stream?session_id=8bae1e0a-bf21-4851-9831-c5d7d73ec231&mac=cb484156af01a689ce987037c296265d1f12f1cd0aa9cc2b26f9f3f5a16f740f HTTP/1.1" 200 -
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5050
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 131-635-008
+127.0.0.1 - - [22/Mar/2026 00:39:27] "[31m[1mGET /stream?session_id=8bae1e0a-bf21-4851-9831-c5d7d73ec231&mac=cb484156af01a689ce987037c296265d1f12f1cd0aa9cc2b26f9f3f5a16f740f HTTP/1.1[0m" 401 -
+127.0.0.1 - - [22/Mar/2026 00:39:31] "GET /instructor HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 00:39:31] "[31m[1mGET /isAuth HTTP/1.1[0m" 401 -
+2026-03-21T19:09:31.372888 | ACTION=UNAUTHORIZED | USER=None | ENDPOINT=/api/instructor/courses | 
+127.0.0.1 - - [22/Mar/2026 00:39:31] "[31m[1mGET /stream?session_id=8bae1e0a-bf21-4851-9831-c5d7d73ec231&mac=cb484156af01a689ce987037c296265d1f12f1cd0aa9cc2b26f9f3f5a16f740f HTTP/1.1[0m" 401 -
+127.0.0.1 - - [22/Mar/2026 00:39:31] "[31m[1mGET /isAuth HTTP/1.1[0m" 401 -
+127.0.0.1 - - [22/Mar/2026 00:39:31] "[31m[1mGET /api/instructor/courses HTTP/1.1[0m" 401 -
+127.0.0.1 - - [22/Mar/2026 00:39:31] "GET /login HTTP/1.1" 200 -
+2026-03-21T19:09:42.007970 | ACTION=LOGIN_OK | USER=3 | ENDPOINT=/login | username=prof_singh
+127.0.0.1 - - [22/Mar/2026 00:39:42] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 00:39:42] "GET /instructor HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 00:39:42] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 00:39:42] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 00:39:42] "GET /stream?session_id=b909bdf4-e585-413d-b8cb-f8057571244f&mac=273bde2b0e9a875c8a6e5c3b84c9482d2d152acba6d271dda099337ec8fd049f HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 00:39:42] "GET /api/instructor/courses HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 00:39:44] "GET /api/instructor/archive HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 00:39:44] "GET /api/instructor/corrections HTTP/1.1" 200 -
+127.0.0.1 - - [22/Mar/2026 00:39:49] "GET /api/instructor/corrections HTTP/1.1" 200 -
