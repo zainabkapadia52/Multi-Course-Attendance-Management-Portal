@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS sessions (
 
 CREATE TABLE IF NOT EXISTS semesters (
     semester_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name        TEXT    NOT NULL,
+    name        TEXT    NOT NULL UNIQUE,
     start_date  TEXT,
     end_date    TEXT,
     is_active   INTEGER DEFAULT 0
