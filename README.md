@@ -77,14 +77,6 @@ Once started, open your browser and visit: **http://localhost:5050**
 - **Total Relationships:** 9
 - **Sample Data:** 10-20 rows per table with realistic academic data
 
-## Entity-Relationship Diagram
-
-![ER Diagram](images/ER_diagram.jpg)
-
-*Complete ER diagram showing entities, relationships, attributes, cardinality ratios, and participation constraints.*
-
----
-
 ## Relational Database Schema
 
 ![Database Schema](images/relational_schema.png)
