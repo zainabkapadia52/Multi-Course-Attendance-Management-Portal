@@ -87,6 +87,26 @@ def corrections_archive():
             })
     return jsonify(result)
 
+@bp.get("/corrections/<int:req_id>/logs")
+@require_role("student")
+def correction_logs(req_id):
+    db  = get_db()
+    # Verify this request belongs to this student
+    req = db.execute(
+        "SELECT 1 FROM correction_requests WHERE req_id=? AND student_id=?",
+        (req_id, g.user["user_id"])
+    ).fetchone()
+    if not req:
+        return jsonify({"error": "Not found"}), 404
+    rows = db.execute(
+        """SELECT cl.action, cl.role, cl.acted_at, u.username
+           FROM correction_logs cl
+           JOIN users u ON u.user_id=cl.acted_by
+           WHERE cl.req_id=?
+           ORDER BY cl.acted_at ASC""", (req_id,)
+    ).fetchall()
+    return jsonify([dict(r) for r in rows])
+
 @bp.get("/attendance-stats/current")
 @require_role("student")
 def attendance_stats_current():

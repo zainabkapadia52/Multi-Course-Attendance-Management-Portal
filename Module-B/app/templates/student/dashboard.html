@@ -76,7 +76,7 @@
           <div class="card-body p-0">
             <table class="table mb-0" id="req-table">
               <thead class="table-light">
-                <tr><th>Date</th><th>Course</th><th>Session</th><th>Status</th></tr>
+                <tr><th>Date</th><th>Course</th><th>Session</th><th>Status</th><th></th></tr>
               </thead>
               <tbody></tbody>
             </table>
@@ -358,14 +358,25 @@ async function loadEligibleSessions() {
 async function loadRequests() {
   const data = await api("GET", "/api/student/corrections/current");
   if (!data) return;
-  document.querySelector("#req-table tbody").innerHTML = data.map(r =>
-    `<tr>
+  document.querySelector("#req-table tbody").innerHTML = data.map(r => `
+    <tr>
       <td>${r.created_at.slice(0,10)}</td>
       <td>${r.course_name}</td>
       <td>${r.session_date}</td>
       <td>${badge(r.status)}</td>
+      <td>
+        <button class="btn btn-sm btn-outline-secondary"
+          onclick="loadCorrLogs(${r.req_id},'student','stu-log-${r.req_id}')">
+          Logs
+        </button>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="5" class="p-0">
+        <div id="stu-log-${r.req_id}" class="d-none px-3 py-2 bg-light"></div>
+      </td>
     </tr>`
-  ).join("") || '<tr><td colspan="4" class="text-center text-muted py-3">No requests this semester</td></tr>';
+  ).join("") || '<tr><td colspan="5" class="text-center text-muted py-3">No requests this semester</td></tr>';
 }
 
 async function submitCorrection() {

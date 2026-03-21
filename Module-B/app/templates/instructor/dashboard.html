@@ -664,21 +664,29 @@ async function loadCorrections() {
               </thead>
               <tbody>
                 ${group.requests.map(r => `
-                  <tr id="corr-row-${r.req_id}">
+                  <tr>
                     <td>${r.student_name}</td>
                     <td>${r.session_date}<br>
                       <span class="text-muted" style="font-size:.78rem">${r.topic||''}</span>
                     </td>
-                    <td style="max-width:200px;word-break:break-word">${r.reason}</td>
-                    <td>${r.proof_url
-                      ? `<a href="${r.proof_url}" target="_blank">View</a>`
-                      : '—'}</td>
+                    <td style="max-width:180px;word-break:break-word">${r.reason}</td>
+                    <td>${r.proof_url ? `<a href="${r.proof_url}" target="_blank">View</a>` : '—'}</td>
                     <td>${badge(r.status)}</td>
-                    <td>${r.status === 'pending' ? `
-                      <button class="btn btn-sm btn-success me-1"
-                        onclick="resolve(${r.req_id},'accept')">Accept</button>
-                      <button class="btn btn-sm btn-danger"
-                        onclick="resolve(${r.req_id},'reject')">Reject</button>` : '—'}
+                    <td>
+                      ${r.status === 'pending' ? `
+                        <button class="btn btn-sm btn-success me-1"
+                          onclick="resolve(${r.req_id},'accept')">Accept</button>
+                        <button class="btn btn-sm btn-danger"
+                          onclick="resolve(${r.req_id},'reject')">Reject</button>` : ''}
+                      <button class="btn btn-sm btn-outline-secondary mt-1"
+                        onclick="loadCorrLogs(${r.req_id},'instructor','instr-log-${r.req_id}')">
+                        Logs
+                      </button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td colspan="6" class="p-0">
+                      <div id="instr-log-${r.req_id}" class="d-none px-3 py-2 bg-light"></div>
                     </td>
                   </tr>`).join("")}
               </tbody>

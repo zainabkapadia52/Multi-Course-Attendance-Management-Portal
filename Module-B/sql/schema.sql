@@ -84,3 +84,12 @@ CREATE TABLE IF NOT EXISTS correction_requests (
     created_at     TEXT    DEFAULT (datetime('now')),
     UNIQUE (student_id, att_session_id)
 );
+
+CREATE TABLE IF NOT EXISTS correction_logs (
+    log_id   INTEGER PRIMARY KEY AUTOINCREMENT,
+    req_id   INTEGER NOT NULL REFERENCES correction_requests(req_id) ON DELETE CASCADE,
+    action   TEXT    NOT NULL CHECK(action IN ('accepted','rejected')),
+    acted_by INTEGER NOT NULL REFERENCES users(user_id),
+    role     TEXT    NOT NULL,
+    acted_at TEXT    NOT NULL DEFAULT (datetime('now'))
+);

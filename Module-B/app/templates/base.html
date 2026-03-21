@@ -105,6 +105,39 @@ function showToast(message, type = "info") {
   setTimeout(() => { t.remove(); }, 4000);
 }
 
+async function loadCorrLogs(reqId, role, containerId) {
+  const con = document.getElementById(containerId);
+  if (!con) return;
+
+  // Toggle — if already showing, hide it
+  if (!con.classList.contains("d-none")) {
+    con.classList.add("d-none"); return;
+  }
+
+  const data = await api("GET", `/api/${role}/corrections/${reqId}/logs`);
+  if (!data) return;
+
+  con.innerHTML = data.length ? `
+    <div style="font-size:.82rem">
+      ${data.map(l => `
+        <div class="d-flex align-items-start gap-2 py-1 border-bottom">
+          <span class="badge bg-${l.action === 'accepted' ? 'success' : 'danger'} mt-1">
+            ${l.action}
+          </span>
+          <div>
+            <span class="fw-semibold">${l.username}</span>
+            <span class="text-muted ms-1">(${l.role})</span>
+            <div class="text-muted" style="font-size:.78rem">
+              ${l.acted_at.replace('T',' ').slice(0,19)} UTC
+            </div>
+          </div>
+        </div>`).join("")}
+    </div>` :
+    '<p class="text-muted mb-0" style="font-size:.82rem">No actions yet.</p>';
+
+  con.classList.remove("d-none");
+}
+
 // ── Populate navbar username/role ─────────────────────────────────────────────
 (async function() {
   const sid = sessionStorage.getItem("session_id");

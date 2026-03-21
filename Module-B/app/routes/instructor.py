@@ -152,6 +152,11 @@ def accept_correction(req_id):
     db.execute("UPDATE attendance_records SET status='present' WHERE att_session_id=? AND student_id=?",
                (req["att_session_id"], req["student_id"]))
     db.commit()
+    db.execute(
+        "INSERT INTO correction_logs (req_id, action, acted_by, role) VALUES (?,?,?,?)",
+        (req_id, "accepted", g.user["user_id"], "instructor")
+    )
+    db.commit()
     broadcast("correction_resolved", {
         "req_id":     req_id,
         "status":     "rejected",     # ← fixed
@@ -177,6 +182,11 @@ def reject_correction(req_id):
     if req["status"] != "pending":
         return jsonify({"error": "Already resolved"}), 400
     db.execute("UPDATE correction_requests SET status='rejected' WHERE req_id=?", (req_id,))
+    db.commit()
+    db.execute(
+        "INSERT INTO correction_logs (req_id, action, acted_by, role) VALUES (?,?,?,?)",
+        (req_id, "rejected", g.user["user_id"], "instructor")
+    )
     db.commit()
     broadcast("correction_resolved", {
         "req_id":    req_id,
@@ -264,6 +274,18 @@ def assign_ta(cid):
         return jsonify({"error": "Already assigned"}), 409
     audit_log("INSTR_ASSIGN_TA", f"/api/instructor/courses/{cid}/tas", g.user["user_id"])
     return jsonify({"message": "TA assigned"}), 201
+
+@bp.get("/corrections/<int:req_id>/logs")
+@require_role("instructor")
+def correction_logs(req_id):
+    rows = get_db().execute(
+        """SELECT cl.action, cl.role, cl.acted_at, u.username
+           FROM correction_logs cl
+           JOIN users u ON u.user_id=cl.acted_by
+           WHERE cl.req_id=?
+           ORDER BY cl.acted_at ASC""", (req_id,)
+    ).fetchall()
+    return jsonify([dict(r) for r in rows])
 
 @bp.delete("/courses/<int:cid>/tas/<int:tid>")
 @require_role("instructor")
