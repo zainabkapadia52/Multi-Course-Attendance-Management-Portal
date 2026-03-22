@@ -152,6 +152,30 @@ def list_corrections():
     ).fetchall()
     return jsonify([dict(r) for r in rows])
 
+@bp.put("/records/<int:rid>")
+@require_role("instructor")
+def update_record(rid):
+    status = (request.json or {}).get("status")
+    if status not in ("present", "absent"):
+        return jsonify({"error": "Invalid status"}), 400
+    db  = get_db()
+    # Verify the record belongs to a session in the instructor's course
+    rec = db.execute(
+        """SELECT ar.record_id FROM attendance_records ar
+           JOIN attendance_sessions att ON att.att_session_id = ar.att_session_id
+           JOIN course_instructors ci ON ci.course_id = att.course_id
+           WHERE ar.record_id = ? AND ci.instructor_id = ?""",
+        (rid, g.user["user_id"])
+    ).fetchone()
+    if not rec:
+        return jsonify({"error": "Not found or forbidden"}), 404
+    db.execute("UPDATE attendance_records SET status=? WHERE record_id=?", (status, rid))
+    db.commit()
+    broadcast("attendance_updated", {"record_id": rid, "status": status})
+    audit_log("INSTRUCTOR_UPDATE_ATT", f"/api/instructor/records/{rid}",
+              g.user["user_id"], f"status={status}")
+    return jsonify({"message": "Record updated"})
+
 @bp.post("/corrections/<int:req_id>/accept")
 @require_role("instructor")
 def accept_correction(req_id):

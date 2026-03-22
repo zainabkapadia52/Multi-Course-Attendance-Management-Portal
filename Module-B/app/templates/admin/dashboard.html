@@ -479,11 +479,17 @@ async function createSemester() {
     document.getElementById("sem-year").value    = "";
     document.getElementById("sem-start").value   = "";
     document.getElementById("sem-end").value     = "";
-    document.getElementById("sem-active").checked = false;
     document.getElementById("sem-preview").textContent = "—";
     showToast(d.message, "success");
-    loadActiveSemester();
-    loadSetupDropdowns();
+
+    // Await both so DOM updates before switching tab
+    await loadActiveSemester();
+    await loadSetupDropdowns();
+    await loadAttCourses();   // also refreshes the attendance override course dropdown
+
+    // Switch to Active Semester tab so the user immediately sees the new semester
+    const activeTab = document.querySelector('[data-bs-target="#tab-active"]');
+    if (activeTab) bootstrap.Tab.getOrCreateInstance(activeTab).show();
   } else {
     errEl.textContent = d.error;
     errEl.classList.remove("d-none");

@@ -17,11 +17,9 @@
   </div>
 
   <!-- CORRECTIONS — course wise -->
+  <!-- CORRECTIONS -->
   <div class="tab-pane fade" id="tab-corrections">
-    <div class="card">
-      <div class="card-header">Correction Requests</div>
-      <div id="ta-corr-table" class="card-body p-0"></div>
-    </div>
+    <div id="ta-corrections-container"></div>
   </div>
 </div>
 
@@ -397,13 +395,18 @@ async function loadCorrections() {
   const data = await api("GET", "/api/ta/corrections");
   if (!data) return;
 
-  const con = document.getElementById("ta-corr-table").parentElement;
+  const con = document.getElementById("ta-corrections-container");
+  if (!con) return;
 
   if (!data.length) {
     con.innerHTML = `
-      <div class="card-body text-muted text-center py-4">
-        No correction requests yet.
-      </div>`; return;
+      <div class="card">
+        <div class="card-header">Correction Requests</div>
+        <div class="card-body text-muted text-center py-4">
+          No correction requests yet.
+        </div>
+      </div>`;
+    return;
   }
 
   // Group by course
@@ -415,61 +418,69 @@ async function loadCorrections() {
     grouped[r.course_id].requests.push(r);
   }
 
-  con.innerHTML = Object.entries(grouped).map(([courseId, group]) => {
-    const pendingCount = group.requests.filter(r => r.status === 'pending').length;
-    return `
-      <div class="border-bottom">
-        <div class="d-flex justify-content-between align-items-center px-3 py-2"
-             style="cursor:pointer;background:#f8f9fa"
-             onclick="toggleTaCorrCourse('ta-corr-${courseId}', this)">
-          <span>
-            <strong>${group.course_name}</strong>
-            ${pendingCount > 0
-              ? `<span class="badge bg-warning text-dark ms-2">${pendingCount} pending</span>`
-              : '<span class="badge bg-secondary ms-2">all resolved</span>'}
-          </span>
-          <span id="ta-corr-toggle-${courseId}" style="font-size:.85rem">▶ Show</span>
-        </div>
-        <div id="ta-corr-${courseId}" class="d-none">
-          <table class="table mb-0">
-            <thead class="table-light">
-              <tr>
-                <th>Student</th><th>Session</th><th>Reason</th>
-                <th>Proof</th><th>Status</th><th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${group.requests.map(r => `
-                <tr>
-                  <td>${r.student_name}</td>
-                  <td>${r.session_date}<br>
-                    <span class="text-muted" style="font-size:.78rem">${r.topic||''}</span>
-                  </td>
-                  <td style="max-width:180px;word-break:break-word">${r.reason}</td>
-                  <td>${r.proof_url ? `<a href="${r.proof_url}" target="_blank">View</a>` : '—'}</td>
-                  <td>${badge(r.status)}</td>
-                  <td>
-                    ${r.status === 'pending' ? `
-                      <button class="btn btn-sm btn-success me-1"
-                        onclick="resolveCorr(${r.req_id},'accept')">Accept</button>
-                      <button class="btn btn-sm btn-danger"
-                        onclick="resolveCorr(${r.req_id},'reject')">Reject</button>` : ''}
-                    <button class="btn btn-sm btn-outline-secondary mt-1"
-                      onclick="loadCorrLogs(${r.req_id},'ta','ta-log-${r.req_id}')">
-                      Logs
-                    </button>
-                  </td>
-                </tr>
-                <tr>
-                  <td colspan="6" class="p-0">
-                    <div id="ta-log-${r.req_id}" class="d-none px-3 py-2 bg-light"></div>
-                  </td>
-                </tr>`).join("")}
-            </tbody>
-          </table>
-        </div>
-      </div>`;
-  }).join("");
+  con.innerHTML = `
+    <div class="card">
+      <div class="card-header">Correction Requests</div>
+      <div class="card-body p-0">
+        ${Object.entries(grouped).map(([courseId, group]) => {
+          const pendingCount = group.requests.filter(r => r.status === 'pending').length;
+          return `
+            <div class="border-bottom">
+              <div class="d-flex justify-content-between align-items-center px-3 py-2"
+                   style="cursor:pointer;background:#f8f9fa"
+                   onclick="toggleTaCorrCourse('ta-corr-${courseId}', this)">
+                <span>
+                  <strong>${group.course_name}</strong>
+                  ${pendingCount > 0
+                    ? `<span class="badge bg-warning text-dark ms-2">${pendingCount} pending</span>`
+                    : '<span class="badge bg-secondary ms-2">all resolved</span>'}
+                </span>
+                <span id="ta-corr-toggle-${courseId}" style="font-size:.85rem">▶ Show</span>
+              </div>
+              <div id="ta-corr-${courseId}" class="d-none">
+                <table class="table mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Student</th><th>Session</th><th>Reason</th>
+                      <th>Proof</th><th>Status</th><th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${group.requests.map(r => `
+                      <tr>
+                        <td>${r.student_name}</td>
+                        <td>${r.session_date}<br>
+                          <span class="text-muted" style="font-size:.78rem">${r.topic||''}</span>
+                        </td>
+                        <td style="max-width:180px;word-break:break-word">${r.reason}</td>
+                        <td>${r.proof_url
+                          ? `<a href="${r.proof_url}" target="_blank">View</a>`
+                          : '—'}</td>
+                        <td>${badge(r.status)}</td>
+                        <td>
+                          ${r.status === 'pending' ? `
+                            <button class="btn btn-sm btn-success me-1"
+                              onclick="resolveCorr(${r.req_id},'accept')">Accept</button>
+                            <button class="btn btn-sm btn-danger"
+                              onclick="resolveCorr(${r.req_id},'reject')">Reject</button>` : ''}
+                          <button class="btn btn-sm btn-outline-secondary mt-1"
+                            onclick="loadCorrLogs(${r.req_id},'ta','ta-log-${r.req_id}')">
+                            Logs
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td colspan="6" class="p-0">
+                          <div id="ta-log-${r.req_id}" class="d-none px-3 py-2 bg-light"></div>
+                        </td>
+                      </tr>`).join("")}
+                  </tbody>
+                </table>
+              </div>
+            </div>`;
+        }).join("")}
+      </div>
+    </div>`;
 
   // Auto-expand courses with pending requests
   Object.keys(grouped).forEach(courseId => {
@@ -492,7 +503,10 @@ function toggleTaCorrCourse(panelId, hdr) {
 
 async function resolveCorr(reqId, action) {
   const d = await api("POST", `/api/ta/corrections/${reqId}/${action}`);
-  if (d) { showToast(d.message || d.error, d.error ? "danger" : "success"); loadCorrections(); }
+  if (d) {
+    showToast(d.message || d.error, d.error ? "danger" : "success");
+    await loadCorrections();  // await so table updates before SSE fires a second reload
+  }
 }
 
 loadTaCourses();

@@ -497,13 +497,48 @@ async function toggleSessionRecords(sid, btn) {
   const show = row.classList.toggle("d-none") === false;
   btn.textContent = show ? "▼ Hide" : "▶ View";
 
-  if (show && cell.textContent === "Loading…") {
+  if (show) {
     const records = await api("GET", `/api/instructor/attendance-sessions/${sid}/records`);
     if (!records || !records.length) {
       cell.innerHTML = '<p class="text-muted mb-0">No records.</p>'; return;
     }
+    renderInstrSessionRecords(sid, records, false);
+  }
+}
+
+function renderInstrSessionRecords(sid, records, editMode) {
+  const cell = document.getElementById(`rec-cell-${sid}`);
+  if (editMode) {
     cell.innerHTML = `
-      <table class="table table-sm mb-0" style="max-width:520px">
+      <table class="table table-sm mb-2" style="max-width:540px">
+        <thead class="table-light">
+          <tr><th>Student</th><th>Roll No</th><th>Program</th><th>Batch</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          ${records.map(r => `
+            <tr>
+              <td>${r.username}</td>
+              <td>${r.roll_no  || '—'}</td>
+              <td>${r.program  || '—'}</td>
+              <td>${r.batch    || '—'}</td>
+              <td>
+                <select class="form-select form-select-sm w-auto instr-upd-status"
+                  data-rid="${r.record_id}">
+                  <option value="present" ${r.status==='present'?'selected':''}>Present</option>
+                  <option value="absent"  ${r.status==='absent' ?'selected':''}>Absent</option>
+                </select>
+              </td>
+            </tr>`).join("")}
+        </tbody>
+      </table>
+      <button class="btn btn-sm btn-dark" onclick="saveInstrSessionRecords(${sid})">Save</button>
+      <button class="btn btn-sm btn-outline-secondary ms-2"
+        onclick="renderInstrSessionRecords(${sid}, ${JSON.stringify(records).replace(/"/g,'&quot;')}, false)">
+        Cancel
+      </button>`;
+  } else {
+    cell.innerHTML = `
+      <table class="table table-sm mb-2" style="max-width:540px">
         <thead class="table-light">
           <tr><th>Student</th><th>Roll No</th><th>Program</th><th>Batch</th><th>Status</th></tr>
         </thead>
@@ -517,8 +552,26 @@ async function toggleSessionRecords(sid, btn) {
               <td>${badge(r.status)}</td>
             </tr>`).join("")}
         </tbody>
-      </table>`;
+      </table>
+      <button class="btn btn-sm btn-outline-warning"
+        onclick="switchInstrToEdit(${sid})">Edit Attendance</button>`;
   }
+}
+
+async function switchInstrToEdit(sid) {
+  const records = await api("GET", `/api/instructor/attendance-sessions/${sid}/records`);
+  if (!records) return;
+  renderInstrSessionRecords(sid, records, true);
+}
+
+async function saveInstrSessionRecords(sid) {
+  const selects = document.querySelectorAll(`#rec-cell-${sid} .instr-upd-status`);
+  for (const sel of selects) {
+    await api("PUT", `/api/instructor/records/${sel.dataset.rid}`, { status: sel.value });
+  }
+  showToast(`${selects.length} record(s) saved.`, "success");
+  const records = await api("GET", `/api/instructor/attendance-sessions/${sid}/records`);
+  if (records) renderInstrSessionRecords(sid, records, false);
 }
 
 // ── create session modal ──────────────────────────────────────────────────────

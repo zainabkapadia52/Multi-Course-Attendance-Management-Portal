@@ -426,10 +426,10 @@ loadStats(); loadRequests(); loadProfile();
 
 window._realtimeHandlers = {
   correction_resolved() {
-    loadRequests();
-    // Reset archive cache so it reloads fresh next time
-    _archiveCorrData = [];
-    showToast("A correction request was resolved.", "info");
+    loadRequests();          // refresh the My Requests table immediately
+    loadStats();             // refresh attendance % (accepted = now present)
+    loadEligibleSessions();  // remove newly-present session from correction form
+    showToast("Your correction request was resolved.", "info");
   },
   attendance_updated()         { loadStats(); },
   attendance_session_created() { loadStats(); loadEligibleSessions(); },
