@@ -59,6 +59,41 @@ python init_db.py
 python run.py
 ```
 
+## Project Structure
+
+```
+Module_B/
+├── app/
+│   ├── __init__.py              # Flask app factory
+│   ├── auth.py                  # Authentication logic
+│   ├── db.py                    # Database connection
+│   ├── middleware.py            # RBAC middleware
+│   ├── logger.py                # Audit logging
+│   ├── events.py                # Event broadcasting
+│   ├── routes/
+│   │   ├── auth_routes.py       # /login, /isAuth, /logout
+│   │   ├── admin.py             # /api/admin/*
+│   │   ├── student.py           # /api/student/*
+│   │   ├── instructor.py        # /api/instructor/*
+│   │   ├── dean.py              # /api/dean/*
+│   │   ├── ta.py                # /api/ta/*
+│   │   ├── page_routes.py       # HTML page rendering (UI)
+│   │   └── stream.py            # Server-sent events
+│   └── templates/               # HTML templates (frontend)
+├── sql/
+│   ├── schema.sql               # Database schema with indexes
+│   └── seed.sql                 # Sample data
+├── logs/
+│   └── audit.log                # Security audit log
+├── init_db.py                   # Database initialization
+├── run.py                       # Application entry point
+├── test_api.py                  # API testing script
+├── benchmark.py                 # Performance benchmarking
+├── API_DOCUMENTATION.md         # Complete API reference
+├── README.md                    # This file
+└── requirements.txt             # Python dependencies
+```
+
 ### Access the Application
 
 Once started, open your browser and visit: **http://localhost:5050**
