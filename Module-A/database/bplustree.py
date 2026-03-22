@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+import math
 from bisect import bisect_left, bisect_right
 from dataclasses import dataclass, field
 from typing import Any
@@ -32,13 +32,13 @@ class BPlusTree:
         return None
 
     def insert(self, key: int, value: Any) -> None:
-        if len(self.root.keys) == self.max_keys:
+        root_max = self.max_keys if self.root.leaf else self.order
+        if len(self.root.keys) == root_max:
             old_root = self.root
             self.root = BPlusTreeNode(leaf=False, children=[old_root])
             self._split_child(self.root, 0)
 
         self._insert_non_full(self.root, key, value)
-        self._refresh_separators(self.root)
 
     def _insert_non_full(self, node: BPlusTreeNode, key: int, value: Any) -> None:
         if node.leaf:
@@ -52,7 +52,9 @@ class BPlusTree:
 
         idx = bisect_right(node.keys, key)
         child = node.children[idx]
-        if len(child.keys) == self.max_keys:
+        # Split internal children when they reach `order` keys; leaves at `order-1`.
+        child_max = self.max_keys if child.leaf else self.order
+        if len(child.keys) == child_max:
             self._split_child(node, idx)
             idx = bisect_right(node.keys, key)
         self._insert_non_full(node.children[idx], key, value)
@@ -60,9 +62,9 @@ class BPlusTree:
     def _split_child(self, parent: BPlusTreeNode, index: int) -> None:
         child = parent.children[index]
         new_sibling = BPlusTreeNode(leaf=child.leaf)
-        mid = len(child.keys) // 2
 
         if child.leaf:
+            mid = len(child.keys) // 2
             new_sibling.keys = child.keys[mid:]
             new_sibling.values = child.values[mid:]
             child.keys = child.keys[:mid]
@@ -75,60 +77,106 @@ class BPlusTree:
             parent.children.insert(index + 1, new_sibling)
             return
 
+        mid = (self.order + 1) // 2 - 1
         promoted = child.keys[mid]
-        new_sibling.keys = child.keys[mid + 1 :]
-        new_sibling.children = child.children[mid + 1 :]
+        new_sibling.keys = child.keys[mid + 1:]
+        new_sibling.children = child.children[mid + 1:]
 
         child.keys = child.keys[:mid]
-        child.children = child.children[: mid + 1]
+        child.children = child.children[:mid + 1]
 
         parent.keys.insert(index, promoted)
         parent.children.insert(index + 1, new_sibling)
 
     def delete(self, key: int) -> bool:
-        deleted = self._delete(self.root, key)
-
-        if not self.root.leaf and len(self.root.keys) == 0:
+        deleted, _ = self._delete(self.root, key)
+        while not self.root.leaf and len(self.root.keys) == 0:
             self.root = self.root.children[0]
-
-        self._refresh_separators(self.root)
         return deleted
 
-    def _delete(self, node: BPlusTreeNode, key: int) -> bool:
+    def _delete(self, node: BPlusTreeNode, key: int) -> tuple[bool, int | None]:
         if node.leaf:
             idx = bisect_left(node.keys, key)
             if idx >= len(node.keys) or node.keys[idx] != key:
-                return False
+                return False, None
             del node.keys[idx]
             del node.values[idx]
-            return True
+            new_min = node.keys[0] if node.keys else None
+            return True, new_min
 
         idx = bisect_right(node.keys, key)
-        child = node.children[idx]
-        deleted = self._delete(child, key)
+        deleted, _ = self._delete(node.children[idx], key)
         if not deleted:
-            return False
+            return False, None
 
-        if child is not self.root and len(child.keys) < self._min_keys(child):
+        idx = min(idx, len(node.children) - 1)
+
+        child_node = node.children[idx]
+        # A child that is not the root must satisfy minimum-occupancy invariants.
+        if child_node.leaf:
+            underflows = len(child_node.keys) < self._min_keys(child_node)
+        else:
+            underflows = len(child_node.children) < math.ceil(self.order / 2)
+        if underflows:
+            num_children_before = len(node.children)
             self._fill_child(node, idx)
+            merge_happened = len(node.children) < num_children_before
 
-        # Child index can change if a merge happened; rebuild it from key.
-        self._refresh_separators(node)
-        return True
+            # After a merge the merged node sits at the lower of the two indices.
+            if merge_happened:
+                affected_idx = idx - 1 if idx >= len(node.children) else idx
+            else:
+                affected_idx = idx
 
-    def _fill_child(self, node: BPlusTreeNode, index: int) -> None:
+            # If the affected child is an internal node, refresh its own separators
+            # so that subsequent traversals route correctly through it.
+            affected = node.children[affected_idx]
+            if not affected.leaf:
+                affected.keys = [
+                    self._first_key(affected.children[i + 1])
+                    for i in range(len(affected.children) - 1)
+                ]
+
+        # Rebuild this node's separator keys from the actual first keys of subtrees.
+        node.keys = [
+            self._first_key(node.children[i + 1])
+            for i in range(len(node.children) - 1)
+        ]
+
+        new_min = self._first_key(node.children[0]) if node.children else None
+        return True, new_min
+
+    def _fill_child(self, node: BPlusTreeNode, index: int) -> int | None:
+        if len(node.children) <= 1:
+            return None
+
+        child = node.children[index]
+
+        # Try to borrow from left sibling
         if index > 0 and len(node.children[index - 1].keys) > self._min_keys(node.children[index - 1]):
             self._borrow_from_prev(node, index)
-            return
+            return node.keys[index - 1]
 
+        # Try to borrow from right sibling
         if index < len(node.children) - 1 and len(node.children[index + 1].keys) > self._min_keys(node.children[index + 1]):
             self._borrow_from_next(node, index)
-            return
+            if index > 0:
+                return node.keys[index - 1]
+            return child.keys[0] if child.leaf and child.keys else None
 
+        # Merge with a sibling
         if index < len(node.children) - 1:
             self._merge(node, index)
+            merged = node.children[index]
+            if index > 0:
+                return node.keys[index - 1]
+            return merged.keys[0] if merged.leaf and merged.keys else None
         else:
             self._merge(node, index - 1)
+            merged = node.children[index - 1]
+            if index >= 2:
+                return node.keys[index - 2]
+            return merged.keys[0] if merged.leaf and merged.keys else None
 
     def _borrow_from_prev(self, node: BPlusTreeNode, index: int) -> None:
         child = node.children[index]
@@ -173,7 +221,7 @@ class BPlusTree:
             left.values.extend(right.values)
             left.next = right.next
         else:
-            left.keys.append(node.keys[index])
+            left.keys.append(node.keys[index])   # push down parent separator
             left.keys.extend(right.keys)
             left.children.extend(right.children)
 
@@ -270,8 +318,8 @@ class BPlusTree:
         if node is self.root:
             return 1 if not node.leaf else 0
         if node.leaf:
-            return self.order // 2
-        return (self.order + 1) // 2 - 1
+            return (self.order - 1) // 2
+        return math.ceil(self.order / 2) - 1
 
     def _first_key(self, node: BPlusTreeNode) -> int:
         cursor = node
