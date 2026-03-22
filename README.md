@@ -72,8 +72,7 @@ Multi-Course-Attendance-Management-Portal/
 │   │   ├── table.py                  # Table abstraction layer
 │   │   └── performance.py            # Performance benchmarking framework
 │   ├── demo_images/                  # Tree visualization outputs
-│   ├── report/
-│   │   └── report.tex                # LaTeX report
+│   ├── report.pdf                    # Module-A report
 │   ├── report.ipynb                  # Jupyter notebook with benchmarks
 │   ├── run_demo.py                   # Demo script
 │   └── requirements.txt              # Python dependencies
