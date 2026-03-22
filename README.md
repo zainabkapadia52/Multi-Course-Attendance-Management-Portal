@@ -62,36 +62,60 @@ python run.py
 ## Project Structure
 
 ```
-Module_B/
-├── app/
-│   ├── __init__.py              # Flask app factory
-│   ├── auth.py                  # Authentication logic
-│   ├── db.py                    # Database connection
-│   ├── middleware.py            # RBAC middleware
-│   ├── logger.py                # Audit logging
-│   ├── events.py                # Event broadcasting
-│   ├── routes/
-│   │   ├── auth_routes.py       # /login, /isAuth, /logout
-│   │   ├── admin.py             # /api/admin/*
-│   │   ├── student.py           # /api/student/*
-│   │   ├── instructor.py        # /api/instructor/*
-│   │   ├── dean.py              # /api/dean/*
-│   │   ├── ta.py                # /api/ta/*
-│   │   ├── page_routes.py       # HTML page rendering (UI)
-│   │   └── stream.py            # Server-sent events
-│   └── templates/               # HTML templates (frontend)
-├── sql/
-│   ├── schema.sql               # Database schema with indexes
-│   └── seed.sql                 # Sample data
-├── logs/
-│   └── audit.log                # Security audit log
-├── init_db.py                   # Database initialization
-├── run.py                       # Application entry point
-├── test_api.py                  # API testing script
-├── benchmark.py                 # Performance benchmarking
-├── API_DOCUMENTATION.md         # Complete API reference
-├── README.md                    # This file
-└── requirements.txt             # Python dependencies
+Multi-Course-Attendance-Management-Portal/
+├── Module-A/                         # Lightweight DBMS with B+ Tree Indexing
+│   ├── database/
+│   │   ├── __init__.py               # Package exports
+│   │   ├── bplustree.py              # B+ tree implementation
+│   │   ├── bruteforce.py             # Brute-force baseline for benchmarking
+│   │   ├── db_manager.py             # Database manager abstraction
+│   │   ├── table.py                  # Table abstraction layer
+│   │   └── performance.py            # Performance benchmarking framework
+│   ├── demo_images/                  # Tree visualization outputs
+│   ├── report/
+│   │   └── report.tex                # LaTeX report
+│   ├── report.ipynb                  # Jupyter notebook with benchmarks
+│   ├── run_demo.py                   # Demo script
+│   └── requirements.txt              # Python dependencies
+│
+├── Module-B/                         # Attendance Management Web Application
+│   ├── app/
+│   │   ├── __init__.py               # Flask app factory
+│   │   ├── auth.py                   # Authentication logic
+│   │   ├── db.py                     # Database connection
+│   │   ├── middleware.py             # RBAC middleware
+│   │   ├── logger.py                 # Audit logging
+│   │   ├── events.py                 # Event broadcasting
+│   │   ├── routes/
+│   │   │   ├── auth_routes.py        # /login, /isAuth, /logout
+│   │   │   ├── admin.py              # /api/admin/*
+│   │   │   ├── student.py            # /api/student/*
+│   │   │   ├── instructor.py         # /api/instructor/*
+│   │   │   ├── dean.py               # /api/dean/*
+│   │   │   ├── ta.py                 # /api/ta/*
+│   │   │   ├── page_routes.py        # HTML page rendering (UI)
+│   │   │   └── stream.py             # Server-sent events
+│   │   └── templates/                # HTML templates (frontend)
+│   ├── sql/
+│   │   ├── schema.sql                # Database schema with indexes
+│   │   └── seed.sql                  # Sample data
+│   ├── logs/
+│   │   ├── audit.log                 # Security audit log
+│   │   └── database_logs.log         # Database query logs
+│   ├── init_db.py                    # Database initialization
+│   ├── run.py                        # Application entry point
+│   ├── test_api.py                   # API testing script
+│   ├── benchmark.py                  # Performance benchmarking
+│   ├── verify.py                     # Verification script
+│   ├── create_indexes.sql            # Index creation for optimization
+│   ├── module_b_report.tex           # LaTeX report
+│   ├── README.md                     # Module-specific documentation
+│   └── requirements.txt              # Python dependencies
+│
+├── images/                           # Schema diagrams
+├── setup.sh / setup.bat              # Automated setup scripts
+├── start.sh / start.bat              # Application start scripts
+└── README.md                         # This file
 ```
 
 ### Access the Application
