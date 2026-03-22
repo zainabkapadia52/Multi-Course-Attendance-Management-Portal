@@ -11,7 +11,7 @@ A centralized database-driven system for managing attendance across multiple cou
 #### For Mac/Linux Users:
 ```bash
 # Clone the repository
-git clone <your-repo-url>
+git clone https://github.com/zainabkapadia52/Multi-Course-Attendance-Management-Portal.git
 cd Multi-Course-Attendance-Management-Portal
 
 # Run setup script (creates venv, installs dependencies, initializes database)
@@ -24,7 +24,7 @@ cd Multi-Course-Attendance-Management-Portal
 #### For Windows Users:
 ```cmd
 # Clone the repository
-git clone <your-repo-url>
+git clone https://github.com/zainabkapadia52/Multi-Course-Attendance-Management-Portal.git
 cd Multi-Course-Attendance-Management-Portal
 
 # Run setup script (creates venv, installs dependencies, initializes database)

@@ -31,4 +31,4 @@ ENV/
 .env.local
 
 # Database files
-*.db
+Module-B/*.db
