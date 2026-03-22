@@ -232,7 +232,7 @@ curl -X GET http://localhost:5000/api/admin/users \
 
 ### 2. Audit Logging
 
-All data modifications are logged to `logs/audit.log`:
+All data modifications via the API or from the UI are logged to `logs/audit.log`:
 
 ```
 [2026-03-19 10:30:45] LOGIN_OK | /login | user_id=5 | username=student1
@@ -240,12 +240,23 @@ All data modifications are logged to `logs/audit.log`:
 [2026-03-19 10:32:00] APPROVE_CORRECTION | /api/instructor/corrections/1 | user_id=2
 ```
 
+Any modification to the database directly or via the API is logged to `logs/database_logs`:
+
+```
+2026-03-21 18:46:36 | TABLE=attendance_records | ROWID=282 | OLD={"att_session_id":11,"student_id":15,"status":"absent"} | NEW={"att_session_id":11,"student_id":15,"status":"present"}
+```
+
+The Database logs are stored in a table `raw_changes`. 
+To view them, run the command: `python3 export_db_logs.py` in the `Module-B` directory.
+
 ### 3. Unauthorized Access Detection
 
 Direct database modifications (bypassing APIs) are detectable:
 - API calls are logged with user_id
 - Direct DB changes have no corresponding log entry
 - Audit review can identify unauthorized modifications
+
+To view all unauthorzed database accesses, run `python3 verify.py` in the `Module-B` directory.
 
 ### 4. Password Security
 
