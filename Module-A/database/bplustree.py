@@ -32,61 +32,79 @@ class BPlusTree:
         return None
 
     def insert(self, key: int, value: Any) -> None:
-        root_max = self.max_keys if self.root.leaf else self.order
-        if len(self.root.keys) == root_max:
-            old_root = self.root
-            self.root = BPlusTreeNode(leaf=False, children=[old_root])
-            self._split_child(self.root, 0)
+        promoted_key = self._insert_recursive(self.root, key, value)
+        
+        # If a key was promoted from the root, create a new root
+        if promoted_key is not None:
+            new_root = BPlusTreeNode(leaf=False)
+            new_root.keys = [promoted_key[0]]
+            new_root.children = [self.root, promoted_key[1]]
+            self.root = new_root
 
-        self._insert_non_full(self.root, key, value)
-
-    def _insert_non_full(self, node: BPlusTreeNode, key: int, value: Any) -> None:
+    def _insert_recursive(self, node: BPlusTreeNode, key: int, value: Any) -> tuple[int, BPlusTreeNode] | None:
+        """
+        Insert into node. Returns (promoted_key, new_sibling) if node splits, None otherwise.
+        """
         if node.leaf:
             idx = bisect_left(node.keys, key)
             if idx < len(node.keys) and node.keys[idx] == key:
                 node.values[idx] = value
-                return
+                return None
+            
             node.keys.insert(idx, key)
             node.values.insert(idx, value)
-            return
+            
+            # Split only if we exceeded max_keys
+            if len(node.keys) > self.max_keys:
+                return self._split_leaf(node)
+            return None
 
+        # Internal node
         idx = bisect_right(node.keys, key)
-        child = node.children[idx]
-        # Split internal children when they reach `order` keys; leaves at `order-1`.
-        child_max = self.max_keys if child.leaf else self.order
-        if len(child.keys) == child_max:
-            self._split_child(node, idx)
-            idx = bisect_right(node.keys, key)
-        self._insert_non_full(node.children[idx], key, value)
+        promoted = self._insert_recursive(node.children[idx], key, value)
+        
+        if promoted is None:
+            return None
+        
+        # A child split, insert the promoted key
+        promoted_key, new_child = promoted
+        node.keys.insert(idx, promoted_key)
+        node.children.insert(idx + 1, new_child)
+        
+        # Split this internal node if it now exceeds max_keys
+        if len(node.keys) > self.max_keys:
+            return self._split_internal(node)
+        return None
+    
+    def _split_leaf(self, node: BPlusTreeNode) -> tuple[int, BPlusTreeNode]:
+        """Split a leaf node and return (promoted_key, new_sibling)."""
+        mid = len(node.keys) // 2
+        new_sibling = BPlusTreeNode(leaf=True)
+        
+        new_sibling.keys = node.keys[mid:]
+        new_sibling.values = node.values[mid:]
+        node.keys = node.keys[:mid]
+        node.values = node.values[:mid]
+        
+        new_sibling.next = node.next
+        node.next = new_sibling
+        
+        return (new_sibling.keys[0], new_sibling)
+    
+    def _split_internal(self, node: BPlusTreeNode) -> tuple[int, BPlusTreeNode]:
+        """Split an internal node and return (promoted_key, new_sibling)."""
+        mid = len(node.keys) // 2
+        promoted_key = node.keys[mid]
+        
+        new_sibling = BPlusTreeNode(leaf=False)
+        new_sibling.keys = node.keys[mid + 1:]
+        new_sibling.children = node.children[mid + 1:]
+        
+        node.keys = node.keys[:mid]
+        node.children = node.children[:mid + 1]
+        
+        return (promoted_key, new_sibling)
 
-    def _split_child(self, parent: BPlusTreeNode, index: int) -> None:
-        child = parent.children[index]
-        new_sibling = BPlusTreeNode(leaf=child.leaf)
-
-        if child.leaf:
-            mid = len(child.keys) // 2
-            new_sibling.keys = child.keys[mid:]
-            new_sibling.values = child.values[mid:]
-            child.keys = child.keys[:mid]
-            child.values = child.values[:mid]
-
-            new_sibling.next = child.next
-            child.next = new_sibling
-
-            parent.keys.insert(index, new_sibling.keys[0])
-            parent.children.insert(index + 1, new_sibling)
-            return
-
-        mid = (self.order + 1) // 2 - 1
-        promoted = child.keys[mid]
-        new_sibling.keys = child.keys[mid + 1:]
-        new_sibling.children = child.children[mid + 1:]
-
-        child.keys = child.keys[:mid]
-        child.children = child.children[:mid + 1]
-
-        parent.keys.insert(index, promoted)
-        parent.children.insert(index + 1, new_sibling)
 
     def delete(self, key: int) -> bool:
         deleted, _ = self._delete(self.root, key)
