@@ -29,7 +29,8 @@ DB_PATH     = "module_b.db"
 SCHEMA_PATH = "sql/schema.sql"
 random.seed(42)
 
-PWD = generate_password_hash("password123")
+# Generate password hash using pbkdf2:sha256 (works on all systems, no OpenSSL issues)
+PWD = generate_password_hash("password123", method='pbkdf2:sha256')
 
 # ── helpers ───────────────────────────────────────────────────────────────────
 

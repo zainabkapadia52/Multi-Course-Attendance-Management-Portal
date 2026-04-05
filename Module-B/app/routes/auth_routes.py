@@ -21,6 +21,7 @@ def do_login():
         "message":       "Login successful",
         "session_token": sess["session_id"],
         "mac":           sess["mac"],
+        "user_id":       sess["user_id"],
         "role":          sess["role"],
         "username":      sess["username"]
     }), 200

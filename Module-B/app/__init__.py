@@ -1,12 +1,26 @@
 from flask import Flask
 from .db import init_app
+from concurrent.futures import ThreadPoolExecutor
+import threading
 
 def create_app():
     app = Flask(__name__)
     app.config["SECRET_KEY"]    = "cs432-iitgn-secret-change-in-prod"
     app.config["DB_PATH"]       = "module_b.db"
     app.config["SESSION_HOURS"] = 2
-
+    
+    # ═══════════════════════════════════════════════════════════════════════════
+    # THREADING CONFIGURATION — Handle concurrent requests in parallel
+    # ═══════════════════════════════════════════════════════════════════════════
+    # ThreadPoolExecutor: manages a pool of worker threads for concurrent operations
+    # max_workers=10: up to 10 concurrent threads (can be increased if needed)
+    app.config["THREAD_POOL"] = ThreadPoolExecutor(max_workers=10)
+    app.config["THREAD_LOCKS"] = {  # Thread-safe locks for critical sections
+        "database": threading.RLock(),      # Recursive lock for DB operations
+        "session": threading.RLock(),       # Lock for session management
+        "auth": threading.RLock(),          # Lock for authentication
+    }
+    
     init_app(app)
 
     from .routes.auth_routes  import bp as auth_bp
