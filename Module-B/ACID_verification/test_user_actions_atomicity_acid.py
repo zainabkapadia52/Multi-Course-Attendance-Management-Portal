@@ -628,6 +628,161 @@ class UserActionsAtomicityTester:
                 conn.close()
         except Exception as e:
             self.log_result(action, "atomicity", "FAIL", str(e))
+
+    def test_instructor_add_ta_to_course_atomic(self):
+        """INSTRUCTOR: Add TA to course must be atomic"""
+        action = "instructor_add_ta_to_course"
+        try:
+            conn = self.get_connection()
+            # Find a course-TA pair not already assigned
+            pair = conn.execute(
+                "SELECT c.course_id, u.user_id FROM courses c, users u "
+                "WHERE u.role='ta' AND NOT EXISTS ("
+                "  SELECT 1 FROM course_tas WHERE course_id=c.course_id AND ta_id=u.user_id"
+                ") LIMIT 1"
+            ).fetchone()
+
+            if not pair:
+                self.log_result(action, "atomicity", "SKIP", "No available TA-course pair")
+                return
+
+            try:
+                conn.execute("BEGIN IMMEDIATE")
+                conn.execute(
+                    "INSERT INTO course_tas (course_id, ta_id) VALUES (?, ?)",
+                    (pair[0], pair[1])
+                )
+                conn.commit()
+                self.log_result(action, "atomicity", "PASS", "TA added to course atomically")
+            except:
+                conn.rollback()
+                self.log_result(action, "atomicity", "FAIL", "TA assignment failed")
+            finally:
+                conn.close()
+        except Exception as e:
+            self.log_result(action, "atomicity", "FAIL", str(e))
+
+    def test_instructor_remove_ta_from_course_atomic(self):
+        """INSTRUCTOR: Remove TA from course must be atomic"""
+        action = "instructor_remove_ta_from_course"
+        try:
+            conn = self.get_connection()
+            # Find an existing TA assignment to remove
+            ta_assignment = conn.execute(
+                "SELECT course_id, ta_id FROM course_tas LIMIT 1"
+            ).fetchone()
+
+            if not ta_assignment:
+                self.log_result(action, "atomicity", "SKIP", "No TA assignments to remove")
+                return
+
+            try:
+                conn.execute("BEGIN IMMEDIATE")
+                conn.execute(
+                    "DELETE FROM course_tas WHERE course_id=? AND ta_id=?",
+                    (ta_assignment[0], ta_assignment[1])
+                )
+                conn.commit()
+                self.log_result(action, "atomicity", "PASS", "TA removed from course atomically")
+            except:
+                conn.rollback()
+                self.log_result(action, "atomicity", "FAIL", "TA removal failed")
+            finally:
+                conn.close()
+        except Exception as e:
+            self.log_result(action, "atomicity", "FAIL", str(e))
+
+    def test_ta_create_attendance_session_atomic(self):
+        """TA: Create attendance session must be atomic"""
+        action = "ta_create_attendance_session"
+        try:
+            conn = self.get_connection()
+            course = conn.execute("SELECT course_id FROM courses LIMIT 1").fetchone()
+
+            if not course:
+                self.log_result(action, "atomicity", "SKIP", "No course available")
+                return
+
+            topic = f"TASession_{int(time.time())}"
+
+            try:
+                conn.execute("BEGIN IMMEDIATE")
+                cur = conn.execute(
+                    "INSERT INTO attendance_sessions (course_id, session_date, topic, created_by) VALUES (?, ?, ?, ?)",
+                    (course[0], datetime.now().date(), topic, 2)  # created_by=2 for TA
+                )
+                session_id = cur.lastrowid
+                conn.commit()
+                self.log_result(action, "atomicity", "PASS", "Attendance session created atomically by TA")
+            except:
+                conn.rollback()
+                self.log_result(action, "atomicity", "FAIL", "Session creation failed")
+            finally:
+                conn.close()
+        except Exception as e:
+            self.log_result(action, "atomicity", "FAIL", str(e))
+
+    def test_ta_accept_correction_request_atomic(self):
+        """TA: Accept correction request must be atomic"""
+        action = "ta_accept_correction_request"
+        try:
+            conn = self.get_connection()
+            request = conn.execute(
+                "SELECT req_id FROM correction_requests WHERE status='pending' LIMIT 1"
+            ).fetchone()
+
+            if not request:
+                self.log_result(action, "atomicity", "SKIP", "No pending corrections")
+                return
+
+            req_id = request[0]
+
+            try:
+                conn.execute("BEGIN IMMEDIATE")
+                conn.execute(
+                    "UPDATE correction_requests SET status=? WHERE req_id=?",
+                    ("accepted", req_id)
+                )
+                conn.commit()
+                self.log_result(action, "atomicity", "PASS", "Correction accepted atomically by TA")
+            except:
+                conn.rollback()
+                self.log_result(action, "atomicity", "FAIL", "Correction acceptance failed")
+            finally:
+                conn.close()
+        except Exception as e:
+            self.log_result(action, "atomicity", "FAIL", str(e))
+
+    def test_ta_reject_correction_request_atomic(self):
+        """TA: Reject correction request must be atomic"""
+        action = "ta_reject_correction_request"
+        try:
+            conn = self.get_connection()
+            # Find a pending correction to reject
+            request = conn.execute(
+                "SELECT req_id FROM correction_requests WHERE status='pending' LIMIT 1 OFFSET 1"
+            ).fetchone()
+
+            if not request:
+                self.log_result(action, "atomicity", "SKIP", "No additional pending corrections")
+                return
+
+            req_id = request[0]
+
+            try:
+                conn.execute("BEGIN IMMEDIATE")
+                conn.execute(
+                    "UPDATE correction_requests SET status=? WHERE req_id=?",
+                    ("rejected", req_id)
+                )
+                conn.commit()
+                self.log_result(action, "atomicity", "PASS", "Correction rejected atomically by TA")
+            except:
+                conn.rollback()
+                self.log_result(action, "atomicity", "FAIL", "Correction rejection failed")
+            finally:
+                conn.close()
+        except Exception as e:
             self.log_result(action, "atomicity", "FAIL", str(e))
 
     # ═════════════════════════════════════════════════════════════════════════
@@ -661,10 +816,15 @@ class UserActionsAtomicityTester:
         self.test_instructor_create_attendance_session_atomic()
         self.test_instructor_accept_correction_request_atomic()
         self.test_instructor_reject_correction_request_atomic()
+        self.test_instructor_add_ta_to_course_atomic()
+        self.test_instructor_remove_ta_from_course_atomic()
 
         # TA actions
         print("\n[TA ACTIONS - ATOMICITY]\n")
         self.test_ta_save_attendance_changes_atomic()
+        self.test_ta_create_attendance_session_atomic()
+        self.test_ta_accept_correction_request_atomic()
+        self.test_ta_reject_correction_request_atomic()
 
         # Student actions
         print("\n[STUDENT ACTIONS - ATOMICITY]\n")

@@ -1,41 +1,111 @@
 {
   "level": "database",
-  "timestamp": "2026-04-05T16:47:13.715256",
+  "timestamp": "2026-04-05T17:13:38.445138",
   "summary": {
-    "total": 4,
-    "passed": 4,
+    "total": 14,
+    "passed": 14,
     "failed": 0,
     "skipped": 0,
     "pass_rate": 100.0
   },
   "results": [
     {
-      "timestamp": "2026-04-05T16:47:13.581021",
-      "action": "admin_concurrent_course_creation",
+      "timestamp": "2026-04-05T17:13:37.938446",
+      "action": "admin_add_course",
       "test": "isolation",
       "status": "PASS",
-      "message": "All 3 concurrent course creations succeeded"
+      "message": "Courses created isolated: 3 success, 0 locked"
     },
     {
-      "timestamp": "2026-04-05T16:47:13.620179",
-      "action": "student_concurrent_correction_submission",
+      "timestamp": "2026-04-05T17:13:37.969851",
+      "action": "admin_delete_course",
+      "test": "isolation",
+      "status": "PASS",
+      "message": "Courses deleted isolated: 2 deleted successfully"
+    },
+    {
+      "timestamp": "2026-04-05T17:13:37.996816",
+      "action": "admin_add_instructor",
+      "test": "isolation",
+      "status": "PASS",
+      "message": "Instructors added isolated: 1 success, 1 already assigned"
+    },
+    {
+      "timestamp": "2026-04-05T17:13:38.038556",
+      "action": "admin_remove_instructor",
+      "test": "isolation",
+      "status": "PASS",
+      "message": "Instructors removed isolated: 2 removed successfully"
+    },
+    {
+      "timestamp": "2026-04-05T17:13:38.061718",
+      "action": "admin_add_ta",
+      "test": "isolation",
+      "status": "PASS",
+      "message": "TAs added isolated: 1 success, 1 already assigned"
+    },
+    {
+      "timestamp": "2026-04-05T17:13:38.105799",
+      "action": "admin_remove_ta",
+      "test": "isolation",
+      "status": "PASS",
+      "message": "TAs removed isolated: 2 removed successfully"
+    },
+    {
+      "timestamp": "2026-04-05T17:13:38.128639",
+      "action": "admin_add_enrolled_student",
+      "test": "isolation",
+      "status": "PASS",
+      "message": "Students enrolled isolated: 0 success, 2 already enrolled"
+    },
+    {
+      "timestamp": "2026-04-05T17:13:38.153626",
+      "action": "admin_remove_enrolled_student",
+      "test": "isolation",
+      "status": "PASS",
+      "message": "Students unenrolled isolated: 2 removed successfully"
+    },
+    {
+      "timestamp": "2026-04-05T17:13:38.189004",
+      "action": "admin_delete_user",
+      "test": "isolation",
+      "status": "PASS",
+      "message": "User deletions isolated: 2 deleted successfully"
+    },
+    {
+      "timestamp": "2026-04-05T17:13:38.270259",
+      "action": "instructor_create_session",
+      "test": "isolation",
+      "status": "PASS",
+      "message": "Sessions created isolated: 3 success, 0 locked"
+    },
+    {
+      "timestamp": "2026-04-05T17:13:38.302672",
+      "action": "instructor_add_ta",
+      "test": "isolation",
+      "status": "PASS",
+      "message": "TAs added isolated: 2 success, 0 already assigned"
+    },
+    {
+      "timestamp": "2026-04-05T17:13:38.336607",
+      "action": "instructor_remove_ta",
+      "test": "isolation",
+      "status": "PASS",
+      "message": "TAs removed isolated: 2 removed successfully"
+    },
+    {
+      "timestamp": "2026-04-05T17:13:38.405266",
+      "action": "ta_create_session",
+      "test": "isolation",
+      "status": "PASS",
+      "message": "TA sessions created isolated: 2 successful"
+    },
+    {
+      "timestamp": "2026-04-05T17:13:38.441874",
+      "action": "student_submit_correction",
       "test": "isolation",
       "status": "PASS",
       "message": "Concurrent isolation working: 1 success, 1 conflict, 0 locked"
-    },
-    {
-      "timestamp": "2026-04-05T16:47:13.681307",
-      "action": "instructor_concurrent_session_creation",
-      "test": "isolation",
-      "status": "PASS",
-      "message": "All 3 concurrent session creations isolated"
-    },
-    {
-      "timestamp": "2026-04-05T16:47:13.712657",
-      "action": "ta_concurrent_attendance_updates",
-      "test": "isolation",
-      "status": "PASS",
-      "message": "All 2 concurrent updates isolated - no lost updates"
     }
   ]
 }
