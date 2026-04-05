@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, g   # fixed: was 'afrom'
 from ..db import get_db
-from ..middleware import require_role
+from ..middleware import require_role, thread_safe_db
 from ..logger import audit_log
 from ..events import broadcast
 
@@ -8,6 +8,7 @@ bp = Blueprint("instructor", __name__)
 
 @bp.get("/courses")
 @require_role("instructor")
+@thread_safe_db("courses")
 def my_courses():
     db  = get_db()
     sem = db.execute("SELECT semester_id FROM semesters WHERE is_active=1 LIMIT 1").fetchone()
@@ -25,6 +26,7 @@ def my_courses():
 
 @bp.get("/courses/<int:cid>/students")
 @require_role("instructor")
+@thread_safe_db("courses", "enrollments")
 def course_students(cid):
     db = get_db()
     if not db.execute("SELECT 1 FROM course_instructors WHERE course_id=? AND instructor_id=?",
@@ -43,6 +45,7 @@ def course_students(cid):
 
 @bp.post("/attendance-sessions")
 @require_role("instructor")
+@thread_safe_db("attendance", "courses")
 def create_session():
     d            = request.json or {}
     course_id    = d.get("course_id")
@@ -93,6 +96,7 @@ def create_session():
 
 @bp.get("/attendance-sessions")
 @require_role("instructor")
+@thread_safe_db("attendance", "courses")
 def list_sessions():
     db  = get_db()
     sem = db.execute("SELECT semester_id FROM semesters WHERE is_active=1 LIMIT 1").fetchone()
@@ -111,6 +115,7 @@ def list_sessions():
 
 @bp.get("/attendance-sessions/<int:sid>/records")
 @require_role("instructor")
+@thread_safe_db("attendance")
 def session_records(sid):
     db = get_db()
     if not db.execute(
@@ -133,6 +138,7 @@ def session_records(sid):
 
 @bp.get("/corrections")
 @require_role("instructor")
+@thread_safe_db("corrections", "courses", "attendance")
 def list_corrections():
     db  = get_db()
     sem = db.execute("SELECT semester_id FROM semesters WHERE is_active=1 LIMIT 1").fetchone()
@@ -154,6 +160,7 @@ def list_corrections():
 
 @bp.put("/records/<int:rid>")
 @require_role("instructor")
+@thread_safe_db("attendance")
 def update_record(rid):
     status = (request.json or {}).get("status")
     if status not in ("present", "absent"):
@@ -178,6 +185,7 @@ def update_record(rid):
 
 @bp.post("/corrections/<int:req_id>/accept")
 @require_role("instructor")
+@thread_safe_db("corrections", "attendance", "courses")
 def accept_correction(req_id):
     db  = get_db()
     req = db.execute(
@@ -236,6 +244,7 @@ def accept_correction(req_id):
 
 @bp.post("/corrections/<int:req_id>/reject")
 @require_role("instructor")
+@thread_safe_db("corrections", "attendance", "courses")
 def reject_correction(req_id):
     db  = get_db()
     req = db.execute(
@@ -274,6 +283,7 @@ def reject_correction(req_id):
 
 @bp.get("/courses/<int:cid>/sessions")
 @require_role("instructor")
+@thread_safe_db("courses", "attendance")
 def course_sessions(cid):
     db  = get_db()
     sem = db.execute("SELECT semester_id FROM semesters WHERE is_active=1 LIMIT 1").fetchone()
@@ -301,6 +311,7 @@ def course_sessions(cid):
 
 @bp.get("/courses/<int:cid>/tas")
 @require_role("instructor")
+@thread_safe_db("courses")
 def course_tas(cid):
     db = get_db()
     if not db.execute("SELECT 1 FROM course_instructors WHERE course_id=? AND instructor_id=?",
@@ -320,6 +331,7 @@ def course_tas(cid):
 
 @bp.get("/available-tas/<int:cid>")
 @require_role("instructor")
+@thread_safe_db("courses")
 def available_tas(cid):
     """TAs not yet assigned to this course."""
     rows = get_db().execute(
@@ -333,6 +345,7 @@ def available_tas(cid):
 
 @bp.post("/courses/<int:cid>/tas")
 @require_role("instructor")
+@thread_safe_db("courses")
 def assign_ta(cid):
     db  = get_db()
     if not db.execute("SELECT 1 FROM course_instructors WHERE course_id=? AND instructor_id=?",
@@ -351,6 +364,7 @@ def assign_ta(cid):
 
 @bp.get("/corrections/<int:req_id>/logs")
 @require_role("instructor")
+@thread_safe_db("corrections")
 def correction_logs(req_id):
     rows = get_db().execute(
         """SELECT cl.action, cl.role, cl.acted_at, u.username
@@ -363,6 +377,7 @@ def correction_logs(req_id):
 
 @bp.delete("/courses/<int:cid>/tas/<int:tid>")
 @require_role("instructor")
+@thread_safe_db("courses")
 def remove_ta(cid, tid):
     db = get_db()
     if not db.execute("SELECT 1 FROM course_instructors WHERE course_id=? AND instructor_id=?",
@@ -376,6 +391,7 @@ def remove_ta(cid, tid):
 
 @bp.get("/profile")
 @require_role("instructor")
+@thread_safe_db("users")
 def profile():
     row = get_db().execute(
         """SELECT u.user_id, u.username, u.role, u.last_login,
@@ -387,6 +403,7 @@ def profile():
 
 @bp.get("/archive")
 @require_role("instructor")
+@thread_safe_db("courses", "attendance")
 def archive():
     db   = get_db()
     sems = db.execute(

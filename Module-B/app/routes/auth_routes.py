@@ -1,10 +1,12 @@
 from flask import Blueprint, request, jsonify, make_response
 from ..auth import login, logout, verify_session, AuthError
+from ..middleware import thread_safe_db
 from ..logger import audit_log
 
 bp = Blueprint("auth", __name__)
 
 @bp.post("/login")
+@thread_safe_db("auth", "users")
 def do_login():
     data     = request.get_json(silent=True) or {}
     username = data.get("user") or data.get("username", "")
@@ -21,11 +23,13 @@ def do_login():
         "message":       "Login successful",
         "session_token": sess["session_id"],
         "mac":           sess["mac"],
+        "user_id":       sess["user_id"],
         "role":          sess["role"],
         "username":      sess["username"]
     }), 200
 
 @bp.get("/isAuth")
+@thread_safe_db("auth", "users")
 def is_auth():
     data = request.get_json(silent=True) or {}
     sid  = (request.headers.get("X-Session-Id")
@@ -46,6 +50,7 @@ def is_auth():
         return jsonify({"error": str(e)}), 401
 
 @bp.post("/logout")
+@thread_safe_db("auth", "users")
 def do_logout():
     sid = (request.headers.get("X-Session-Id")
            or request.cookies.get("session_id"))
