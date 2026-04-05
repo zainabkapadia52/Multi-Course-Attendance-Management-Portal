@@ -1,0 +1,55 @@
+{
+  "level": "database",
+  "timestamp": "2026-04-05T16:47:08.648860",
+  "summary": {
+    "total": 6,
+    "passed": 6,
+    "failed": 0,
+    "skipped": 0,
+    "pass_rate": 100.0
+  },
+  "results": [
+    {
+      "timestamp": "2026-04-05T16:47:08.582028",
+      "action": "admin_create_semester_durable",
+      "test": "durability",
+      "status": "PASS",
+      "message": "Semester persisted"
+    },
+    {
+      "timestamp": "2026-04-05T16:47:08.591174",
+      "action": "admin_add_course_durable",
+      "test": "durability",
+      "status": "PASS",
+      "message": "Course persisted"
+    },
+    {
+      "timestamp": "2026-04-05T16:47:08.606952",
+      "action": "instructor_create_session_durable",
+      "test": "durability",
+      "status": "PASS",
+      "message": "Session persisted"
+    },
+    {
+      "timestamp": "2026-04-05T16:47:08.615679",
+      "action": "ta_update_attendance_durable",
+      "test": "durability",
+      "status": "PASS",
+      "message": "Attendance update persisted"
+    },
+    {
+      "timestamp": "2026-04-05T16:47:08.623686",
+      "action": "instructor_accept_correction_durable",
+      "test": "durability",
+      "status": "PASS",
+      "message": "Correction acceptance persisted"
+    },
+    {
+      "timestamp": "2026-04-05T16:47:08.647134",
+      "action": "student_submit_correction_durable",
+      "test": "durability",
+      "status": "PASS",
+      "message": "Correction submission persisted"
+    }
+  ]
+}

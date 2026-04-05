@@ -1,0 +1,62 @@
+{
+  "level": "database",
+  "timestamp": "2026-04-05T16:47:04.434813",
+  "summary": {
+    "total": 7,
+    "passed": 7,
+    "failed": 0,
+    "skipped": 0,
+    "pass_rate": 100.0
+  },
+  "results": [
+    {
+      "timestamp": "2026-04-05T16:47:04.386946",
+      "action": "admin_add_instructor_consistency",
+      "test": "consistency",
+      "status": "PASS",
+      "message": "FK references valid"
+    },
+    {
+      "timestamp": "2026-04-05T16:47:04.418485",
+      "action": "admin_delete_course_cascade_consistency",
+      "test": "consistency",
+      "status": "PASS",
+      "message": "Course deleted with cascade"
+    },
+    {
+      "timestamp": "2026-04-05T16:47:04.423108",
+      "action": "instructor_create_session_consistency",
+      "test": "consistency",
+      "status": "PASS",
+      "message": "Course reference consistent"
+    },
+    {
+      "timestamp": "2026-04-05T16:47:04.425562",
+      "action": "student_submit_correction_consistency",
+      "test": "consistency",
+      "status": "PASS",
+      "message": "FK constraint enforced on correction"
+    },
+    {
+      "timestamp": "2026-04-05T16:47:04.430780",
+      "action": "admin_add_enrolled_duplicate_check",
+      "test": "consistency",
+      "status": "PASS",
+      "message": "Unique constraint prevents duplicate enrollment"
+    },
+    {
+      "timestamp": "2026-04-05T16:47:04.432587",
+      "action": "admin_attendance_status_constraint",
+      "test": "consistency",
+      "status": "PASS",
+      "message": "Status check constraint enforced"
+    },
+    {
+      "timestamp": "2026-04-05T16:47:04.433660",
+      "action": "instructor_accept_correction_valid_transition",
+      "test": "consistency",
+      "status": "PASS",
+      "message": "Correction status valid"
+    }
+  ]
+}
