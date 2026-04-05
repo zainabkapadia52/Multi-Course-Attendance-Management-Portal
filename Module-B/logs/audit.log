@@ -3537,3 +3537,281 @@
 127.0.0.1 - - [05/Apr/2026 15:59:32] "[31m[1mGET /api/admin/semesters HTTP/1.1[0m" 401 -
 127.0.0.1 - - [05/Apr/2026 15:59:32] "[33mPOST /api/auth/login HTTP/1.1[0m" 404 -
 127.0.0.1 - - [05/Apr/2026 15:59:32] "[33mPOST /api/auth/login HTTP/1.1[0m" 404 -
+127.0.0.1 - - [05/Apr/2026 16:03:23] "[33mPOST /api/auth/login HTTP/1.1[0m" 404 -
+127.0.0.1 - - [05/Apr/2026 16:03:23] "[33mPOST /api/auth/login HTTP/1.1[0m" 404 -
+2026-04-05T10:33:23.846895 | ACTION=UNAUTHORIZED | USER=None | ENDPOINT=/api/admin/semesters | 
+127.0.0.1 - - [05/Apr/2026 16:03:23] "[31m[1mPOST /api/admin/semesters HTTP/1.1[0m" 401 -
+127.0.0.1 - - [05/Apr/2026 16:03:23] "[33mPOST /api/auth/logout HTTP/1.1[0m" 404 -
+127.0.0.1 - - [05/Apr/2026 16:03:23] "[33mPOST /api/auth/login HTTP/1.1[0m" 404 -
+2026-04-05T10:33:23.863460 | ACTION=UNAUTHORIZED | USER=None | ENDPOINT=/api/admin/semesters | 
+127.0.0.1 - - [05/Apr/2026 16:03:23] "[31m[1mGET /api/admin/semesters HTTP/1.1[0m" 401 -
+127.0.0.1 - - [05/Apr/2026 16:03:23] "[33mPOST /api/auth/login HTTP/1.1[0m" 404 -
+127.0.0.1 - - [05/Apr/2026 16:03:23] "[33mPOST /api/auth/login HTTP/1.1[0m" 404 -
+2026-04-05T10:33:31.279824 | ACTION=LOGIN_OK | USER=1 | ENDPOINT=/login | username=admin
+2026-04-05T10:33:31.388955 | ACTION=LOGIN_OK | USER=3 | ENDPOINT=/login | username=prof_singh
+2026-04-05T10:33:31.393035 | ACTION=LOGIN_FAIL | USER=None | ENDPOINT=/login | username=student_01
+2026-04-05T10:33:31.393658 | ACTION=UNAUTHORIZED | USER=None | ENDPOINT=/api/admin/semesters | 
+2026-04-05T10:33:31.394348 | ACTION=UNAUTHORIZED | USER=None | ENDPOINT=/api/student/corrections | 
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\acid_application_tests.py', reloading
+ * Restarting with stat
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\acid_application_tests.py', reloading
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\acid_application_tests.py', reloading
+ * Restarting with stat
+ * Restarting with stat
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\acid_application_tests.py', reloading
+ * Restarting with stat
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\acid_application_tests.py', reloading
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\acid_application_tests.py', reloading
+ * Restarting with stat
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\acid_application_tests.py', reloading
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\acid_application_tests.py', reloading
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\acid_application_tests.py', reloading
+ * Restarting with stat
+ * Restarting with stat
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\acid_application_tests.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\acid_application_tests.py', reloading
+ * Restarting with stat
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\acid_application_tests.py', reloading
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\acid_application_tests.py', reloading
+ * Restarting with stat
+ * Restarting with stat
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\acid_application_tests.py', reloading
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\acid_application_tests.py', reloading
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Restarting with stat
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+2026-04-05T10:37:11.514727 | ACTION=LOGIN_OK | USER=1 | ENDPOINT=/login | username=admin
+2026-04-05T10:37:11.657857 | ACTION=LOGIN_OK | USER=3 | ENDPOINT=/login | username=prof_singh
+2026-04-05T10:37:11.663102 | ACTION=LOGIN_FAIL | USER=None | ENDPOINT=/login | username=student_01
+2026-04-05T10:37:11.663881 | ACTION=UNAUTHORIZED | USER=None | ENDPOINT=/api/admin/semesters | 
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_atomicity_acid.py', reloading
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_atomicity_acid.py', reloading
+ * Restarting with stat
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger PIN: 590-769-549
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_atomicity_acid.py', reloading
+ * Restarting with stat
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_atomicity_acid.py', reloading
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_atomicity_acid.py', reloading
+ * Restarting with stat
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_consistency_acid.py', reloading
+ * Restarting with stat
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_consistency_acid.py', reloading
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_consistency_acid.py', reloading
+ * Restarting with stat
+ * Restarting with stat
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_consistency_acid.py', reloading
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_consistency_acid.py', reloading
+ * Restarting with stat
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_isolation_acid.py', reloading
+ * Restarting with stat
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_isolation_acid.py', reloading
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_isolation_acid.py', reloading
+ * Restarting with stat
+ * Restarting with stat
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_isolation_acid.py', reloading
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_isolation_acid.py', reloading
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Restarting with stat
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_atomicity_acid.py', reloading
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_atomicity_acid.py', reloading
+ * Restarting with stat
+ * Restarting with stat
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_atomicity_acid.py', reloading
+ * Restarting with stat
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_atomicity_acid.py', reloading
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_atomicity_acid.py', reloading
+ * Restarting with stat
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_durability_acid.py', reloading
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_durability_acid.py', reloading
+ * Restarting with stat
+ * Restarting with stat
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_durability_acid.py', reloading
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_durability_acid.py', reloading
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_durability_acid.py', reloading
+ * Restarting with stat
+ * Restarting with stat
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\run_comprehensive_acid_tests.py', reloading
+ * Restarting with stat
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_atomicity_acid.py', reloading
+ * Restarting with stat
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\run_comprehensive_acid_tests.py', reloading
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\run_comprehensive_acid_tests.py', reloading
+ * Restarting with stat
+ * Restarting with stat
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\run_comprehensive_acid_tests.py', reloading
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_consistency_acid.py', reloading
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_consistency_acid.py', reloading
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_consistency_acid.py', reloading
+ * Restarting with stat
+ * Restarting with stat
+ * Restarting with stat
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_consistency_acid.py', reloading
+ * Restarting with stat
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_consistency_acid.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_isolation_acid.py', reloading
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_isolation_acid.py', reloading
+ * Restarting with stat
+ * Restarting with stat
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_isolation_acid.py', reloading
+ * Restarting with stat
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_isolation_acid.py', reloading
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_isolation_acid.py', reloading
+ * Restarting with stat
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_durability_acid.py', reloading
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_durability_acid.py', reloading
+ * Restarting with stat
+ * Restarting with stat
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_durability_acid.py', reloading
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_durability_acid.py', reloading
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\test_durability_acid.py', reloading
+ * Restarting with stat
+ * Restarting with stat
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\comprehensive_multi_level_acid_tests.py', reloading
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\comprehensive_multi_level_acid_tests.py', reloading
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\comprehensive_multi_level_acid_tests.py', reloading
+ * Restarting with stat
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\comprehensive_multi_level_acid_tests.py', reloading
+ * Detected change in 'C:\\Users\\siddh\\Desktop\\Siddharth\\Databases\\Assignment_2\\Multi-Course-Attendance-Management-Portal\\Module-B\\ACID_verification\\comprehensive_multi_level_acid_tests.py', reloading
+ * Restarting with stat
+ * Restarting with stat
+ * Restarting with stat
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger is active!
+ * Debugger is active!
+ * Debugger PIN: 590-769-549
+ * Debugger PIN: 590-769-549
