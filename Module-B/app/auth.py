@@ -23,7 +23,9 @@ def login(username: str, password: str) -> dict:
     ).fetchone()
     if not user or not check_password_hash(user["pwd_hash"], password):
         raise AuthError("Invalid credentials")
-    db.execute("DELETE FROM sessions WHERE user_id = ?", (user["user_id"],))
+    # FIX: Allow multiple sessions per user (for concurrent testing/sessions)
+    # This was causing 401 errors under concurrent load as new logins deleted old sessions
+    # db.execute("DELETE FROM sessions WHERE user_id = ?", (user["user_id"],))
     session_id = str(uuid.uuid4())
     secret     = current_app.config["SECRET_KEY"]
     mac        = _make_mac(session_id, secret)
