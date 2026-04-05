@@ -1,0 +1,139 @@
+{
+  "level": "database",
+  "timestamp": "2026-04-05T16:46:58.213414",
+  "summary": {
+    "total": 18,
+    "passed": 18,
+    "failed": 0,
+    "skipped": 0,
+    "pass_rate": 100.0
+  },
+  "results": [
+    {
+      "timestamp": "2026-04-05T16:46:58.037133",
+      "action": "admin_add_instructor_to_course",
+      "test": "atomicity",
+      "status": "PASS",
+      "message": "Instructor added atomically"
+    },
+    {
+      "timestamp": "2026-04-05T16:46:58.046596",
+      "action": "admin_remove_instructor_from_course",
+      "test": "atomicity",
+      "status": "PASS",
+      "message": "Instructor removed atomically"
+    },
+    {
+      "timestamp": "2026-04-05T16:46:58.055396",
+      "action": "admin_add_ta_to_course",
+      "test": "atomicity",
+      "status": "PASS",
+      "message": "TA added atomically"
+    },
+    {
+      "timestamp": "2026-04-05T16:46:58.064298",
+      "action": "admin_remove_ta_from_course",
+      "test": "atomicity",
+      "status": "PASS",
+      "message": "TA removed atomically"
+    },
+    {
+      "timestamp": "2026-04-05T16:46:58.071807",
+      "action": "admin_add_enrolled_student",
+      "test": "atomicity",
+      "status": "PASS",
+      "message": "Student enrolled atomically"
+    },
+    {
+      "timestamp": "2026-04-05T16:46:58.080733",
+      "action": "admin_remove_enrolled_student",
+      "test": "atomicity",
+      "status": "PASS",
+      "message": "Student removed atomically"
+    },
+    {
+      "timestamp": "2026-04-05T16:46:58.089777",
+      "action": "admin_delete_course",
+      "test": "atomicity",
+      "status": "PASS",
+      "message": "Course deleted atomically with cascade"
+    },
+    {
+      "timestamp": "2026-04-05T16:46:58.099363",
+      "action": "admin_create_semester",
+      "test": "atomicity",
+      "status": "PASS",
+      "message": "Semester created atomically"
+    },
+    {
+      "timestamp": "2026-04-05T16:46:58.107210",
+      "action": "admin_add_course",
+      "test": "atomicity",
+      "status": "PASS",
+      "message": "Course added atomically"
+    },
+    {
+      "timestamp": "2026-04-05T16:46:58.117478",
+      "action": "admin_create_user",
+      "test": "atomicity",
+      "status": "PASS",
+      "message": "User created atomically"
+    },
+    {
+      "timestamp": "2026-04-05T16:46:58.127863",
+      "action": "admin_delete_user",
+      "test": "atomicity",
+      "status": "PASS",
+      "message": "User deleted atomically"
+    },
+    {
+      "timestamp": "2026-04-05T16:46:58.138631",
+      "action": "admin_delete_past_semester",
+      "test": "atomicity",
+      "status": "PASS",
+      "message": "Past semester deleted atomically"
+    },
+    {
+      "timestamp": "2026-04-05T16:46:58.149564",
+      "action": "admin_override_attendance_batch",
+      "test": "atomicity",
+      "status": "PASS",
+      "message": "Batch override 3 records atomically"
+    },
+    {
+      "timestamp": "2026-04-05T16:46:58.163247",
+      "action": "instructor_create_attendance_session",
+      "test": "atomicity",
+      "status": "PASS",
+      "message": "Attendance session created atomically"
+    },
+    {
+      "timestamp": "2026-04-05T16:46:58.172017",
+      "action": "instructor_accept_correction_request",
+      "test": "atomicity",
+      "status": "PASS",
+      "message": "Correction request accepted atomically"
+    },
+    {
+      "timestamp": "2026-04-05T16:46:58.182791",
+      "action": "instructor_reject_correction_request",
+      "test": "atomicity",
+      "status": "PASS",
+      "message": "Correction request rejected atomically"
+    },
+    {
+      "timestamp": "2026-04-05T16:46:58.190770",
+      "action": "ta_save_attendance_changes",
+      "test": "atomicity",
+      "status": "PASS",
+      "message": "Saved 3 changes atomically"
+    },
+    {
+      "timestamp": "2026-04-05T16:46:58.212027",
+      "action": "student_submit_correction_request",
+      "test": "atomicity",
+      "status": "PASS",
+      "message": "Correction request submitted atomically"
+    }
+  ]
+}
