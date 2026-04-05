@@ -1,0 +1,41 @@
+{
+  "level": "database",
+  "timestamp": "2026-04-05T16:47:13.715256",
+  "summary": {
+    "total": 4,
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0,
+    "pass_rate": 100.0
+  },
+  "results": [
+    {
+      "timestamp": "2026-04-05T16:47:13.581021",
+      "action": "admin_concurrent_course_creation",
+      "test": "isolation",
+      "status": "PASS",
+      "message": "All 3 concurrent course creations succeeded"
+    },
+    {
+      "timestamp": "2026-04-05T16:47:13.620179",
+      "action": "student_concurrent_correction_submission",
+      "test": "isolation",
+      "status": "PASS",
+      "message": "Concurrent isolation working: 1 success, 1 conflict, 0 locked"
+    },
+    {
+      "timestamp": "2026-04-05T16:47:13.681307",
+      "action": "instructor_concurrent_session_creation",
+      "test": "isolation",
+      "status": "PASS",
+      "message": "All 3 concurrent session creations isolated"
+    },
+    {
+      "timestamp": "2026-04-05T16:47:13.712657",
+      "action": "ta_concurrent_attendance_updates",
+      "test": "isolation",
+      "status": "PASS",
+      "message": "All 2 concurrent updates isolated - no lost updates"
+    }
+  ]
+}
