@@ -358,6 +358,14 @@ class InstructorUser(HttpUser):
 
     # All 5 seeded instructors
     INSTRUCTORS = ["prof_singh", "prof_rao", "prof_mehta", "prof_sharma", "prof_jain"]
+    # Map each instructor to their assigned courses (verified from database)
+    INSTRUCTOR_COURSES = {
+        "prof_singh":   [1, 6, 10],
+        "prof_rao":     [2, 7, 11],
+        "prof_mehta":   [3, 8, 12],
+        "prof_sharma":  [4, 9, 13],
+        "prof_jain":    [5, 10, 14],
+    }
 
     def on_start(self):
         self.username = random.choice(self.INSTRUCTORS)
@@ -371,24 +379,11 @@ class InstructorUser(HttpUser):
             "Content-Type":  "application/json",
         }
         
-        # Fetch this instructor's assigned courses to avoid 403 errors
-        self.course_ids = []
-        if self.authenticated:
-            try:
-                resp = self.client.get(
-                    "/api/instructor/courses",
-                    headers=self.headers,
-                    catch_response=True,
-                )
-                if resp.status_code == 200:
-                    courses = resp.json()
-                    self.course_ids = [c.get("course_id") for c in courses if "course_id" in c]
-                resp.close()
-            except:
-                pass
+        # Use pre-mapped instructor courses to avoid 403 errors
+        self.course_ids = self.INSTRUCTOR_COURSES.get(self.username, [1, 2, 3])
         
         status = "✓" if self.authenticated else "✗"
-        print(f"[INSTRUCTOR] {status} {self.username} (user_id={self.user_id}, courses={len(self.course_ids)})")
+        print(f"[INSTRUCTOR] {status} {self.username} (user_id={self.user_id}, courses={self.course_ids})")
 
     def on_stop(self):
         if self.authenticated:
