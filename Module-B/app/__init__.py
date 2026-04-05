@@ -13,8 +13,8 @@ def create_app():
     # THREADING CONFIGURATION — Handle concurrent requests in parallel
     # ═══════════════════════════════════════════════════════════════════════════
     # ThreadPoolExecutor: manages a pool of worker threads for concurrent operations
-    # max_workers=10: up to 10 concurrent threads (can be increased if needed)
-    app.config["THREAD_POOL"] = ThreadPoolExecutor(max_workers=10)
+    # max_workers=100: up to 100 concurrent threads for 100 concurrent users
+    app.config["THREAD_POOL"] = ThreadPoolExecutor(max_workers=100)
     app.config["THREAD_LOCKS"] = {  # Thread-safe locks for critical sections
         "database": threading.RLock(),      # Recursive lock for DB operations
         "session": threading.RLock(),       # Lock for session management

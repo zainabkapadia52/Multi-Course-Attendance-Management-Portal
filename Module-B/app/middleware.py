@@ -1,5 +1,5 @@
 from functools import wraps
-from flask import request, jsonify, g
+from flask import request, jsonify, g, current_app
 from .auth import verify_session, AuthError
 from .logger import audit_log
 
@@ -9,6 +9,15 @@ def _read_session():
     mac        = (request.headers.get("X-Session-Mac")
                   or request.cookies.get("session_mac"))
     return session_id, mac
+
+def thread_safe_db(f):
+    """Decorator to wrap route handlers with thread-safe database locking"""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        db_lock = current_app.config["THREAD_LOCKS"]["database"]
+        with db_lock:
+            return f(*args, **kwargs)
+    return decorated
 
 def require_auth(f):
     @wraps(f)
