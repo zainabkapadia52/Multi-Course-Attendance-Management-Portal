@@ -8,7 +8,7 @@ bp = Blueprint("student", __name__)
 
 @bp.get("/courses")
 @require_role("student")
-@thread_safe_db
+@thread_safe_db("courses", "enrollments")
 def my_courses():
     db   = get_db()
     rows = db.execute(
@@ -25,7 +25,7 @@ def my_courses():
 
 @bp.get("/attendance-stats")
 @require_role("student")
-@thread_safe_db
+@thread_safe_db("attendance")
 def attendance_stats():
     db      = get_db()
     courses = db.execute(
@@ -38,7 +38,7 @@ def attendance_stats():
 
 @bp.get("/corrections/current")
 @require_role("student")
-@thread_safe_db
+@thread_safe_db("corrections")
 def corrections_current():
     """Only correction requests for courses in the active semester."""
     db  = get_db()
@@ -58,7 +58,7 @@ def corrections_current():
 
 @bp.get("/corrections/archive")
 @require_role("student")
-@thread_safe_db
+@thread_safe_db("corrections")
 def corrections_archive():
     """Correction requests grouped by past semester."""
     db   = get_db()
@@ -93,7 +93,7 @@ def corrections_archive():
 
 @bp.get("/corrections/<int:req_id>/logs")
 @require_role("student")
-@thread_safe_db
+@thread_safe_db("corrections")
 def correction_logs(req_id):
     db  = get_db()
     # Verify this request belongs to this student
@@ -114,7 +114,7 @@ def correction_logs(req_id):
 
 @bp.get("/attendance-stats/current")
 @require_role("student")
-@thread_safe_db
+@thread_safe_db("attendance")
 def attendance_stats_current():
     """Only courses in the active semester."""
     db      = get_db()
@@ -134,7 +134,7 @@ def attendance_stats_current():
 
 @bp.get("/attendance-stats/archive")
 @require_role("student")
-@thread_safe_db
+@thread_safe_db("attendance")
 def attendance_stats_archive():
     """All past semesters this student has courses in."""
     db   = get_db()
@@ -219,7 +219,7 @@ def _build_stats(db, courses, student_id, archive=False):
 
 @bp.get("/courses/<int:cid>/sessions")
 @require_role("student")
-@thread_safe_db
+@thread_safe_db("courses", "attendance")
 def course_sessions(cid):
     """Only absent sessions are eligible for correction requests."""
     db = get_db()
@@ -238,7 +238,7 @@ def course_sessions(cid):
 
 @bp.get("/corrections")
 @require_role("student")
-@thread_safe_db
+@thread_safe_db("corrections")
 def my_corrections():
     rows = get_db().execute(
         """SELECT cr.*, c.name AS course_name, att.session_date, att.topic
@@ -251,7 +251,7 @@ def my_corrections():
 
 @bp.post("/corrections")
 @require_role("student")
-@thread_safe_db
+@thread_safe_db("corrections", "courses", "attendance")
 def submit_correction():
     d              = request.json or {}
     course_id      = d.get("course_id")
@@ -294,7 +294,7 @@ def submit_correction():
 
 @bp.get("/profile")
 @require_role("student")
-@thread_safe_db
+@thread_safe_db("users")
 def profile():
     row = get_db().execute(
         """SELECT u.user_id, u.username, u.role, u.last_login,

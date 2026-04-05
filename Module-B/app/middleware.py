@@ -10,14 +10,57 @@ def _read_session():
                   or request.cookies.get("session_mac"))
     return session_id, mac
 
-def thread_safe_db(f):
-    """Decorator to wrap route handlers with thread-safe database locking"""
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        db_lock = current_app.config["THREAD_LOCKS"]["database"]
-        with db_lock:
-            return f(*args, **kwargs)
-    return decorated
+def thread_safe_db(*resources):
+    """
+    Decorator to wrap route handlers with per-resource thread-safe locking.
+    Supports multiple resources - locks are acquired in order.
+    
+    Usage:
+        @bp.get("/students")
+        @require_role("admin")
+        @thread_safe_db("users", "enrollments")  # Lock users and enrollments
+        def list_students():
+            # ...
+    
+    Args:
+        *resources: Resource names to lock (e.g., "auth", "courses", "attendance", etc.)
+    """
+    def decorator(f):
+        @wraps(f)
+        def decorated(*args, **kwargs):
+            locks = [current_app.config["THREAD_LOCKS"].get(resource) 
+                     for resource in resources if resource in current_app.config["THREAD_LOCKS"]]
+            
+            # Acquire all locks in order (prevents deadlock with consistent ordering)
+            for lock in locks:
+                lock.acquire()
+            
+            try:
+                return f(*args, **kwargs)
+            finally:
+                # Release in reverse order
+                for lock in reversed(locks):
+                    lock.release()
+        
+        return decorated
+    
+    # Handle case where decorator is used without arguments (backward compatibility)
+    if len(resources) == 1 and callable(resources[0]):
+        f = resources[0]
+        @wraps(f)
+        def decorated(*args, **kwargs):
+            # Use "auth" as default if no resource specified
+            lock = current_app.config["THREAD_LOCKS"].get("auth")
+            if lock:
+                lock.acquire()
+            try:
+                return f(*args, **kwargs)
+            finally:
+                if lock:
+                    lock.release()
+        return decorated
+    
+    return decorator
 
 def require_auth(f):
     @wraps(f)

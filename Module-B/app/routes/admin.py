@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, g
 from werkzeug.security import generate_password_hash
 from ..db import get_db
-from ..middleware import require_role
+from ..middleware import require_role, thread_safe_db
 from ..logger import audit_log
 from ..events import broadcast
 
@@ -49,7 +49,7 @@ def _semester_courses(db, semester_id):
 
 @bp.get("/active-semester")
 @require_role("admin")
-@thread_safe_db
+@thread_safe_db("semesters")
 def active_semester():
     db  = get_db()
     sem = db.execute("SELECT * FROM semesters WHERE is_active=1 LIMIT 1").fetchone()
@@ -57,7 +57,7 @@ def active_semester():
 
 @bp.get("/semesters")
 @require_role("admin")
-@thread_safe_db
+@thread_safe_db("semesters")
 def list_semesters():
     db = get_db()
     rows = db.execute("SELECT * FROM semesters ORDER BY semester_id DESC").fetchall()
@@ -65,7 +65,7 @@ def list_semesters():
 
 @bp.post("/semesters")
 @require_role("admin")
-@thread_safe_db
+@thread_safe_db("semesters")
 def create_semester():
     d           = request.json or {}
     sem_number  = str(d.get("sem_number", "")).strip()
@@ -117,7 +117,7 @@ def create_semester():
 
 @bp.delete("/semesters/<int:sid>")
 @require_role("admin")
-@thread_safe_db
+@thread_safe_db("semesters")
 def delete_semester(sid):
     db  = get_db()
     sem = db.execute("SELECT * FROM semesters WHERE semester_id=?", (sid,)).fetchone()
@@ -133,13 +133,13 @@ def delete_semester(sid):
 
 @bp.get("/semesters/<int:sid>/courses")
 @require_role("admin")
-@thread_safe_db
+@thread_safe_db("semesters", "courses")
 def semester_courses(sid):
     return jsonify(_semester_courses(get_db(), sid))
 
 @bp.get("/archive")
 @require_role("admin")
-@thread_safe_db
+@thread_safe_db("semesters", "courses")
 def archive():
     db   = get_db()
     sems = db.execute("SELECT * FROM semesters WHERE is_active=0 ORDER BY semester_id DESC").fetchall()
@@ -149,7 +149,7 @@ def archive():
 
 @bp.get("/courses")
 @require_role("admin")
-@thread_safe_db
+@thread_safe_db("courses")
 def list_courses():
     db   = get_db()
     rows = db.execute("SELECT c.*,s.name AS semester_name FROM courses c JOIN semesters s USING(semester_id)").fetchall()
@@ -157,7 +157,7 @@ def list_courses():
 
 @bp.post("/courses")
 @require_role("admin")
-@thread_safe_db
+@thread_safe_db("courses", "semesters")
 def create_course():
     d           = request.json or {}
     name        = d.get("name", "").strip()
@@ -200,7 +200,7 @@ def create_course():
 
 @bp.delete("/courses/<int:cid>")
 @require_role("admin")
-@thread_safe_db
+@thread_safe_db("courses")
 def delete_course(cid):
     db     = get_db()
     course = db.execute("SELECT * FROM courses WHERE course_id=?", (cid,)).fetchone()
@@ -222,7 +222,7 @@ def delete_course(cid):
 
 @bp.post("/courses/<int:cid>/instructors")
 @require_role("admin")
-@thread_safe_db
+@thread_safe_db("courses")
 def assign_instructor(cid):
     iid = (request.json or {}).get("instructor_id")
     if not iid:
@@ -245,7 +245,7 @@ def assign_instructor(cid):
 
 @bp.delete("/courses/<int:cid>/instructors/<int:iid>")
 @require_role("admin")
-@thread_safe_db
+@thread_safe_db("courses")
 def remove_instructor(cid, iid):
     db = get_db()
     db.execute("DELETE FROM course_instructors WHERE course_id=? AND instructor_id=?", (cid, iid))
@@ -262,7 +262,7 @@ def remove_instructor(cid, iid):
 
 @bp.post("/courses/<int:cid>/tas")
 @require_role("admin")
-@thread_safe_db
+@thread_safe_db("courses")
 def assign_ta(cid):
     tid = (request.json or {}).get("ta_id")
     if not tid:
@@ -285,7 +285,7 @@ def assign_ta(cid):
 
 @bp.delete("/courses/<int:cid>/tas/<int:tid>")
 @require_role("admin")
-@thread_safe_db
+@thread_safe_db("courses")
 def remove_ta(cid, tid):
     db = get_db()
     db.execute("DELETE FROM course_tas WHERE course_id=? AND ta_id=?", (cid, tid))
@@ -302,7 +302,7 @@ def remove_ta(cid, tid):
 
 @bp.post("/courses/<int:cid>/enrollments")
 @require_role("admin")
-@thread_safe_db
+@thread_safe_db("courses", "enrollments")
 def enroll_student(cid):
     sid = (request.json or {}).get("student_id")
     if not sid:
@@ -325,7 +325,7 @@ def enroll_student(cid):
 
 @bp.delete("/courses/<int:cid>/enrollments/<int:sid>")
 @require_role("admin")
-@thread_safe_db
+@thread_safe_db("courses", "enrollments")
 def remove_enrollment(cid, sid):
     db = get_db()
     db.execute("DELETE FROM course_enrollments WHERE course_id=? AND student_id=?", (cid, sid))
@@ -344,7 +344,7 @@ def remove_enrollment(cid, sid):
 
 @bp.get("/users")
 @require_role("admin")
-@thread_safe_db
+@thread_safe_db("users")
 def list_users():
     db   = get_db()
     rows = db.execute(
@@ -357,7 +357,7 @@ def list_users():
 
 @bp.post("/users")
 @require_role("admin")
-@thread_safe_db
+@thread_safe_db("users")
 def create_user():
     d        = request.json or {}
     username = d.get("username", "").strip()
@@ -402,7 +402,7 @@ def create_user():
 
 @bp.delete("/users/<int:uid>")
 @require_role("admin")
-@thread_safe_db
+@thread_safe_db("users")
 def delete_user(uid):
     db   = get_db()
     user = db.execute("SELECT * FROM users WHERE user_id=?", (uid,)).fetchone()
@@ -428,14 +428,14 @@ def delete_user(uid):
 
 @bp.get("/instructors")
 @require_role("admin")
-@thread_safe_db
+@thread_safe_db("users")
 def list_instructors():
     rows = get_db().execute("SELECT user_id,username FROM users WHERE role='instructor'").fetchall()
     return jsonify([dict(r) for r in rows])
 
 @bp.get("/courses/<int:cid>/available-instructors")
 @require_role("admin")
-@thread_safe_db
+@thread_safe_db("courses")
 def available_instructors(cid):
     """Instructors NOT yet assigned to this course."""
     rows = get_db().execute(
@@ -449,14 +449,14 @@ def available_instructors(cid):
 
 @bp.get("/students")
 @require_role("admin")
-@thread_safe_db
+@thread_safe_db("users")
 def list_students():
     rows = get_db().execute("SELECT user_id,username FROM users WHERE role='student'").fetchall()
     return jsonify([dict(r) for r in rows])
 
 @bp.get("/tas")
 @require_role("admin")
-@thread_safe_db
+@thread_safe_db("users")
 def list_tas():
     rows = get_db().execute("SELECT user_id,username FROM users WHERE role='ta'").fetchall()
     return jsonify([dict(r) for r in rows])
@@ -465,7 +465,7 @@ def list_tas():
 
 @bp.get("/courses/<int:cid>/sessions")
 @require_role("admin")
-@thread_safe_db
+@thread_safe_db("courses", "attendance")
 def course_sessions(cid):
     rows = get_db().execute(
         "SELECT att_session_id,session_date,topic FROM attendance_sessions WHERE course_id=? ORDER BY session_date DESC",
@@ -475,7 +475,7 @@ def course_sessions(cid):
 
 @bp.get("/sessions/<int:sid>/records")
 @require_role("admin")
-@thread_safe_db
+@thread_safe_db("attendance")
 def session_records(sid):
     rows = get_db().execute(
         """SELECT ar.record_id, ar.student_id, u.username, ar.status
@@ -486,7 +486,7 @@ def session_records(sid):
 
 @bp.put("/records/<int:rid>")
 @require_role("admin")
-@thread_safe_db
+@thread_safe_db("attendance")
 def update_record(rid):
     status = (request.json or {}).get("status")
     if status not in ("present","absent"):
@@ -515,7 +515,7 @@ def update_record(rid):
 
 @bp.get("/profile")
 @require_role("admin")
-@thread_safe_db
+@thread_safe_db("users")
 def profile():
     row = get_db().execute(
         "SELECT user_id, username, role, last_login FROM users WHERE user_id=?",

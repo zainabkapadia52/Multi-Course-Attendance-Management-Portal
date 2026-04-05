@@ -10,15 +10,19 @@ def create_app():
     app.config["SESSION_HOURS"] = 2
     
     # ═══════════════════════════════════════════════════════════════════════════
-    # THREADING CONFIGURATION — Handle concurrent requests in parallel
+    # THREADING CONFIGURATION — Handle concurrent requests with per-resource locking
     # ═══════════════════════════════════════════════════════════════════════════
     # ThreadPoolExecutor: manages a pool of worker threads for concurrent operations
     # max_workers=100: up to 100 concurrent threads for 100 concurrent users
     app.config["THREAD_POOL"] = ThreadPoolExecutor(max_workers=100)
-    app.config["THREAD_LOCKS"] = {  # Thread-safe locks for critical sections
-        "database": threading.RLock(),      # Recursive lock for DB operations
-        "session": threading.RLock(),       # Lock for session management
-        "auth": threading.RLock(),          # Lock for authentication
+    app.config["THREAD_LOCKS"] = {  # Per-resource locks for fine-grained concurrency
+        "auth": threading.RLock(),           # User authentication & sessions
+        "users": threading.RLock(),          # User management
+        "courses": threading.RLock(),        # Course management
+        "enrollments": threading.RLock(),    # Student enrollments
+        "attendance": threading.RLock(),     # Attendance sessions & records
+        "corrections": threading.RLock(),    # Correction requests
+        "semesters": threading.RLock(),      # Semester management
     }
     
     init_app(app)
