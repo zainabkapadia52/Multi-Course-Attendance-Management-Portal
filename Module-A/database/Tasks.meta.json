@@ -1,0 +1,25 @@
+{
+  "primary_key": "task_id",
+  "schema": [
+    {
+      "name": "task_id",
+      "type_str": "INT",
+      "nullable": true,
+      "default": null
+    },
+    {
+      "name": "task_desc",
+      "type_str": "VARCHAR(50)",
+      "nullable": true,
+      "default": null
+    },
+    {
+      "name": "emp_id",
+      "type_str": "INT",
+      "nullable": true,
+      "default": null
+    }
+  ],
+  "next_slot": 3,
+  "free_list": []
+}

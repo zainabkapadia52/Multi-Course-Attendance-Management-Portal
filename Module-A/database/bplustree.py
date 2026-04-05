@@ -8,7 +8,7 @@ from typing import Any
 @dataclass
 class BPlusTreeNode:
     leaf: bool
-    keys: list[int] = field(default_factory=list)
+    keys: list[Any] = field(default_factory=list)
     children: list["BPlusTreeNode"] = field(default_factory=list)
     values: list[Any] = field(default_factory=list)
     next: "BPlusTreeNode | None" = None
@@ -24,14 +24,14 @@ class BPlusTree:
         self.max_keys = order - 1
         self.root = BPlusTreeNode(leaf=True)
 
-    def search(self, key: int) -> Any | None:
+    def search(self, key: Any) -> Any | None:
         leaf = self._find_leaf(key)
         idx = bisect_left(leaf.keys, key)
         if idx < len(leaf.keys) and leaf.keys[idx] == key:
             return leaf.values[idx]
         return None
 
-    def insert(self, key: int, value: Any) -> None:
+    def insert(self, key: Any, value: Any) -> None:
         promoted_key = self._insert_recursive(self.root, key, value)
         
         # If a key was promoted from the root, create a new root
@@ -41,7 +41,7 @@ class BPlusTree:
             new_root.children = [self.root, promoted_key[1]]
             self.root = new_root
 
-    def _insert_recursive(self, node: BPlusTreeNode, key: int, value: Any) -> tuple[int, BPlusTreeNode] | None:
+    def _insert_recursive(self, node: BPlusTreeNode, key: Any, value: Any) -> tuple[int, BPlusTreeNode] | None:
         """
         Insert into node. Returns (promoted_key, new_sibling) if node splits, None otherwise.
         """
