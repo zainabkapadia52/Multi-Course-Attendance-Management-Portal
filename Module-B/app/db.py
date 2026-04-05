@@ -16,17 +16,13 @@ def get_db():
         g.db.execute("PRAGMA foreign_keys = ON")
         g.db.execute("PRAGMA journal_mode = WAL")  # Write-Ahead Logging for concurrency
     
-    # Acquire the database lock before returning connection
-    if "db_lock" not in g:
-        g.db_lock = current_app.config["THREAD_LOCKS"]["database"]
-    
     return g.db
 
 
 def acquire_db_lock():
-    """Acquire the thread lock for database operations"""
+    """Acquire the thread lock for database operations - use auth as general lock"""
     if "db_lock" not in g:
-        g.db_lock = current_app.config["THREAD_LOCKS"]["database"]
+        g.db_lock = current_app.config["THREAD_LOCKS"].get("auth")
     return g.db_lock
 
 

@@ -28,8 +28,12 @@ def thread_safe_db(*resources):
     def decorator(f):
         @wraps(f)
         def decorated(*args, **kwargs):
-            locks = [current_app.config["THREAD_LOCKS"].get(resource) 
-                     for resource in resources if resource in current_app.config["THREAD_LOCKS"]]
+            locks = []
+            for resource in resources:
+                if resource in current_app.config["THREAD_LOCKS"]:
+                    lock = current_app.config["THREAD_LOCKS"][resource]
+                    if lock is not None:
+                        locks.append(lock)
             
             # Acquire all locks in order (prevents deadlock with consistent ordering)
             for lock in locks:
