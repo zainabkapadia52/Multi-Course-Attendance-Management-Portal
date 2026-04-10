@@ -4332,3 +4332,27 @@
  * Debugger PIN: 590-769-549
  * Debugger is active!
  * Debugger PIN: 590-769-549
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5050
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 827-842-885
+127.0.0.1 - - [10/Apr/2026 12:12:27] "[32mGET / HTTP/1.1[0m" 302 -
+127.0.0.1 - - [10/Apr/2026 12:12:27] "GET /login HTTP/1.1" 200 -
+127.0.0.1 - - [10/Apr/2026 12:12:27] "[33mGET /apple-touch-icon-precomposed.png HTTP/1.1[0m" 404 -
+127.0.0.1 - - [10/Apr/2026 12:12:27] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+127.0.0.1 - - [10/Apr/2026 12:12:28] "[33mGET /apple-touch-icon.png HTTP/1.1[0m" 404 -
+127.0.0.1 - - [10/Apr/2026 12:12:28] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-04-10T06:42:38.642091 | ACTION=LOGIN_OK | USER=1 | ENDPOINT=/login | username=admin
+127.0.0.1 - - [10/Apr/2026 12:12:38] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [10/Apr/2026 12:12:38] "GET /admin HTTP/1.1" 200 -
+127.0.0.1 - - [10/Apr/2026 12:12:38] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [10/Apr/2026 12:12:38] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [10/Apr/2026 12:12:38] "GET /stream?session_id=245cb1cc-410b-4335-995b-08534974ecdf&mac=e8b32f46f46593266bd019f631d4d8e349c889f55171b8b5707929b74ee65104 HTTP/1.1" 200 -
+127.0.0.1 - - [10/Apr/2026 12:12:38] "GET /api/admin/courses HTTP/1.1" 200 -
+127.0.0.1 - - [10/Apr/2026 12:12:38] "GET /api/admin/active-semester HTTP/1.1" 200 -
+127.0.0.1 - - [10/Apr/2026 12:12:38] "GET /api/admin/semesters HTTP/1.1" 200 -
+127.0.0.1 - - [10/Apr/2026 12:12:38] "GET /api/admin/users HTTP/1.1" 200 -
+127.0.0.1 - - [10/Apr/2026 12:12:38] "GET /api/admin/profile HTTP/1.1" 200 -
+127.0.0.1 - - [10/Apr/2026 12:12:38] "GET /api/admin/semesters/1/courses HTTP/1.1" 200 -
