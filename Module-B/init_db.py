@@ -32,6 +32,12 @@ random.seed(42)
 # Generate password hash using pbkdf2:sha256 (works on all systems, no OpenSSL issues)
 PWD = generate_password_hash("password123", method='pbkdf2:sha256')
 
+# from app.shard import init_shards   # adjust import path to your structure
+
+# def init_app(app):
+#     app.teardown_appcontext(close_db)
+#     init_shards(app)              # ← add this
+
 # ── helpers ───────────────────────────────────────────────────────────────────
 
 def insert_user(conn, username, role):

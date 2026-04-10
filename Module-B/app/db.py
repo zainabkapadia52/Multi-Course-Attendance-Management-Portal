@@ -2,6 +2,8 @@ import sqlite3
 import click
 from flask import g, current_app
 
+from .shard import init_shards   # adjust import path to your structure
+         
 
 def get_db():
     """Get database connection with thread-safe locking"""
@@ -33,3 +35,5 @@ def close_db(e=None):
 
 def init_app(app):
     app.teardown_appcontext(close_db)
+    from .shard import init_shards   # ← add this
+    init_shards(app) 
