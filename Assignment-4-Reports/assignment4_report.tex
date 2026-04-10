@@ -193,23 +193,72 @@ Stable & 0 observed key-change events in audit data \\
 \textbf{Why not \texttt{record\_id} despite tighter balance?}
 \texttt{record\_id} is an auto-increment identifier with little query relevance. Choosing it would distribute each student's attendance history across multiple shards, forcing fan-out and merge behavior for common student operations.
 
-\subsection{Partitioning Strategy}
-The selected strategy is \textbf{range-based sharding on \texttt{student\_id}}.
-
-\textbf{Why range-based for this project:}
-\begin{itemize}
-    \item \textbf{Predictable routing:} shard can be computed by simple boundary checks.
-    \item \textbf{Low routing overhead:} no extra directory lookup per query.
-    \item \textbf{Observed balance:} measured deviation remains low (about $\pm 3.8\%$).
-\end{itemize}
-
-Relative to alternatives used in evaluation, range-based \texttt{student\_id} partitioning preserves student-locality while keeping shard loads near-even for current data volume.
-
-\subsection{Expected Distribution and Skew Risk}
-Using the current ranges and dataset:
+\subsection{Partitioning Strategy Comparison and Justification}
+Experimental comparison was conducted on \texttt{attendance\_records} with 2128 rows.
 
 \begin{table}[htbp]
-\caption{Observed Student-Range Distribution (3 Shards)}
+\caption{Strategy-Level Distribution Comparison}
+\centering
+\begin{tabular}{p{2.2cm}p{0.8cm}p{0.8cm}p{0.8cm}p{1.2cm}p{1.2cm}}
+\toprule
+\textbf{Strategy} & \textbf{S0} & \textbf{S1} & \textbf{S2} & \textbf{Max Imbalance} & \textbf{Max Deviation} \\
+\midrule
+Range (\texttt{student\_id}) & 686 & 736 & 706 & 50 & $\pm 3.8\%$ \\
+Hash (\texttt{student\_id \% 3}) & 739 & 674 & 715 & 65 & $\pm 5.0\%$ \\
+Directory (department) & 999 & 780 & 349 & 650 & $\pm 50.8\%$ \\
+\bottomrule
+\end{tabular}
+\label{tab:strategy_comparison}
+\end{table}
+
+\subsubsection{Strategy 1: Range-Based}
+Range sharding divides contiguous student-id intervals as follows: Shard 0: 12--30, Shard 1: 31--50, Shard 2: 51--71.
+
+\textbf{Why it suits this project:}
+\begin{itemize}
+    \item \textbf{Routing simplicity:} shard resolution is a constant-time boundary check.
+    \item \textbf{Cohort locality:} adjacent students remain colocated, improving batch/cohort style queries.
+    \item \textbf{Best observed balance:} lowest deviation among all tested strategies ($\pm 3.8\%$).
+\end{itemize}
+
+\subsubsection{Strategy 2: Hash-Based}
+Hash placement uses \texttt{shard\_id = student\_id \% 3}.
+
+\textbf{Why not chosen:}
+\begin{itemize}
+    \item Slightly worse observed balance than range ($\pm 5.0\%$ vs $\pm 3.8\%$).
+    \item Breaks range locality for cohort-level access patterns.
+    \item Resharding from $k$ to $k+1$ shards causes widespread key remapping.
+\end{itemize}
+
+\subsubsection{Strategy 3: Directory-Based (Department Mapping)}
+Directory mapping assigns students to shards by department (Computer Science, Electronics, Mechanical Engineering).
+
+\textbf{Why not chosen:}
+\begin{itemize}
+    \item Severe skew in measured data: 999 vs 349 records (650-record gap).
+    \item Structural imbalance risk because department populations are inherently unequal.
+    \item Requires an extra lookup step before routing each request.
+\end{itemize}
+
+\textbf{Noted advantage:} directory schemes offer flexible reassignment by changing mapping entries without changing key formulas.
+
+\subsection{Final Partitioning Decision}
+\textbf{Selected strategy: range-based sharding on \texttt{student\_id}.}
+
+\begin{enumerate}
+    \item \textbf{Best empirical balance} on current data ($\pm 3.8\%$ and only 50-record imbalance).
+    \item \textbf{Zero routing overhead} beyond simple interval checks.
+    \item \textbf{Access-pattern alignment} with student-centric API filters.
+    \item \textbf{Cohort locality preservation} for operational analytics.
+    \item \textbf{Practical maintenance} via periodic boundary adjustment.
+\end{enumerate}
+
+\subsection{Expected Distribution and Skew Risk}
+Using current range boundaries:
+
+\begin{table}[htbp]
+\caption{Observed Student-Range Distribution (Selected Strategy)}
 \centering
 \begin{tabular}{p{1.25cm}p{2.2cm}p{1.2cm}p{1.4cm}}
 \toprule
@@ -223,13 +272,11 @@ Shard 2 & 51--71 & 706 & -0.5\% \\
 \label{tab:range_distribution}
 \end{table}
 
-\textbf{Skew risks:}
+\textbf{Skew risks and mitigation:}
 \begin{itemize}
-    \item \textbf{Enrollment growth drift:} newly created student IDs accumulate in the highest range, increasing load on the last shard.
-    \item \textbf{Activity skew:} uneven attendance/correction activity by specific student groups can create write hotspots.
-    \item \textbf{Lifecycle skew:} older ID cohorts may retain longer histories and heavier reads.
+    \item \textbf{Growth drift:} new students accumulate in the highest ID range and can overload the last shard.
+    \item \textbf{Activity skew:} uneven engagement by student groups can create write hotspots.
+    \item \textbf{Mitigation:} periodically recalibrate boundaries; at larger scale, migrate to hash/directory-assisted placement.
 \end{itemize}
-
-\textbf{Mitigation plan:} periodically re-evaluate boundaries and, if scale increases substantially, transition to hash-based or directory-based placement for smoother long-term balancing.
 
 \end{document}

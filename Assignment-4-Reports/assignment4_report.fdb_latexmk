@@ -1,6 +1,6 @@
 # Fdb version 4
-["pdflatex"] 1775804892.11109 "/Users/tejasmacipad/Downloads/DB_assign4/Multi-Course-Attendance-Management-Portal/Assignment-4-Reports/assignment4_report.tex" "assignment4_report.pdf" "assignment4_report" 1775804892.57414 0
-  "/Users/tejasmacipad/Downloads/DB_assign4/Multi-Course-Attendance-Management-Portal/Assignment-4-Reports/assignment4_report.tex" 1775804889.89887 8507 5c7fdb0591e60a7b58cb79fb28af8a73 ""
+["pdflatex"] 1775813607.21704 "/Users/tejasmacipad/Downloads/DB_assign4/Multi-Course-Attendance-Management-Portal/Assignment-4-Reports/assignment4_report.tex" "assignment4_report.pdf" "assignment4_report" 1775813607.76142 0
+  "/Users/tejasmacipad/Downloads/DB_assign4/Multi-Course-Attendance-Management-Portal/Assignment-4-Reports/assignment4_report.tex" 1775813603.28378 13072 1f7e89ca3f77c187bf362dc2bfc5778c ""
   "/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/base/8r.enc" 1165713224 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/local/texlive/2025/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/tfm/adobe/courier/pcrb7t.tfm" 1136768653 960 4ab65358b8406f30ef5496c8c096d22b ""
@@ -35,6 +35,7 @@
   "/usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb" 1248133631 37166 8ab3487cbe3ab49ebce74c29ea2418db ""
   "/usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb" 1248133631 35469 70d41d2b9ea31d5d813066df7c99281c ""
   "/usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb" 1248133631 35752 024fb6c41858982481f6968b5fc26508 ""
+  "/usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb" 1248133631 32726 0a1aea6fcd6468ee2cf64d891f5c43c8 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb" 1248133631 32569 5e5ddc8df908dea60932f3c484a54c0d ""
   "/usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb" 1248133631 32716 08e384dc442464e7285e891af9f45947 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb" 1248133631 32626 4f5c1b83753b1dd3a97d1b399a005b4b ""
@@ -114,9 +115,9 @@
   "/usr/local/texlive/2025/texmf-var/web2c/pdftex/pdflatex.fmt" 1768133624 3345736 dba350a364a9daf6b48e265f5b13cd36 ""
   "/usr/local/texlive/2025/texmf.cnf" 1741450484 577 418a7058ec8e006d8704f60ecd22c938 ""
   "Images/shard_key_distribution.png" 1775804741.24978 94965 ed476bb736ee97f2e6543495a9dcc2fb ""
-  "assignment4_report.aux" 1775804892.52462 2548 1e9deddc0a37344bcc9811050317f2fd "pdflatex"
-  "assignment4_report.out" 1775804892.52521 2147 5b1d52829a7251b41deb6b050c4825a1 "pdflatex"
-  "assignment4_report.tex" 1775804889.89887 8507 5c7fdb0591e60a7b58cb79fb28af8a73 ""
+  "assignment4_report.aux" 1775813607.70478 4963 ab885119236b10eba9ab7a1211b71f75 "pdflatex"
+  "assignment4_report.out" 1775813607.70528 3997 483bfd0d2e433e4c65ea2c8d753affa3 "pdflatex"
+  "assignment4_report.tex" 1775813603.28378 13072 1f7e89ca3f77c187bf362dc2bfc5778c ""
   (generated)
   "assignment4_report.aux"
   "assignment4_report.log"
