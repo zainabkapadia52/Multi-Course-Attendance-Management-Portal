@@ -4366,3 +4366,17 @@
  * Debugger is active!
  * Debugger PIN: 827-842-885
 127.0.0.1 - - [10/Apr/2026 12:18:04] "GET /stream?session_id=245cb1cc-410b-4335-995b-08534974ecdf&mac=e8b32f46f46593266bd019f631d4d8e349c889f55171b8b5707929b74ee65104 HTTP/1.1" 200 -
+ * Detected change in '/Users/tejasmacipad/Downloads/DB_assign4/Multi-Course-Attendance-Management-Portal/Module-B/migrate_to_shards_hash.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 827-842-885
+127.0.0.1 - - [10/Apr/2026 12:20:09] "GET /stream?session_id=245cb1cc-410b-4335-995b-08534974ecdf&mac=e8b32f46f46593266bd019f631d4d8e349c889f55171b8b5707929b74ee65104 HTTP/1.1" 200 -
+ * Detected change in '/Users/tejasmacipad/Downloads/DB_assign4/Multi-Course-Attendance-Management-Portal/Module-B/migrate_to_shards_directory.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 827-842-885
+127.0.0.1 - - [10/Apr/2026 12:23:12] "GET /stream?session_id=245cb1cc-410b-4335-995b-08534974ecdf&mac=e8b32f46f46593266bd019f631d4d8e349c889f55171b8b5707929b74ee65104 HTTP/1.1" 200 -
+ * Detected change in '/Users/tejasmacipad/Downloads/DB_assign4/Multi-Course-Attendance-Management-Portal/Module-B/migrate_to_shards_directory.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 827-842-885
