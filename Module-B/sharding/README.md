@@ -2,4 +2,4 @@
 
 ### 2. Run create_shards , then migrate.py
 
-### 3. To validate the results, run validate.py
+### 3. To verify correct sharding, run verify.py
