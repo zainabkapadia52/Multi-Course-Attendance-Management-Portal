@@ -26,18 +26,18 @@ import sys
 SQLITE_DB_PATH = "../module_b.db"
 
 SHARD_RANGES = {
-    0: (12, 31),
-    1: (32, 51),
-    2: (52, 71),
+    0: (12, 30),
+    1: (31, 50),
+    2: (51, 71),
 }
 
 SHARD_CONFIGS = {
-    0: {"host": "localhost", "port": 3307,
-        "database": "shard_db_0", "user": "root", "password": "shardpass"},
-    1: {"host": "localhost", "port": 3308,
-        "database": "shard_db_1", "user": "root", "password": "shardpass"},
-    2: {"host": "localhost", "port": 3309,
-        "database": "shard_db_2", "user": "root", "password": "shardpass"},
+    0: {"host": "10.0.116.184", "port": 3307,
+        "database": "Scalix", "user": "Scalix", "password": "password@123"},
+    1: {"host": "10.0.116.184", "port": 3308,
+        "database": "Scalix", "user": "Scalix", "password": "password@123"},
+    2: {"host": "10.0.116.184", "port": 3309,
+        "database": "Scalix", "user": "Scalix", "password": "password@123"},
 }
 
 def print_header():

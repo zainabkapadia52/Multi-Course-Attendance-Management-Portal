@@ -5,9 +5,9 @@
 =============================================================
   Strategy  : Range-Based Partitioning
   Shard Key : student_id
-  Ranges    : Shard 0 → 12 to 31
-              Shard 1 → 32 to 51
-              Shard 2 → 52 to 71
+  Ranges    : Shard 0 → 12 to 30
+              Shard 1 → 31 to 50
+              Shard 2 → 51 to 71
 =============================================================
 """
 
@@ -21,37 +21,37 @@ import sys
 SHARD_CONFIGS = [
     {
         "shard_id": 0,
-        "host": "localhost",
+        "host": "10.0.116.184",
         "port": 3307,
-        "database": "shard_db_0",
-        "user": "root",
-        "password": "shardpass",
+        "database": "Scalix",
+        "user": "Scalix",
+        "password": "password@123",
         "container": "shard_0",
         "min_id": 12,
-        "max_id": 31,
+        "max_id": 30,
         "condition": "student_id BETWEEN 12 AND 31",
     },
     {
         "shard_id": 1,
-        "host": "localhost",
+        "host": "10.0.116.184",
         "port": 3308,
-        "database": "shard_db_1",
-        "user": "root",
-        "password": "shardpass",
+        "database": "Scalix",
+        "user": "Scalix",
+        "password": "password@123",
         "container": "shard_1",
-        "min_id": 32,
-        "max_id": 51,
+        "min_id": 31,
+        "max_id": 50,
         "condition": "student_id BETWEEN 32 AND 51",
     },
     {
         "shard_id": 2,
-        "host": "localhost",
+        "host": "10.0.116.184",
         "port": 3309,
-        "database": "shard_db_2",
-        "user": "root",
-        "password": "shardpass",
+        "database": "Scalix",
+        "user": "Scalix",
+        "password": "password@123",
         "container": "shard_2",
-        "min_id": 52,
+        "min_id": 51,
         "max_id": 71,
         "condition": "student_id BETWEEN 52 AND 71",
     },
@@ -60,7 +60,7 @@ SHARD_CONFIGS = [
 def print_header():
     print()
     print("=" * 60)
-    print("  STEP 1: CREATING SHARD TABLES IN DOCKER CONTAINERS")
+    print("  STEP 1: CREATING SHARD TABLES IN REMOTE MYSQL SHARDS")
     print("=" * 60)
     print()
     print("  Sharding Strategy : Range-Based Partitioning")
@@ -71,9 +71,9 @@ def print_header():
     print("  ┌──────────┬────────────┬──────────┬─────────────────────┐")
     print("  │  Shard   │  Database  │   Port   │   student_id Range  │")
     print("  ├──────────┼────────────┼──────────┼─────────────────────┤")
-    print("  │ shard_0  │ shard_db_0 │   3307   │   12  to  31        │")
-    print("  │ shard_1  │ shard_db_1 │   3308   │   32  to  51        │")
-    print("  │ shard_2  │ shard_db_2 │   3309   │   52  to  71        │")
+    print("  │ shard_0  │ Scalix     │   3307   │   12  to  30        │")
+    print("  │ shard_1  │ Scalix     │   3308   │   31  to  50        │")
+    print("  │ shard_2  │ Scalix     │   3309   │   51  to  71        │")
     print("  └──────────┴────────────┴──────────┴─────────────────────┘")
     print()
 
@@ -134,7 +134,7 @@ def main():
     print_header()
 
     print("─" * 60)
-    print("  Connecting to Docker containers...")
+    print("  Connecting to remote MySQL shards...")
     print("─" * 60)
 
     # Wait for all containers to be ready
@@ -161,7 +161,7 @@ def main():
         shard_id = config["shard_id"]
         try:
             create_table(config)
-            print(f"  ✓ shard_{shard_id} | Database : shard_db_{shard_id} "
+            print(f"  ✓ shard_{shard_id} | Database : {config['database']} "
                   f"| Port : {config['port']}")
             print(f"    Table     : shard_{shard_id}_attendance_records")
             print(f"    CHECK     : student_id BETWEEN "
