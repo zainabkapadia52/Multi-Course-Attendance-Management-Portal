@@ -181,48 +181,30 @@ def update_record(rid):
     if status not in ("present", "absent"):
         return jsonify({"error": "Invalid status"}), 400
 
-    db = get_db()
+    # UPDATE — route to correct shard by student_id
+    from ..shard_router import update_record as shard_update, get_student_id_for_record
+    student_id = get_student_id_for_record(rid)
+    if student_id == -1:
+        return jsonify({"error": "Record not found in any shard"}), 404
 
-    # Fetch old value BEFORE making the change
-    row = db.execute(
-        "SELECT status, student_id, att_session_id FROM attendance_records WHERE record_id = ?",
-        (rid,)
-    ).fetchone()
+    found = shard_update(rid, status, student_id)  # Pass student_id for direct routing
+    
+    if not found:
+        return jsonify({"error": "Update failed"}), 500
 
-    if not row:
-        return jsonify({"error": "Record not found"}), 404
-
-    old_status = row["status"]
-
-    # Make the change — trigger fires here → raw_changes gets an entry
-    db.execute(
-        "UPDATE attendance_records SET status = ? WHERE record_id = ?",
-        (status, rid)
-    )
-    db.commit()
     broadcast("attendance_updated", {
         "record_id": rid,
+        "student_id": student_id,
         "status":    status,
     })
 
-    # Write to audit.log — this is the API fingerprint
     audit_log(
         action="TA_UPDATE_ATT",
         endpoint=f"/api/ta/records/{rid}",
         user_id=g.user["user_id"],
         details=f"record_id={rid}",
-        old_value={
-            "record_id":     rid,
-            "student_id":    row["student_id"],
-            "att_session_id": row["att_session_id"],
-            "status":        old_status
-        },
-        new_value={
-            "record_id":     rid,
-            "student_id":    row["student_id"],
-            "att_session_id": row["att_session_id"],
-            "status":        status
-        }
+        old_value={"record_id": rid, "student_id": student_id, "status": "(previous)"},
+        new_value={"record_id": rid, "student_id": student_id, "status": status}
     )
 
     return jsonify({"message": "Record updated"})
