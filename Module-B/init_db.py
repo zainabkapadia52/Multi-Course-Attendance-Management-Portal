@@ -44,6 +44,17 @@ SHARD_CONFIGS = {
         "database": "Scalix", "user": "Scalix", "password": "password@123"},
 }
 
+SHARD_SCHEMA_DROP = "DROP TABLE IF EXISTS shard_{shard_id}_attendance_records"
+
+SHARD_SCHEMA_CREATE = """CREATE TABLE shard_{shard_id}_attendance_records (
+    record_id      INT AUTO_INCREMENT PRIMARY KEY,
+    att_session_id INT NOT NULL,
+    student_id     INT NOT NULL,
+    status         ENUM('present', 'absent', 'late') NOT NULL DEFAULT 'absent',
+    INDEX idx_student (student_id),
+    INDEX idx_session (att_session_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"""
+
 
 def get_shard_id(student_id: int) -> int:
     """Return shard index for a student_id using modulo 3 partitioning."""

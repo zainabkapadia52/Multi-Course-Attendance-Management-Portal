@@ -115,13 +115,9 @@ def get_records_for_student(student_id: int) -> list:
 
 def get_records_for_session(att_session_id: int) -> list:
     """
-    RANGE QUERY — queries shards intelligently based on session's student range.
-    
-    OPTIMIZATION: Instead of always querying all 3 shards, fetch the student_id
-    range for this session from the main DB, then determine which shards to query.
-    
-    Note: Most sessions will still span all shards since students are distributed
-    by ID, so this optimization provides limited benefit but is more correct.
+    RANGE QUERY — queries all 3 shards in parallel.
+    With modulo 3 partitioning, students are uniformly distributed across shards,
+    so we must query all shards to get complete session records.
     
     Returns merged attendance_records for one session across all shards.
     Returns partial results if shard fails; logs errors.
@@ -129,37 +125,9 @@ def get_records_for_session(att_session_id: int) -> list:
     rows = []
     failed_shards = []
     
-    # OPTIMIZATION: Determine relevant shards by checking which student_ids are in this session
-    from flask import g
-    try:
-        db = g.get('db')
-        if db:
-            # Fetch min/max student_id for this session from main DB
-            result = db.execute(
-                "SELECT MIN(student_id) as min_id, MAX(student_id) as max_id "
-                "FROM attendance_records WHERE att_session_id = ?",
-                (att_session_id,)
-            ).fetchone()
-            
-            if result and result['min_id'] is not None:
-                min_id = result['min_id']
-                max_id = result['max_id']
-                relevant_shards = get_shards_for_range(min_id, max_id)
-                logger.debug(f"  Session {att_session_id}: students {min_id}-{max_id} → shards {relevant_shards}")
-            else:
-                # No records in this session
-                logger.debug(f"  Session {att_session_id}: no records in main DB")
-                return []
-        else:
-            # No main DB available, query all shards (fallback)
-            relevant_shards = list(SHARD_CONFIGS.keys())
-            logger.debug(f"  Session {att_session_id}: no main DB, querying all shards")
-    except Exception as e:
-        # On any error, fall back to querying all shards
-        logger.warning(f"  Session {att_session_id}: error determining relevant shards, querying all: {str(e)}")
-        relevant_shards = list(SHARD_CONFIGS.keys())
+    # With modulo 3, always query all shards (data uniformly distributed)
+    relevant_shards = list(SHARD_CONFIGS.keys())
     
-    # PARALLELIZATION: Query relevant shards simultaneously instead of sequentially
     def query_shard(shard_id):
         """Query one shard (executed in parallel)."""
         try:
