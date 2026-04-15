@@ -321,6 +321,22 @@ def _build_stats(db, courses, student_id, archive=False):
             else:
                 colour, warning = "success", "safe"
 
+        # Enrich records with session details (date, topic) from main SQLite db
+        enriched_records = []
+        for r in records:
+            session = db.execute(
+                "SELECT session_date, topic FROM attendance_sessions WHERE att_session_id = ?",
+                (r["att_session_id"],)
+            ).fetchone()
+            enriched_records.append({
+                "record_id":      r["record_id"],
+                "att_session_id": r["att_session_id"],
+                "student_id":     r["student_id"],
+                "status":         r["status"],
+                "session_date":   session["session_date"] if session else None,
+                "topic":          session["topic"] if session else None,
+            })
+
         result.append({
             "course_id":      course["course_id"],
             "name":           course["name"],
@@ -332,7 +348,7 @@ def _build_stats(db, courses, student_id, archive=False):
             "percentage":     pct,
             "colour":         colour,
             "warning":        warning,
-            "records":        [dict(r) for r in records]
+            "records":        enriched_records
         })
     return result
 
