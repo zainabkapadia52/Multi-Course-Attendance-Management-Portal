@@ -11,6 +11,8 @@ Range-based partitioning on student_id (Team: Scalix):
 import mysql.connector
 from flask import g
 import logging
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 logger = logging.getLogger(__name__)
 
@@ -172,8 +174,9 @@ def get_records_for_session(att_session_id: int) -> list:
         logger.warning(f"  Session {att_session_id}: error determining relevant shards, querying all: {str(e)}")
         relevant_shards = list(SHARD_CONFIGS.keys())
     
-    # Query only the relevant shards
-    for shard_id in relevant_shards:
+    # PARALLELIZATION: Query relevant shards simultaneously instead of sequentially
+    def query_shard(shard_id):
+        """Query one shard (executed in parallel)."""
         try:
             conn   = get_shard_conn(shard_id)
             cursor = conn.cursor(dictionary=True)
@@ -183,14 +186,31 @@ def get_records_for_session(att_session_id: int) -> list:
                 (att_session_id,)
             )
             shard_rows = cursor.fetchall()
-            rows.extend(shard_rows)
             cursor.close()
             logger.debug(f"✓ Retrieved {len(shard_rows)} records from shard {shard_id} for session {att_session_id}")
-        except mysql.connector.Error as e:
-            logger.error(f"✗ Query error on shard {shard_id} for session {att_session_id}: {str(e)}")
-            failed_shards.append(shard_id)
+            return shard_rows
         except Exception as e:
-            logger.error(f"✗ Unexpected error on shard {shard_id}: {str(e)}")
+            logger.error(f"✗ Query error on shard {shard_id} for session {att_session_id}: {str(e)}")
+            return []
+    
+    try:
+        with ThreadPoolExecutor(max_workers=len(relevant_shards)) as executor:
+            futures = {executor.submit(query_shard, shard_id): shard_id 
+                      for shard_id in relevant_shards}
+            
+            for future in as_completed(futures):
+                shard_id = futures[future]
+                try:
+                    shard_rows = future.result(timeout=10)
+                    rows.extend(shard_rows)
+                except Exception as e:
+                    logger.error(f"✗ Shard {shard_id} query failed: {str(e)}")
+                    failed_shards.append(shard_id)
+    except Exception as e:
+        logger.error(f"✗ ThreadPoolExecutor error for session {att_session_id}: {str(e)}")
+        # Fallback to sequential
+        for shard_id in relevant_shards:
+            rows.extend(query_shard(shard_id))
             failed_shards.append(shard_id)
     
     if failed_shards:
@@ -384,45 +404,66 @@ def delete_records_for_student(student_id: int) -> int:
 def delete_records_for_session(att_session_id: int) -> int:
     """
     CASCADE DELETE — delete all attendance_records for a session across all shards.
+    OPTIMIZED: Uses parallel ThreadPoolExecutor to query all shards simultaneously.
     Called when an attendance session is deleted.
     Returns count of records deleted across all shards.
     """
-    total_deleted = 0
-    failed_shards = []
-    
-    for shard_id in SHARD_CONFIGS:
+    def delete_from_shard(shard_id):
+        """Delete from one shard (executed in parallel)."""
         try:
             conn   = get_shard_conn(shard_id)
             cursor = conn.cursor()
-            
             cursor.execute(
                 f"DELETE FROM shard_{shard_id}_attendance_records "
                 "WHERE att_session_id = %s",
                 (att_session_id,)
             )
             deleted_count = cursor.rowcount
-            total_deleted += deleted_count
             conn.commit()
             cursor.close()
             logger.debug(f"✓ Deleted {deleted_count} records from shard {shard_id} for session {att_session_id}")
-        except mysql.connector.Error as e:
-            logger.error(f"✗ Delete error on shard {shard_id} for session {att_session_id}: {str(e)}")
-            failed_shards.append(shard_id)
+            return deleted_count
         except Exception as e:
-            logger.error(f"✗ Unexpected error on shard {shard_id}: {str(e)}")
-            failed_shards.append(shard_id)
+            logger.error(f"✗ Delete error on shard {shard_id} for session {att_session_id}: {str(e)}")
+            return 0
+    
+    # PARALLELIZATION: Query all 3 shards simultaneously instead of sequentially
+    total_deleted = 0
+    failed_shards = []
+    
+    try:
+        with ThreadPoolExecutor(max_workers=3) as executor:
+            futures = {executor.submit(delete_from_shard, shard_id): shard_id 
+                      for shard_id in SHARD_CONFIGS}
+            
+            for future in as_completed(futures):
+                shard_id = futures[future]
+                try:
+                    deleted_count = future.result(timeout=10)
+                    total_deleted += deleted_count
+                except Exception as e:
+                    logger.error(f"✗ Shard {shard_id} delete failed: {str(e)}")
+                    failed_shards.append(shard_id)
+    except Exception as e:
+        logger.error(f"✗ ThreadPoolExecutor error for session {att_session_id}: {str(e)}")
+        # Fallback to sequential
+        for shard_id in SHARD_CONFIGS:
+            total_deleted += delete_from_shard(shard_id)
     
     if failed_shards:
         logger.warning(f"⚠ Partial delete for session {att_session_id} (failed shards: {failed_shards})")
     
-    logger.info(f"✓ Cascade deleted total {total_deleted} records for session {att_session_id}")
+    logger.info(f"✓ Cascade deleted total {total_deleted} records for session {att_session_id} (parallel)")
     return total_deleted
 
 
 def delete_records_for_course(course_id: int, db) -> tuple:
     """
     CASCADE DELETE — delete all attendance_records for all sessions of a course
-    across all shards. First deletes all sessions, then their records.
+    across all shards in parallel using batch DELETE with IN clause.
+    OPTIMIZED: Instead of 20 sessions × 3 shards = 60 serial roundtrips, 
+               now uses 1 batch per shard in parallel = 3 parallel queries total.
+    
     Called when a course is deleted.
     Returns (sessions_deleted, records_deleted).
     """
@@ -432,19 +473,71 @@ def delete_records_for_course(course_id: int, db) -> tuple:
         (course_id,)
     ).fetchall()
     
-    records_deleted = 0
-    for session in sessions:
-        session_id = session["att_session_id"]
-        records_deleted += delete_records_for_session(session_id)
+    if not sessions:
+        logger.info(f"✓ No sessions found for course {course_id}")
+        return (0, 0)
     
+    session_ids = [session["att_session_id"] for session in sessions]
     sessions_deleted = len(sessions)
-    return (sessions_deleted, records_deleted)
+    
+    def batch_delete_from_shard(shard_id):
+        """Delete all records for these sessions from one shard (in parallel)."""
+        try:
+            conn   = get_shard_conn(shard_id)
+            cursor = conn.cursor()
+            
+            # Batch DELETE: delete all records with session_id IN (list) in a single query
+            placeholders = ",".join(["%s"] * len(session_ids))
+            cursor.execute(
+                f"DELETE FROM shard_{shard_id}_attendance_records "
+                f"WHERE att_session_id IN ({placeholders})",
+                tuple(session_ids)
+            )
+            deleted_count = cursor.rowcount
+            conn.commit()
+            cursor.close()
+            logger.debug(f"✓ Batch deleted {deleted_count} records from shard {shard_id} for course {course_id}")
+            return deleted_count
+        except Exception as e:
+            logger.error(f"✗ Batch delete error on shard {shard_id} for course {course_id}: {str(e)}")
+            return 0
+    
+    # PARALLELIZATION: Delete from all 3 shards simultaneously using batch query
+    total_deleted = 0
+    failed_shards = []
+    
+    try:
+        with ThreadPoolExecutor(max_workers=3) as executor:
+            futures = {executor.submit(batch_delete_from_shard, shard_id): shard_id 
+                      for shard_id in SHARD_CONFIGS}
+            
+            for future in as_completed(futures):
+                shard_id = futures[future]
+                try:
+                    deleted_count = future.result(timeout=10)
+                    total_deleted += deleted_count
+                except Exception as e:
+                    logger.error(f"✗ Shard {shard_id} batch delete failed: {str(e)}")
+                    failed_shards.append(shard_id)
+    except Exception as e:
+        logger.error(f"✗ ThreadPoolExecutor error for course {course_id}: {str(e)}")
+        # Fallback to sequential
+        for shard_id in SHARD_CONFIGS:
+            total_deleted += batch_delete_from_shard(shard_id)
+    
+    if failed_shards:
+        logger.warning(f"⚠ Partial delete for course {course_id} (failed shards: {failed_shards})")
+    
+    logger.info(f"✓ Cascade deleted {sessions_deleted} sessions and {total_deleted} records for course {course_id} (batch+parallel)")
+    return (sessions_deleted, total_deleted)
 
 
 def delete_records_for_student_in_course(student_id: int, course_id: int, db) -> int:
     """
     CASCADE DELETE — delete attendance_records for a specific student in a specific course
-    across all shards (deletes records only for sessions in that course).
+    across all shards in batch (for all sessions of this course).
+    OPTIMIZED: Uses batch DELETE with IN clause instead of looping sessions.
+    
     Called when a student is unenrolled from a course.
     Returns count of records deleted.
     """
@@ -455,6 +548,12 @@ def delete_records_for_student_in_course(student_id: int, course_id: int, db) ->
             (course_id,)
         ).fetchall()
         
+        if not sessions:
+            logger.info(f"⚠ No sessions found for course {course_id}")
+            return 0
+        
+        session_ids = [session["att_session_id"] for session in sessions]
+        
         shard_id = get_shard_id(student_id)
         if shard_id == -1:
             logger.warning(f"⚠ Cannot delete: student_id {student_id} out of range")
@@ -463,20 +562,19 @@ def delete_records_for_student_in_course(student_id: int, course_id: int, db) ->
         conn   = get_shard_conn(shard_id)
         cursor = conn.cursor()
         
-        total_deleted = 0
-        for session in sessions:
-            session_id = session["att_session_id"]
-            cursor.execute(
-                f"DELETE FROM shard_{shard_id}_attendance_records "
-                "WHERE student_id = %s AND att_session_id = %s",
-                (student_id, session_id)
-            )
-            total_deleted += cursor.rowcount
+        # Batch DELETE: delete all records for this student in any of these sessions
+        placeholders = ",".join(["%s"] * len(session_ids))
+        cursor.execute(
+            f"DELETE FROM shard_{shard_id}_attendance_records "
+            f"WHERE student_id = %s AND att_session_id IN ({placeholders})",
+            (student_id, *session_ids)
+        )
+        total_deleted = cursor.rowcount
         
         conn.commit()
         cursor.close()
         
-        logger.info(f"✓ Cascade deleted {total_deleted} records for student {student_id} from course {course_id}")
+        logger.info(f"✓ Batch deleted {total_deleted} records for student {student_id} from course {course_id}")
         return total_deleted
     except mysql.connector.Error as e:
         logger.error(f"✗ Delete error for student {student_id} in course {course_id}: {str(e)}")

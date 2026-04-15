@@ -108,12 +108,15 @@ def create_table(config):
 
     create_sql = f"""
         CREATE TABLE IF NOT EXISTS shard_{shard_id}_attendance_records (
-            record_id       INT          PRIMARY KEY,
+            record_id       INT          PRIMARY KEY AUTO_INCREMENT,
             att_session_id  INT          NOT NULL,
             student_id      INT          NOT NULL,
             status          VARCHAR(10)  NOT NULL,
             CONSTRAINT chk_shard_{shard_id}
-                CHECK (student_id BETWEEN {min_id} AND {max_id})
+                CHECK (student_id BETWEEN {min_id} AND {max_id}),
+            INDEX idx_att_session (att_session_id),
+            INDEX idx_student_id (student_id),
+            INDEX idx_session_student (att_session_id, student_id)
         )
     """
 

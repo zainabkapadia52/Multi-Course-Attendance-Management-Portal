@@ -3,6 +3,7 @@ from ..db import get_db
 from ..middleware import require_role, thread_safe_db
 from ..logger import audit_log
 from ..events import broadcast
+import time
 
 bp = Blueprint("instructor", __name__)
 
@@ -197,7 +198,13 @@ def update_record(rid):
     if not found:
         return jsonify({"error": "Update failed"}), 500
     
-    broadcast("attendance_updated", {"record_id": rid, "status": status})
+    # BROADCAST: Notify all students viewing this session's records
+    broadcast("attendance_updated", {
+        "record_id": rid,
+        "student_id": student_id,
+        "status": status,
+        "timestamp": time.time()
+    })
     audit_log("INSTRUCTOR_UPDATE_ATT", f"/api/instructor/records/{rid}",
               g.user["user_id"], f"status={status}")
     return jsonify({"message": "Record updated"})
