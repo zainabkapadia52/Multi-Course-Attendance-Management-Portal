@@ -4625,3 +4625,6 @@
 127.0.0.1 - - [15/Apr/2026 18:59:20] "GET /api/student/corrections/current HTTP/1.1" 200 -
 ✓ Connected to shard 0 (port 3307)
 127.0.0.1 - - [15/Apr/2026 18:59:21] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+ * Debugger is active!
+ * Debugger PIN: 114-926-886
+127.0.0.1 - - [15/Apr/2026 19:28:57] "GET /stream?session_id=1da0b933-946e-4e43-b756-db72750c7eeb&mac=b45cd4a88b8e559d06349d4eefec03b24c8885934ee7e51f090dd6a344a5755f HTTP/1.1" 200 -
