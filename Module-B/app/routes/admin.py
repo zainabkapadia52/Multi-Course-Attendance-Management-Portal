@@ -206,17 +206,32 @@ def delete_course(cid):
     course = db.execute("SELECT * FROM courses WHERE course_id=?", (cid,)).fetchone()
     if not course:
         return jsonify({"error": "Course not found"}), 404
+    
+    # CASCADE DELETE: Delete all attendance records for all sessions in this course
+    from ..shard_router import delete_records_for_course
+    sessions_deleted, records_deleted = delete_records_for_course(cid, db)
+    
+    # Delete all sessions for this course (SQLite)
+    db.execute("DELETE FROM attendance_sessions WHERE course_id=?", (cid,))
+    
+    # Delete enrollments and assignments
+    db.execute("DELETE FROM course_enrollments WHERE course_id=?", (cid,))
+    db.execute("DELETE FROM course_instructors WHERE course_id=?", (cid,))
+    db.execute("DELETE FROM course_tas WHERE course_id=?", (cid,))
+    
+    # Finally delete the course
     db.execute("DELETE FROM courses WHERE course_id=?", (cid,))
     db.commit()
+    
     audit_log(
         "DELETE_COURSE",
         f"/api/admin/courses/{cid}",
         g.user["user_id"],
-        details=f"record_id={cid}",
+        details=f"record_id={cid}, cascade_deleted_sessions={sessions_deleted}, cascade_deleted_attendance_records={records_deleted}",
         old_value={"course_id": cid, "name": course["name"], "code": course["code"]},
         new_value=None
     )
-    return jsonify({"message": f"Course {course['code']} deleted"})
+    return jsonify({"message": f"Course {course['code']} deleted (deleted {sessions_deleted} sessions and {records_deleted} attendance records)"})
 
 # ── Instructor / TA / Student assignment ──────────────────────────────────────
 
@@ -328,17 +343,22 @@ def enroll_student(cid):
 @thread_safe_db("courses", "enrollments")
 def remove_enrollment(cid, sid):
     db = get_db()
+    
+    # CASCADE DELETE: Delete student's attendance records for this course's sessions
+    from ..shard_router import delete_records_for_student_in_course
+    records_deleted = delete_records_for_student_in_course(sid, cid, db)
+    
     db.execute("DELETE FROM course_enrollments WHERE course_id=? AND student_id=?", (cid, sid))
     db.commit()
     audit_log(
         "REMOVE_ENROLLMENT",
         f"/api/admin/courses/{cid}/enrollments/{sid}",
         g.user["user_id"],
-        details=f"record_id={cid}",
+        details=f"record_id={cid}, cascade_deleted_attendance_records={records_deleted}",
         old_value={"course_id": cid, "student_id": sid},
         new_value=None
     )
-    return jsonify({"message": "Student removed"})
+    return jsonify({"message": f"Student removed (deleted {records_deleted} attendance records)"})
 
 # ── Users ─────────────────────────────────────────────────────────────────────
 
@@ -412,17 +432,25 @@ def delete_user(uid):
         cnt = db.execute("SELECT COUNT(*) AS c FROM users WHERE role='admin'").fetchone()["c"]
         if cnt <= 1:
             return jsonify({"error": "Cannot delete the last admin account"}), 400
+    
+    # CASCADE DELETE: If user is a student, delete all their attendance_records from shards
+    if user["role"] == "student":
+        from ..shard_router import delete_records_for_student
+        deleted_count = delete_records_for_student(uid)
+    else:
+        deleted_count = 0
+    
     db.execute("DELETE FROM users WHERE user_id=?", (uid,))
     db.commit()
     audit_log(
         "DELETE_USER",
         f"/api/admin/users/{uid}",
         g.user["user_id"],
-        details=f"record_id={uid}",
+        details=f"record_id={uid}, cascade_deleted_attendance_records={deleted_count}",
         old_value={"user_id": uid, "username": user["username"], "role": user["role"]},
         new_value=None
     )
-    return jsonify({"message": "User permanently deleted"})
+    return jsonify({"message": f"User permanently deleted (cascade deleted {deleted_count} attendance records)"})
 
 # ── Dropdown helpers (read-only, no logging needed) ───────────────────────────
 
