@@ -2,10 +2,10 @@
 """
 Query router for MySQL shards on 10.0.116.184 (Scalix team database).
 
-Range-based partitioning on student_id (Team: Scalix):
-    Shard 0  student_id 1-334    →  10.0.116.184:3307
-    Shard 1  student_id 335-667  →  10.0.116.184:3308
-    Shard 2  student_id 668-1000 →  10.0.116.184:3309
+Hash-based partitioning on student_id (Team: Scalix):
+    Shard 0  student_id % 3 == 0  →  10.0.116.184:3307
+    Shard 1  student_id % 3 == 1  →  10.0.116.184:3308
+    Shard 2  student_id % 3 == 2  →  10.0.116.184:3309
 """
 
 import mysql.connector
@@ -15,12 +15,6 @@ import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 logger = logging.getLogger(__name__)
-
-SHARD_RANGES = {
-    0: (12, 30),       # student_id 12-30 → Shard 0 (matches migrate.py)
-    1: (31, 50),       # student_id 31-50 → Shard 1 (matches migrate.py)
-    2: (51, 71),       # student_id 51-71 → Shard 2 (matches migrate.py)
-}
 
 SHARD_CONFIGS = {
     0: {"host": "10.0.116.184", "port": 3307,
@@ -34,22 +28,16 @@ SHARD_CONFIGS = {
 # ── Routing logic ─────────────────────────────────────────────────────────────
 
 def get_shard_id(student_id: int) -> int:
-    """Return shard index for a student_id. Returns -1 if out of range."""
-    for shard_id, (lo, hi) in SHARD_RANGES.items():
-        if lo <= student_id <= hi:
-            return shard_id
-    return -1   # student_id outside all shard ranges
+    """Return shard index for a student_id using modulo 3 partitioning."""
+    return student_id % 3
 
 def get_shards_for_range(min_id: int, max_id: int) -> list:
     """
-    Return list of shard_ids whose range overlaps [min_id, max_id].
-    Used for range queries that may span multiple shards.
+    Return list of shard_ids for a range of student_ids.
+    With modulo 3 partitioning, any student_id in a range could be on any shard,
+    so we always return all shards for range queries.
     """
-    result = []
-    for shard_id, (lo, hi) in SHARD_RANGES.items():
-        if lo <= max_id and hi >= min_id:
-            result.append(shard_id)
-    return result
+    return list(SHARD_CONFIGS.keys())  # Always query all shards for ranges
 
 # ── Connection management (one connection per shard per request) ───────────────
 
@@ -104,9 +92,6 @@ def get_records_for_student(student_id: int) -> list:
     Returns empty list if not found or on error.
     """
     shard_id = get_shard_id(student_id)
-    if shard_id == -1:
-        logger.warning(f"⚠ Student {student_id} out of shard range")
-        return []
 
     try:
         conn   = get_shard_conn(shard_id)
@@ -271,9 +256,6 @@ def update_record(record_id: int, new_status: str, student_id: int = None) -> bo
         # OPTIMIZATION: If student_id provided, route directly to one shard
         if student_id is not None:
             shard_id = get_shard_id(student_id)
-            if shard_id == -1:
-                logger.warning(f"⚠ Cannot update: student_id {student_id} out of range")
-                return False
             
             try:
                 conn   = get_shard_conn(shard_id)

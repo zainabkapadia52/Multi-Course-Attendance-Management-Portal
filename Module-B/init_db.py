@@ -33,13 +33,7 @@ random.seed(42)
 # Generate password hash using pbkdf2:sha256 (works on all systems, no OpenSSL issues)
 PWD = generate_password_hash("password123", method='pbkdf2:sha256')
 
-# ── MySQL Shard Configuration ─────────────────────────────────────────────────
-
-SHARD_RANGES = {
-    0: (12, 30),
-    1: (31, 50),
-    2: (51, 71),
-}
+# ── MySQL Shard Configuration (Modulo 3 Strategy) ──────────────────────────
 
 SHARD_CONFIGS = {
     0: {"host": "10.0.116.184", "port": 3307,
@@ -50,24 +44,10 @@ SHARD_CONFIGS = {
         "database": "Scalix", "user": "Scalix", "password": "password@123"},
 }
 
-SHARD_SCHEMA_DROP = "DROP TABLE IF EXISTS shard_{shard_id}_attendance_records"
-
-SHARD_SCHEMA_CREATE = """CREATE TABLE shard_{shard_id}_attendance_records (
-    record_id      INT AUTO_INCREMENT PRIMARY KEY,
-    att_session_id INT NOT NULL,
-    student_id     INT NOT NULL,
-    status         ENUM('present', 'absent', 'late') NOT NULL DEFAULT 'absent',
-    INDEX idx_student (student_id),
-    INDEX idx_session (att_session_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"""
-
 
 def get_shard_id(student_id: int) -> int:
-    """Return shard index for a student_id. Returns -1 if out of range."""
-    for shard_id, (lo, hi) in SHARD_RANGES.items():
-        if lo <= student_id <= hi:
-            return shard_id
-    return -1
+    """Return shard index for a student_id using modulo 3 partitioning."""
+    return student_id % 3
 
 
 def migrate_to_mysql_shards():
@@ -95,17 +75,10 @@ def migrate_to_mysql_shards():
     
     for row in rows:
         shard_id = get_shard_id(row["student_id"])
-        if shard_id == -1:
-            skipped += 1
-            continue
         shard_data[shard_id].append((row["att_session_id"], row["student_id"], row["status"]))
     
     for shard_id, data in shard_data.items():
-        lo, hi = SHARD_RANGES[shard_id]
-        print(f"    Shard {shard_id} (student_id {lo}-{hi}): {len(data)} records")
-    
-    if skipped > 0:
-        print(f"    Skipped: {skipped} records (out of range)")
+        print(f"    Shard {shard_id} (student_id % 3 == {shard_id}): {len(data)} records")
     
     # Connect to MySQL shards
     print()

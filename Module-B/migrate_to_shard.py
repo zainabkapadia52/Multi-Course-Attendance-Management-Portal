@@ -5,12 +5,6 @@ import os
 MAIN_DB = "module_b.db"
 NUM_SHARDS = 3
 
-SHARD_RANGES = [
-    (12, 30),   # shard_0 — 19 students
-    (31, 50),   # shard_1 — 20 students
-    (51, 71),   # shard_2 — 21 students
-]
-
 SHARD_SCHEMA = """
 CREATE TABLE IF NOT EXISTS attendance_records (
     record_id      INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -24,10 +18,8 @@ CREATE INDEX IF NOT EXISTS idx_ar_session ON attendance_records(att_session_id);
 
 
 def get_shard_id(student_id: int) -> int:
-    for shard_id, (lo, hi) in enumerate(SHARD_RANGES):
-        if lo <= student_id <= hi:
-            return shard_id
-    return -1
+    """Return shard index for a student_id using modulo 3 partitioning."""
+    return student_id % 3
 
 
 def get_shard_path(shard_id: int) -> str:
@@ -44,7 +36,6 @@ def migrate():
     ).fetchall()
 
     print(f"Total records in main.db: {len(rows)}")
-    print(f"Shard ranges: {SHARD_RANGES}")
     print()
 
     # Delete old shard files if they exist
@@ -62,20 +53,15 @@ def migrate():
         conn.executescript(SHARD_SCHEMA)
         conn.commit()
         shard_conns[shard_id] = conn
-        lo, hi = SHARD_RANGES[shard_id]
-        print(f"Initialised {path}  (student_id {lo}–{hi})")
+        print(f"Initialised {path}  (student_id % 3 == {shard_id})")
 
     print()
 
     # Distribute records into shards
     counts = {i: 0 for i in range(NUM_SHARDS)}
-    skipped = []
 
     for row in rows:
         shard_id = get_shard_id(row["student_id"])
-        if shard_id == -1:
-            skipped.append(row["student_id"])
-            continue
         shard_conns[shard_id].execute(
             """INSERT INTO attendance_records
                (record_id, att_session_id, student_id, status)
