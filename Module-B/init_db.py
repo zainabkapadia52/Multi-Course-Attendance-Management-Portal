@@ -330,6 +330,11 @@ CORRECTION_REASONS = [
 # ── main seed function ────────────────────────────────────────────────────────
 
 def init():
+    # Delete old database file to start fresh
+    if os.path.exists(DB_PATH):
+        os.remove(DB_PATH)
+        print(f"  ✓  Removed old database: {DB_PATH}")
+    
     conn = sqlite3.connect(DB_PATH)
     conn.execute("PRAGMA foreign_keys = ON")
     conn.row_factory = sqlite3.Row
