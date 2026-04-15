@@ -1,6 +1,6 @@
 {
   "level": "database",
-  "timestamp": "2026-04-05T16:47:04.434813",
+  "timestamp": "2026-04-14T10:34:50.461143",
   "summary": {
     "total": 7,
     "passed": 7,
@@ -10,49 +10,49 @@
   },
   "results": [
     {
-      "timestamp": "2026-04-05T16:47:04.386946",
+      "timestamp": "2026-04-14T10:34:50.444042",
       "action": "admin_add_instructor_consistency",
       "test": "consistency",
       "status": "PASS",
       "message": "FK references valid"
     },
     {
-      "timestamp": "2026-04-05T16:47:04.418485",
+      "timestamp": "2026-04-14T10:34:50.449519",
       "action": "admin_delete_course_cascade_consistency",
       "test": "consistency",
       "status": "PASS",
       "message": "Course deleted with cascade"
     },
     {
-      "timestamp": "2026-04-05T16:47:04.423108",
+      "timestamp": "2026-04-14T10:34:50.452936",
       "action": "instructor_create_session_consistency",
       "test": "consistency",
       "status": "PASS",
       "message": "Course reference consistent"
     },
     {
-      "timestamp": "2026-04-05T16:47:04.425562",
+      "timestamp": "2026-04-14T10:34:50.455196",
       "action": "student_submit_correction_consistency",
       "test": "consistency",
       "status": "PASS",
       "message": "FK constraint enforced on correction"
     },
     {
-      "timestamp": "2026-04-05T16:47:04.430780",
+      "timestamp": "2026-04-14T10:34:50.457741",
       "action": "admin_add_enrolled_duplicate_check",
       "test": "consistency",
       "status": "PASS",
       "message": "Unique constraint prevents duplicate enrollment"
     },
     {
-      "timestamp": "2026-04-05T16:47:04.432587",
+      "timestamp": "2026-04-14T10:34:50.458844",
       "action": "admin_attendance_status_constraint",
       "test": "consistency",
       "status": "PASS",
       "message": "Status check constraint enforced"
     },
     {
-      "timestamp": "2026-04-05T16:47:04.433660",
+      "timestamp": "2026-04-14T10:34:50.459796",
       "action": "instructor_accept_correction_valid_transition",
       "test": "consistency",
       "status": "PASS",

@@ -4,6 +4,7 @@ from ..db import get_db
 from ..middleware import require_role, thread_safe_db
 from ..logger import audit_log
 from ..events import broadcast
+import time
 
 bp = Blueprint("admin", __name__)
 
@@ -215,6 +216,9 @@ def delete_course(cid):
     db.execute("DELETE FROM attendance_sessions WHERE course_id=?", (cid,))
     
     # Delete enrollments and assignments
+    enrolled_students = db.execute(
+        "SELECT student_id FROM course_enrollments WHERE course_id=?", (cid,)
+    ).fetchall()
     db.execute("DELETE FROM course_enrollments WHERE course_id=?", (cid,))
     db.execute("DELETE FROM course_instructors WHERE course_id=?", (cid,))
     db.execute("DELETE FROM course_tas WHERE course_id=?", (cid,))
@@ -222,6 +226,17 @@ def delete_course(cid):
     # Finally delete the course
     db.execute("DELETE FROM courses WHERE course_id=?", (cid,))
     db.commit()
+    
+    # BROADCAST: Notify all connected students that their course list changed
+    broadcast(
+        "course_deleted",
+        {
+            "course_id": cid,
+            "course_code": course["code"],
+            "course_name": course["name"],
+            "affected_students": [s["student_id"] for s in enrolled_students]
+        }
+    )
     
     audit_log(
         "DELETE_COURSE",
