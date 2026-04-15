@@ -1,0 +1,30 @@
+{
+  "primary_key": "id",
+  "schema": [
+    {
+      "name": "id",
+      "type_str": "INT",
+      "nullable": false,
+      "default": null
+    },
+    {
+      "name": "order_id",
+      "type_str": "INT",
+      "nullable": true,
+      "default": null
+    },
+    {
+      "name": "status",
+      "type_str": "VARCHAR(20)",
+      "nullable": true,
+      "default": null
+    }
+  ],
+  "next_slot": 20,
+  "free_list": [
+    3,
+    13,
+    8,
+    18
+  ]
+}

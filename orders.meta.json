@@ -1,0 +1,28 @@
+{
+  "primary_key": "id",
+  "schema": [
+    {
+      "name": "id",
+      "type_str": "INT",
+      "nullable": false,
+      "default": null
+    },
+    {
+      "name": "user_id",
+      "type_str": "INT",
+      "nullable": true,
+      "default": null
+    },
+    {
+      "name": "amount",
+      "type_str": "FLOAT",
+      "nullable": true,
+      "default": null
+    }
+  ],
+  "next_slot": 11,
+  "free_list": [
+    4,
+    9
+  ]
+}

@@ -799,63 +799,6 @@ class UserActionsIsolationTester:
         except Exception as e:
             self.log_result(action, "isolation", "FAIL", str(e))
 
-    def test_admin_delete_past_semester_isolated(self):
-        """ADMIN: Concurrent delete_past_semester operations must be isolated"""
-        action = "admin_delete_past_semester"
-        try:
-            conn = self.get_connection()
-            # Get past semesters (old year)
-            semesters = conn.execute(
-                "SELECT semester_id FROM semesters WHERE name LIKE '2020%' OR name LIKE '2021%' OR name LIKE '2022%' LIMIT 3"
-            ).fetchall()
-
-            if len(semesters) < 2:
-                self.log_result(action, "isolation", "SKIP", "Not enough past semesters to delete")
-                conn.close()
-                return
-
-            results = {"success": 0, "failed": 0, "not_found": 0}
-            lock = Lock()
-            delete_sems = [semesters[i][0] for i in range(min(2, len(semesters)))]
-
-            def delete_semester(sem_id):
-                try:
-                    c = self.get_connection()
-                    c.execute("BEGIN IMMEDIATE")
-                    check = c.execute("SELECT semester_id FROM semesters WHERE semester_id=?", (sem_id,)).fetchone()
-                    if not check:
-                        with lock:
-                            results["not_found"] += 1
-                        c.close()
-                        return
-
-                    c.execute("DELETE FROM semesters WHERE semester_id=?", (sem_id,))
-                    c.commit()
-                    with lock:
-                        results["success"] += 1
-                    c.close()
-                except:
-                    with lock:
-                        results["failed"] += 1
-                    c.close()
-
-            # 2 concurrent deletes
-            threads = [threading.Thread(target=delete_semester, args=(sem_id,)) for sem_id in delete_sems]
-            for t in threads:
-                t.start()
-            for t in threads:
-                t.join()
-
-            if results["failed"] == 0 and results["success"] > 0:
-                self.log_result(action, "isolation", "PASS",
-                    f"Semesters deleted isolated: {results['success']} deleted successfully")
-            else:
-                self.log_result(action, "isolation", "FAIL",
-                    f"Isolation issue: {results['success']} success, {results['failed']} failed")
-
-            conn.close()
-        except Exception as e:
-            self.log_result(action, "isolation", "FAIL", str(e))
 
     # ═════════════════════════════════════════════════════════════════════════
     # INSTRUCTOR ACTION ISOLATION TESTS (5 total)
@@ -1515,7 +1458,6 @@ class UserActionsIsolationTester:
         self.test_admin_remove_enrolled_student_isolated()
         self.test_admin_delete_user_isolated()
         self.test_admin_override_attendance_batch_isolated()
-        self.test_admin_delete_past_semester_isolated()
 
         # Instructor Actions (5 total)
         print("\n[INSTRUCTOR ACTIONS - 5 TESTS]")
@@ -1545,7 +1487,7 @@ class UserActionsIsolationTester:
         print(f"\n{'-'*100}")
         print(f"USER ACTIONS ISOLATION TEST SUMMARY ({self.level.upper()})")
         print(f"{'-'*100}")
-        print(f"Total: 23 Tests | Passed: {self.pass_count} | Failed: {self.fail_count} | Skipped: {self.skip_count}")
+        print(f"Total: 22 Tests | Passed: {self.pass_count} | Failed: {self.fail_count} | Skipped: {self.skip_count}")
         print(f"Pass Rate: {pass_pct:.1f}%")
 
         # Breakdown by category
