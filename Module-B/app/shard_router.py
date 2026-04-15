@@ -129,9 +129,19 @@ def get_records_for_session(att_session_id: int) -> list:
     relevant_shards = list(SHARD_CONFIGS.keys())
     
     def query_shard(shard_id):
-        """Query one shard (executed in parallel)."""
+        """Query one shard (executed in parallel). Creates its own connection."""
         try:
-            conn   = get_shard_conn(shard_id)
+            # Create direct connection (can't use g object in thread pool)
+            cfg = SHARD_CONFIGS[shard_id]
+            conn = mysql.connector.connect(
+                host=cfg["host"],
+                port=cfg["port"],
+                user=cfg["user"],
+                password=cfg["password"],
+                database=cfg["database"],
+                connection_timeout=10,
+                autocommit=False
+            )
             cursor = conn.cursor(dictionary=True)
             cursor.execute(
                 f"SELECT * FROM shard_{shard_id}_attendance_records "
@@ -140,6 +150,7 @@ def get_records_for_session(att_session_id: int) -> list:
             )
             shard_rows = cursor.fetchall()
             cursor.close()
+            conn.close()
             logger.debug(f"✓ Retrieved {len(shard_rows)} records from shard {shard_id} for session {att_session_id}")
             return shard_rows
         except Exception as e:
@@ -359,9 +370,19 @@ def delete_records_for_session(att_session_id: int) -> int:
     Returns count of records deleted across all shards.
     """
     def delete_from_shard(shard_id):
-        """Delete from one shard (executed in parallel)."""
+        """Delete from one shard (executed in parallel). Creates its own connection."""
         try:
-            conn   = get_shard_conn(shard_id)
+            # Create direct connection (can't use g object in thread pool)
+            cfg = SHARD_CONFIGS[shard_id]
+            conn = mysql.connector.connect(
+                host=cfg["host"],
+                port=cfg["port"],
+                user=cfg["user"],
+                password=cfg["password"],
+                database=cfg["database"],
+                connection_timeout=10,
+                autocommit=False
+            )
             cursor = conn.cursor()
             cursor.execute(
                 f"DELETE FROM shard_{shard_id}_attendance_records "
@@ -371,6 +392,7 @@ def delete_records_for_session(att_session_id: int) -> int:
             deleted_count = cursor.rowcount
             conn.commit()
             cursor.close()
+            conn.close()
             logger.debug(f"✓ Deleted {deleted_count} records from shard {shard_id} for session {att_session_id}")
             return deleted_count
         except Exception as e:
@@ -431,9 +453,19 @@ def delete_records_for_course(course_id: int, db) -> tuple:
     sessions_deleted = len(sessions)
     
     def batch_delete_from_shard(shard_id):
-        """Delete all records for these sessions from one shard (in parallel)."""
+        """Delete all records for these sessions from one shard (in parallel). Creates its own connection."""
         try:
-            conn   = get_shard_conn(shard_id)
+            # Create direct connection (can't use g object in thread pool)
+            cfg = SHARD_CONFIGS[shard_id]
+            conn = mysql.connector.connect(
+                host=cfg["host"],
+                port=cfg["port"],
+                user=cfg["user"],
+                password=cfg["password"],
+                database=cfg["database"],
+                connection_timeout=10,
+                autocommit=False
+            )
             cursor = conn.cursor()
             
             # Batch DELETE: delete all records with session_id IN (list) in a single query
@@ -446,6 +478,7 @@ def delete_records_for_course(course_id: int, db) -> tuple:
             deleted_count = cursor.rowcount
             conn.commit()
             cursor.close()
+            conn.close()
             logger.debug(f"✓ Batch deleted {deleted_count} records from shard {shard_id} for course {course_id}")
             return deleted_count
         except Exception as e:
