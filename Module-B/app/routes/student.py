@@ -10,6 +10,7 @@ bp = Blueprint("student", __name__)
 @require_role("student")
 @thread_safe_db("courses", "enrollments")
 def my_courses():
+    from flask import make_response
     db   = get_db()
     rows = db.execute(
         """SELECT c.course_id, c.name, c.code, s.name AS semester,
@@ -21,19 +22,32 @@ def my_courses():
            LEFT JOIN users u ON u.user_id=ci.instructor_id
            WHERE ce.student_id=? GROUP BY c.course_id""", (g.user["user_id"],)
     ).fetchall()
-    return jsonify([dict(r) for r in rows])
+    
+    # CACHE-BUSTING: Return response with no-cache headers to force fresh data on each request
+    response = make_response(jsonify([dict(r) for r in rows]))
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, private"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
 
 @bp.get("/attendance-stats")
 @require_role("student")
 @thread_safe_db("attendance")
 def attendance_stats():
+    from flask import make_response
     db      = get_db()
     courses = db.execute(
         """SELECT c.course_id, c.name, c.code
            FROM courses c JOIN course_enrollments ce ON ce.course_id=c.course_id
            WHERE ce.student_id=?""", (g.user["user_id"],)
     ).fetchall()
-    return jsonify(_build_stats(db, courses, g.user["user_id"]))
+    
+    # CACHE-BUSTING: No-cache headers ensure fresh data on every request
+    response = make_response(jsonify(_build_stats(db, courses, g.user["user_id"])))
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, private"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
 
 
 @bp.get("/corrections/current")
@@ -164,20 +178,126 @@ def attendance_stats_archive():
         })
     return jsonify(result)
 
+
+@bp.get("/sync")
+@require_role("student")
+@thread_safe_db("courses", "enrollments")
+def sync_enrollment_changes():
+    """
+    REAL-TIME SYNC ENDPOINT — called by frontend polling to detect course changes.
+    Returns courses with a hash/timestamp so frontend can detect when courses changed.
+    
+    Frontend usage:
+    - Call this every 5-10 seconds
+    - If hash differs from last response, refresh course list
+    - This ensures instant updates when courses are deleted
+    """
+    from flask import make_response
+    import hashlib
+    
+    db = get_db()
+    student_id = g.user["user_id"]
+    
+    # Get current enrolled courses with their deletion status
+    rows = db.execute(
+        """SELECT c.course_id, c.name, c.code, c.semester_id, s.name AS semester
+           FROM courses c
+           JOIN course_enrollments ce ON ce.course_id=c.course_id
+           JOIN semesters s ON s.semester_id=c.semester_id
+           WHERE ce.student_id=?
+           ORDER BY c.course_id""", 
+        (student_id,)
+    ).fetchall()
+    
+    courses = [dict(r) for r in rows]
+    
+    # Create hash of current courses to detect changes
+    course_data = ",".join([f"{c['course_id']}:{c['code']}" for c in courses])
+    courses_hash = hashlib.md5(course_data.encode()).hexdigest()
+    
+    response_data = {
+        "hash": courses_hash,
+        "count": len(courses),
+        "courses": courses
+    }
+    
+    response = make_response(jsonify(response_data))
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, private"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
+
+@bp.get("/events")
+@require_role("student")
+def course_events():
+    """
+    SERVER-SENT EVENTS (SSE) — Real-time course update notifications.
+    
+    Browser usage:
+      const eventSource = new EventSource('/api/student/events');
+      eventSource.addEventListener('course_deleted', (e) => {
+        console.log('Course deleted:', e.data);
+        location.reload();  // Refresh page
+      });
+    """
+    from flask import Response
+    from ..events import subscribe, unsubscribe
+    import time
+    
+    def generate():
+        q = subscribe()
+        student_id = g.user["user_id"]
+        
+        try:
+            # Send initial keep-alive
+            yield f"data: {{'type': 'connected', 'student_id': {student_id}}}\n\n"
+            
+            # Stream events to this student
+            while True:
+                try:
+                    msg = q.get(timeout=30)  # 30s timeout for keep-alive
+                    
+                    # msg contains: {"type": "course_deleted", "data": {...}}
+                    import json as json_module
+                    event_data = json_module.loads(msg)
+                    event_type = event_data.get("type", "message")
+                    event_payload = json_module.dumps(event_data.get("data", {}))
+                    
+                    # Send in proper SSE format: event: TYPE\ndata: PAYLOAD
+                    yield f"event: {event_type}\ndata: {event_payload}\n\n"
+                except Exception:
+                    # Keep-alive ping every 30s
+                    yield f": keep-alive\n\n"
+                    
+        finally:
+            unsubscribe(q)
+    
+    response = Response(generate(), mimetype="text/event-stream")
+    response.headers["Cache-Control"] = "no-cache"
+    response.headers["X-Accel-Buffering"] = "no"  # Disable buffering in proxies
+    return response
+
 def _build_stats(db, courses, student_id, archive=False):
     """Shared helper — builds per-course attendance stats."""
+    from ..shard_router import get_records_for_student
     MIN_SESSIONS_TO_WARN = 5
     result = []
+    
+    # LOOKUP: Get all records for this student from the correct shard
+    all_student_records = get_records_for_student(student_id)
+    
     for course in courses:
-        records = db.execute(
-            """SELECT ar.record_id, ar.status, att.session_date, att.topic,
-                      att.att_session_id
-               FROM attendance_records ar
-               JOIN attendance_sessions att ON att.att_session_id=ar.att_session_id
-               WHERE att.course_id=? AND ar.student_id=?
-               ORDER BY att.session_date DESC""",
-            (course["course_id"], student_id)
-        ).fetchall()
+        # Filter to this course using session lookup in main SQLite db
+        session_ids_for_course = {
+            r["att_session_id"] for r in db.execute(
+                "SELECT att_session_id FROM attendance_sessions WHERE course_id = ?",
+                (course["course_id"],)
+            ).fetchall()
+        }
+        
+        records = [r for r in all_student_records
+                   if r["att_session_id"] in session_ids_for_course]
 
         total   = len(records)
         present = sum(1 for r in records if r["status"] == "present")
@@ -201,6 +321,22 @@ def _build_stats(db, courses, student_id, archive=False):
             else:
                 colour, warning = "success", "safe"
 
+        # Enrich records with session details (date, topic) from main SQLite db
+        enriched_records = []
+        for r in records:
+            session = db.execute(
+                "SELECT session_date, topic FROM attendance_sessions WHERE att_session_id = ?",
+                (r["att_session_id"],)
+            ).fetchone()
+            enriched_records.append({
+                "record_id":      r["record_id"],
+                "att_session_id": r["att_session_id"],
+                "student_id":     r["student_id"],
+                "status":         r["status"],
+                "session_date":   session["session_date"] if session else None,
+                "topic":          session["topic"] if session else None,
+            })
+
         result.append({
             "course_id":      course["course_id"],
             "name":           course["name"],
@@ -212,7 +348,7 @@ def _build_stats(db, courses, student_id, archive=False):
             "percentage":     pct,
             "colour":         colour,
             "warning":        warning,
-            "records":        [dict(r) for r in records]
+            "records":        enriched_records
         })
     return result
 
@@ -226,15 +362,38 @@ def course_sessions(cid):
     if not db.execute("SELECT 1 FROM course_enrollments WHERE course_id=? AND student_id=?",
                       (cid, g.user["user_id"])).fetchone():
         return jsonify({"error": "Not enrolled"}), 403
-    rows = db.execute(
-        """SELECT att.att_session_id, att.session_date, att.topic, ar.status
-           FROM attendance_sessions att
-           JOIN attendance_records ar ON ar.att_session_id=att.att_session_id
-           WHERE att.course_id=? AND ar.student_id=? AND ar.status='absent'
-           ORDER BY att.session_date DESC""",
-        (cid, g.user["user_id"])
-    ).fetchall()
-    return jsonify([dict(r) for r in rows])
+    
+    # LOOKUP: Get all records for this student from the correct shard
+    from ..shard_router import get_records_for_student
+    all_student_records = get_records_for_student(g.user["user_id"])
+    
+    # Filter by course and absent status
+    session_ids_for_course = {
+        r["att_session_id"] for r in db.execute(
+            "SELECT att_session_id FROM attendance_sessions WHERE course_id = ?",
+            (cid,)
+        ).fetchall()
+    }
+    
+    absent_records = [r for r in all_student_records
+                      if r["att_session_id"] in session_ids_for_course and r["status"] == "absent"]
+    
+    # Enrich with session details from main db
+    result = []
+    for rec in absent_records:
+        session = db.execute(
+            "SELECT att_session_id, session_date, topic FROM attendance_sessions WHERE att_session_id = ?",
+            (rec["att_session_id"],)
+        ).fetchone()
+        if session:
+            result.append({
+                "att_session_id": session["att_session_id"],
+                "session_date":   session["session_date"],
+                "topic":          session["topic"],
+                "status":         rec["status"],
+            })
+    
+    return jsonify(sorted(result, key=lambda x: x["session_date"], reverse=True))
 
 @bp.get("/corrections")
 @require_role("student")

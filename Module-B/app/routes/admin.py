@@ -4,6 +4,7 @@ from ..db import get_db
 from ..middleware import require_role, thread_safe_db
 from ..logger import audit_log
 from ..events import broadcast
+import time
 
 bp = Blueprint("admin", __name__)
 
@@ -206,17 +207,46 @@ def delete_course(cid):
     course = db.execute("SELECT * FROM courses WHERE course_id=?", (cid,)).fetchone()
     if not course:
         return jsonify({"error": "Course not found"}), 404
+    
+    # CASCADE DELETE: Delete all attendance records for all sessions in this course
+    from ..shard_router import delete_records_for_course
+    sessions_deleted, records_deleted = delete_records_for_course(cid, db)
+    
+    # Delete all sessions for this course (SQLite)
+    db.execute("DELETE FROM attendance_sessions WHERE course_id=?", (cid,))
+    
+    # Delete enrollments and assignments
+    enrolled_students = db.execute(
+        "SELECT student_id FROM course_enrollments WHERE course_id=?", (cid,)
+    ).fetchall()
+    db.execute("DELETE FROM course_enrollments WHERE course_id=?", (cid,))
+    db.execute("DELETE FROM course_instructors WHERE course_id=?", (cid,))
+    db.execute("DELETE FROM course_tas WHERE course_id=?", (cid,))
+    
+    # Finally delete the course
     db.execute("DELETE FROM courses WHERE course_id=?", (cid,))
     db.commit()
+    
+    # BROADCAST: Notify all connected students that their course list changed
+    broadcast(
+        "course_deleted",
+        {
+            "course_id": cid,
+            "course_code": course["code"],
+            "course_name": course["name"],
+            "affected_students": [s["student_id"] for s in enrolled_students]
+        }
+    )
+    
     audit_log(
         "DELETE_COURSE",
         f"/api/admin/courses/{cid}",
         g.user["user_id"],
-        details=f"record_id={cid}",
+        details=f"record_id={cid}, cascade_deleted_sessions={sessions_deleted}, cascade_deleted_attendance_records={records_deleted}",
         old_value={"course_id": cid, "name": course["name"], "code": course["code"]},
         new_value=None
     )
-    return jsonify({"message": f"Course {course['code']} deleted"})
+    return jsonify({"message": f"Course {course['code']} deleted (deleted {sessions_deleted} sessions and {records_deleted} attendance records)"})
 
 # ── Instructor / TA / Student assignment ──────────────────────────────────────
 
@@ -328,17 +358,22 @@ def enroll_student(cid):
 @thread_safe_db("courses", "enrollments")
 def remove_enrollment(cid, sid):
     db = get_db()
+    
+    # CASCADE DELETE: Delete student's attendance records for this course's sessions
+    from ..shard_router import delete_records_for_student_in_course
+    records_deleted = delete_records_for_student_in_course(sid, cid, db)
+    
     db.execute("DELETE FROM course_enrollments WHERE course_id=? AND student_id=?", (cid, sid))
     db.commit()
     audit_log(
         "REMOVE_ENROLLMENT",
         f"/api/admin/courses/{cid}/enrollments/{sid}",
         g.user["user_id"],
-        details=f"record_id={cid}",
+        details=f"record_id={cid}, cascade_deleted_attendance_records={records_deleted}",
         old_value={"course_id": cid, "student_id": sid},
         new_value=None
     )
-    return jsonify({"message": "Student removed"})
+    return jsonify({"message": f"Student removed (deleted {records_deleted} attendance records)"})
 
 # ── Users ─────────────────────────────────────────────────────────────────────
 
@@ -412,17 +447,25 @@ def delete_user(uid):
         cnt = db.execute("SELECT COUNT(*) AS c FROM users WHERE role='admin'").fetchone()["c"]
         if cnt <= 1:
             return jsonify({"error": "Cannot delete the last admin account"}), 400
+    
+    # CASCADE DELETE: If user is a student, delete all their attendance_records from shards
+    if user["role"] == "student":
+        from ..shard_router import delete_records_for_student
+        deleted_count = delete_records_for_student(uid)
+    else:
+        deleted_count = 0
+    
     db.execute("DELETE FROM users WHERE user_id=?", (uid,))
     db.commit()
     audit_log(
         "DELETE_USER",
         f"/api/admin/users/{uid}",
         g.user["user_id"],
-        details=f"record_id={uid}",
+        details=f"record_id={uid}, cascade_deleted_attendance_records={deleted_count}",
         old_value={"user_id": uid, "username": user["username"], "role": user["role"]},
         new_value=None
     )
-    return jsonify({"message": "User permanently deleted"})
+    return jsonify({"message": f"User permanently deleted (cascade deleted {deleted_count} attendance records)"})
 
 # ── Dropdown helpers (read-only, no logging needed) ───────────────────────────
 
@@ -477,38 +520,56 @@ def course_sessions(cid):
 @require_role("admin")
 @thread_safe_db("attendance")
 def session_records(sid):
-    rows = get_db().execute(
-        """SELECT ar.record_id, ar.student_id, u.username, ar.status
-           FROM attendance_records ar JOIN users u ON u.user_id=ar.student_id
-           WHERE ar.att_session_id=? ORDER BY u.username""", (sid,)
-    ).fetchall()
-    return jsonify([dict(r) for r in rows])
+    db = get_db()
+    
+    # RANGE QUERY — fan-out across all 3 shards, merge results
+    from ..shard_router import get_records_for_session
+    shard_rows = get_records_for_session(sid)   # list of dicts from MySQL
+    
+    # Enrich with username from main SQLite db
+    result = []
+    for row in shard_rows:
+        user = db.execute(
+            "SELECT username FROM users WHERE user_id = ?",
+            (row["student_id"],)
+        ).fetchone()
+        
+        result.append({
+            "record_id":  row["record_id"],
+            "student_id": row["student_id"],
+            "status":     row["status"],
+            "username":   user["username"] if user else "—",
+        })
+    
+    return jsonify(result)
 
 @bp.put("/records/<int:rid>")
 @require_role("admin")
 @thread_safe_db("attendance")
 def update_record(rid):
     status = (request.json or {}).get("status")
-    if status not in ("present","absent"):
+    if status not in ("present","absent", "late"):
         return jsonify({"error": "Invalid status"}), 400
-    db  = get_db()
-    row = db.execute(
-        "SELECT status, student_id, att_session_id FROM attendance_records WHERE record_id=?",
-        (rid,)
-    ).fetchone()
-    if not row:
-        return jsonify({"error": "Record not found"}), 404
-    old_status = row["status"]
-    db.execute("UPDATE attendance_records SET status=? WHERE record_id=?", (status, rid))
-    db.commit()
+    
+    # UPDATE — optimize by fetching student_id first, then routing directly
+    from ..shard_router import update_record as shard_update, get_student_id_for_record
+    student_id = get_student_id_for_record(rid)
+    if student_id == -1:
+        return jsonify({"error": "Record not found in any shard"}), 404
+    
+    found = shard_update(rid, status, student_id)  # Pass student_id for direct routing
+    
+    if not found:
+        return jsonify({"error": "Update failed"}), 500
+    
     broadcast("attendance_updated", {"record_id": rid, "status": status})
     audit_log(
         "ADMIN_ATT_OVERRIDE",
         f"/api/admin/records/{rid}",
         g.user["user_id"],
         details=f"record_id={rid}",
-        old_value={"record_id": rid, "student_id": row["student_id"], "att_session_id": row["att_session_id"], "status": old_status},
-        new_value={"record_id": rid, "student_id": row["student_id"], "att_session_id": row["att_session_id"], "status": status}
+        old_value={"record_id": rid, "status": "(previous)"},
+        new_value={"record_id": rid, "status": status}
     )
     return jsonify({"message": "Record updated"})
 

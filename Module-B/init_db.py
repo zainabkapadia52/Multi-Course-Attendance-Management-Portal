@@ -18,6 +18,7 @@ All passwords: password123
 """
 
 import sqlite3
+import mysql.connector
 import random
 from datetime import date, timedelta
 from werkzeug.security import generate_password_hash
@@ -31,6 +32,143 @@ random.seed(42)
 
 # Generate password hash using pbkdf2:sha256 (works on all systems, no OpenSSL issues)
 PWD = generate_password_hash("password123", method='pbkdf2:sha256')
+
+# ── MySQL Shard Configuration (Modulo 3 Strategy) ──────────────────────────
+
+SHARD_CONFIGS = {
+    0: {"host": "10.0.116.184", "port": 3307,
+        "database": "Scalix", "user": "Scalix", "password": "password@123"},
+    1: {"host": "10.0.116.184", "port": 3308,
+        "database": "Scalix", "user": "Scalix", "password": "password@123"},
+    2: {"host": "10.0.116.184", "port": 3309,
+        "database": "Scalix", "user": "Scalix", "password": "password@123"},
+}
+
+SHARD_SCHEMA_DROP = "DROP TABLE IF EXISTS shard_{shard_id}_attendance_records"
+
+SHARD_SCHEMA_CREATE = """CREATE TABLE shard_{shard_id}_attendance_records (
+    record_id      INT AUTO_INCREMENT PRIMARY KEY,
+    att_session_id INT NOT NULL,
+    student_id     INT NOT NULL,
+    status         ENUM('present', 'absent', 'late') NOT NULL DEFAULT 'absent',
+    INDEX idx_student (student_id),
+    INDEX idx_session (att_session_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"""
+
+
+def get_shard_id(student_id: int) -> int:
+    """Return shard index for a student_id using modulo 3 partitioning."""
+    return student_id % 3
+
+
+def migrate_to_mysql_shards():
+    """Migrate attendance records from SQLite to MySQL shards using bulk inserts."""
+    print()
+    print("  Connecting to SQLite database...")
+    
+    try:
+        sqlite_conn = sqlite3.connect(DB_PATH)
+        sqlite_conn.row_factory = sqlite3.Row
+        
+        rows = sqlite_conn.execute(
+            "SELECT att_session_id, student_id, status FROM attendance_records ORDER BY student_id"
+        ).fetchall()
+        
+        print(f"  ✓  Found {len(rows)} attendance records")
+    except sqlite3.Error as e:
+        print(f"  ✗  Cannot read attendance_records: {e}")
+        return
+    
+    # Group records by shard
+    print("  Preparing data for bulk insert...")
+    shard_data = {i: [] for i in range(len(SHARD_CONFIGS))}
+    skipped = 0
+    
+    for row in rows:
+        shard_id = get_shard_id(row["student_id"])
+        shard_data[shard_id].append((row["att_session_id"], row["student_id"], row["status"]))
+    
+    for shard_id, data in shard_data.items():
+        print(f"    Shard {shard_id} (student_id % 3 == {shard_id}): {len(data)} records")
+    
+    # Connect to MySQL shards
+    print()
+    print("  Connecting to MySQL shards...")
+    mysql_conns = {}
+    
+    for shard_id, config in SHARD_CONFIGS.items():
+        try:
+            conn = mysql.connector.connect(
+                host=config["host"],
+                port=config["port"],
+                user=config["user"],
+                password=config["password"],
+                database=config["database"],
+                autocommit=False,
+                connection_timeout=10
+            )
+            
+            # Drop old table (clears all previous data)
+            cursor = conn.cursor()
+            cursor.execute(SHARD_SCHEMA_DROP.format(shard_id=shard_id))
+            cursor.close()
+            
+            # Create fresh table with proper AUTO_INCREMENT
+            cursor = conn.cursor()
+            cursor.execute(SHARD_SCHEMA_CREATE.format(shard_id=shard_id))
+            cursor.close()
+            
+            conn.commit()
+            
+            mysql_conns[shard_id] = conn
+            print(f"    ✓  Shard {shard_id} ready (cleared old data, port {config['port']})")
+        except mysql.connector.Error as e:
+            print(f"    ✗  Shard {shard_id} failed: {e}")
+            for c in mysql_conns.values():
+                c.close()
+            sqlite_conn.close()
+            print("\n  ⚠  MySQL migration failed - continuing without shards")
+            print("     Run 'python migrate_to_mysql_shards_fast.py' manually later")
+            return
+    
+    # Bulk insert for each shard
+    print()
+    print("  Bulk inserting records...")
+    counts = {}
+    
+    for shard_id, data in shard_data.items():
+        if not data:
+            counts[shard_id] = 0
+            continue
+        
+        try:
+            conn = mysql_conns[shard_id]
+            cursor = conn.cursor()
+            
+            cursor.executemany(
+                f"INSERT INTO shard_{shard_id}_attendance_records "
+                "(att_session_id, student_id, status) VALUES (%s, %s, %s)",
+                data
+            )
+            
+            conn.commit()
+            counts[shard_id] = cursor.rowcount
+            cursor.close()
+            
+            print(f"    ✓  Shard {shard_id}: {counts[shard_id]} records inserted")
+        except mysql.connector.Error as e:
+            print(f"    ✗  Shard {shard_id}: {e}")
+            counts[shard_id] = 0
+    
+    # Close connections
+    for conn in mysql_conns.values():
+        conn.close()
+    sqlite_conn.close()
+    
+    total = sum(counts.values())
+    print()
+    print(f"  ✓  Total migrated to MySQL shards: {total} records")
+
 
 # from app.shard import init_shards   # adjust import path to your structure
 
@@ -176,6 +314,11 @@ CORRECTION_REASONS = [
 # ── main seed function ────────────────────────────────────────────────────────
 
 def init():
+    # Delete old database file to start fresh
+    if os.path.exists(DB_PATH):
+        os.remove(DB_PATH)
+        print(f"  ✓  Removed old database: {DB_PATH}")
+    
     conn = sqlite3.connect(DB_PATH)
     conn.execute("PRAGMA foreign_keys = ON")
     conn.row_factory = sqlite3.Row
@@ -338,7 +481,8 @@ def init():
         "INSERT OR IGNORE INTO attendance_records (att_session_id, student_id, status) VALUES (?,?,?)",
         records
     )
-    print(f"  ✓  {len(records)} attendance records inserted")
+    conn.commit()
+    print(f"  ✓  {len(records)} attendance records inserted into main SQLite DB")
 
     # ── correction requests + correction_logs ─────────────────────────────────
     absent_set  = {(r[0], r[1]) for r in records if r[2] == "absent"}
@@ -637,6 +781,14 @@ def init():
 
     conn.commit()
     conn.close()
+
+    # ── migrate to MySQL shards ───────────────────────────────────────────────
+    print()
+    print("═" * 55)
+    print("  Migrating attendance records to MySQL shards...")
+    print("═" * 55)
+    
+    migrate_to_mysql_shards()
 
     print()
     print("═" * 55)

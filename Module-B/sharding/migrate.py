@@ -3,15 +3,16 @@
   CS 432 - Assignment 4: Sharding
   SubTask 2: Migrate Data from SQLite to MySQL Shards
 =============================================================
-  Strategy  : Range-Based Partitioning
+  Strategy  : Hash-Based Partitioning
   Shard Key : student_id
+  Method    : student_id % 3
   Source    : module_b.db (SQLite)
   Targets   : shard_db_0, shard_db_1, shard_db_2 (MySQL)
 
   Routing Logic:
-    student_id 12 – 31  →  shard_db_0  (port 3307)
-    student_id 32 – 51  →  shard_db_1  (port 3308)
-    student_id 52 – 71  →  shard_db_2  (port 3309)
+    student_id % 3 == 0  →  shard_db_0  (port 3307)
+    student_id % 3 == 1  →  shard_db_1  (port 3308)
+    student_id % 3 == 2  →  shard_db_2  (port 3309)
 =============================================================
 """
 
@@ -27,12 +28,8 @@ import time
 # ─────────────────────────────────────────────
 SQLITE_DB_PATH = "../module_b.db"
 
-# Range boundaries for each shard
-SHARD_RANGES = {
-    0: (12, 30),
-    1: (31, 50),
-    2: (51, 71),
-}
+# Number of shards
+NUMBER_OF_SHARDS = 3
 
 SHARD_CONFIGS = {
     0: {"host": "10.0.116.184", "port": 3307,
@@ -59,24 +56,18 @@ def print_header():
     print(f"              10.0.116.184:3308 -> Scalix")
     print(f"              10.0.116.184:3309 -> Scalix")
     print()
-    print("  Routing Logic (Range-Based):")
-    print("    student_id  12 – 30  →  shard_db_0")
-    print("    student_id  31 – 50  →  shard_db_1")
-    print("    student_id  51 – 71  →  shard_db_2")
+    print("  Routing Logic (Hash-Based):")
+    print("    student_id % 3 == 0  →  shard_db_0")
+    print("    student_id % 3 == 1  →  shard_db_1")
+    print("    student_id % 3 == 2  →  shard_db_2")
     print()
 
 def get_shard_id(student_id):
     """
-    Route a student_id to the correct shard based on range boundaries.
-    Raises ValueError if student_id falls outside all defined ranges.
+    Route a student_id to the correct shard based on hash partitioning.
+    Shard ID = student_id % 3
     """
-    for shard_id, (min_id, max_id) in SHARD_RANGES.items():
-        if min_id <= student_id <= max_id:
-            return shard_id
-    raise ValueError(
-        f"student_id {student_id} is outside all defined shard ranges! "
-        f"Ranges are: {SHARD_RANGES}"
-    )
+    return student_id % NUMBER_OF_SHARDS
 
 def read_from_sqlite():
     """Read all attendance_records from original SQLite database."""
@@ -117,8 +108,26 @@ def connect_to_shards():
             sys.exit(1)
     return connections, cursors
 
+def clear_shard_tables(connections):
+    """Clear all existing data from shard tables before migration."""
+    print()
+    print("─" * 60)
+    print("  Clearing existing data from shard tables...")
+    print("─" * 60)
+    for shard_id, conn in connections.items():
+        cursor = conn.cursor()
+        table_name = f"shard_{shard_id}_attendance_records"
+        try:
+            cursor.execute(f"DELETE FROM {table_name}")
+            conn.commit()
+            print(f"  ✓ Cleared {table_name}")
+        except Exception as e:
+            print(f"  ⚠ Could not clear {table_name}: {e}")
+        cursor.close()
+    print()
+
 def migrate(rows, connections, cursors, max_per_shard=DEFAULT_MAX_PER_SHARD):
-    """Route and insert each row into the correct shard by range."""
+    """Route and insert each row into the correct shard by hash function."""
     counts      = {0: 0, 1: 0, 2: 0}
     skipped     = []
     throttled   = 0
@@ -130,11 +139,7 @@ def migrate(rows, connections, cursors, max_per_shard=DEFAULT_MAX_PER_SHARD):
 
     for row in rows:
         student_id = row["student_id"]
-        try:
-            shard_id = get_shard_id(student_id)
-        except ValueError as e:
-            skipped.append((row["record_id"], student_id, str(e)))
-            continue
+        shard_id = get_shard_id(student_id)
 
         if max_per_shard and counts[shard_id] >= max_per_shard:
             throttled += 1
@@ -177,13 +182,12 @@ def print_summary(original_count, counts, skipped, throttled, max_per_shard):
     print(f"  {'─'*35} {'─'*8}")
     print(f"  {'Original (module_b.db)':<35} {original_count:>8}")
     print()
-    print(f"  {'Shard':<35} {'Inserted':>8}  {'Range'}")
+    print(f"  {'Shard':<35} {'Inserted':>8}  {'Hash Rule'}")
     print(f"  {'─'*35} {'─'*8}  {'─'*16}")
     for shard_id, count in counts.items():
-        min_id, max_id = SHARD_RANGES[shard_id]
         pct = (count / original_count * 100) if original_count > 0 else 0
         print(f"  {'shard_db_' + str(shard_id) + ' (port ' + str(SHARD_CONFIGS[shard_id]['port']) + ')':<35} "
-              f"{count:>8}  student_id {min_id}–{max_id}  ({pct:.1f}%)")
+              f"{count:>8}  student_id % 3 == {shard_id}  ({pct:.1f}%)")
     print(f"  {'─'*35} {'─'*8}")
     print(f"  {'TOTAL MIGRATED':<35} {total_migrated:>8}")
     print()
@@ -194,7 +198,7 @@ def print_summary(original_count, counts, skipped, throttled, max_per_shard):
         print()
 
     if skipped:
-        print(f"  ⚠ {len(skipped)} rows skipped (student_id out of range):")
+        print(f"  ⚠ {len(skipped)} rows skipped:")
         for record_id, student_id, reason in skipped:
             print(f"    record_id={record_id}, student_id={student_id}")
         print()
@@ -205,8 +209,7 @@ def print_summary(original_count, counts, skipped, throttled, max_per_shard):
         print("  ✓ All records migrated successfully. No data loss.")
     else:
         diff = original_count - total_migrated
-        print(f"  ⚠ {diff} records not migrated "
-              f"({'skipped due to out-of-range student_id' if skipped else 'data loss'}).")
+        print(f"  ⚠ {diff} records not migrated.")
 
     print()
 
@@ -267,9 +270,12 @@ def main():
     connections, cursors = connect_to_shards()
     print()
 
+    # Step 2b: Clear existing data
+    clear_shard_tables(connections)
+
     # Step 3: Migrate
     print("─" * 60)
-    print(f"  Migrating {original_count} records using range-based routing...")
+    print(f"  Migrating {original_count} records using hash-based routing...")
     if args.max_per_shard:
         print(f"  Test run mode enabled: max {args.max_per_shard} rows per shard")
     else:

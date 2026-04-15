@@ -3,12 +3,13 @@
   CS 432 - Assignment 4: Sharding
   SubTask 2: Verify Data Integrity Across Shards
 =============================================================
-  Strategy  : Range-Based Partitioning
+  Strategy  : Hash-Based Partitioning
   Shard Key : student_id
+  Method    : student_id % 3
 
   Checks:
     1. Total row count matches original (no data loss)
-    2. Each shard contains only its designated range
+    2. Each shard contains only its designated hash partition
     3. No duplicate record_ids across shards
     4. CHECK constraint rejects wrong-shard inserts
     5. All original student_ids are present after migration
@@ -25,11 +26,8 @@ import sys
 # ─────────────────────────────────────────────
 SQLITE_DB_PATH = "../module_b.db"
 
-SHARD_RANGES = {
-    0: (12, 30),
-    1: (31, 50),
-    2: (51, 71),
-}
+# Number of shards for hash-based partitioning
+NUMBER_OF_SHARDS = 3
 
 SHARD_CONFIGS = {
     0: {"host": "10.0.116.184", "port": 3307,
@@ -46,19 +44,20 @@ def print_header():
     print("  STEP 3: VERIFYING DATA INTEGRITY ACROSS SHARDS")
     print("=" * 60)
     print()
-    print("  Strategy  : Range-Based Partitioning")
+    print("  Strategy  : Hash-Based Partitioning")
     print("  Shard Key : student_id")
+    print("  Method    : student_id % 3")
     print()
-    print("  Shard Ranges:")
-    for shard_id, (min_id, max_id) in SHARD_RANGES.items():
+    print("  Shard Hash Rules:")
+    for shard_id in range(NUMBER_OF_SHARDS):
         print(f"    shard_{shard_id} (shard_db_{shard_id}) → "
-              f"student_id {min_id} to {max_id}")
+              f"student_id % 3 == {shard_id}")
     print()
     print("  Running 5 verification checks:")
     print("    Check 1 — Row count matches original (no data loss)")
-    print("    Check 2 — Each shard has only its correct range")
+    print("    Check 2 — Each shard has only its correct hash partition")
     print("    Check 3 — No duplicate record_ids across shards")
-    print("    Check 4 — CHECK constraint rejects wrong-range inserts")
+    print("    Check 4 — CHECK constraint rejects wrong-partition inserts")
     print("    Check 5 — All original student_ids present after migration")
     print()
 
@@ -94,6 +93,7 @@ def check_1_row_counts(shards):
         )
         shard_counts[shard_id] = cur.fetchone()[0]
 
+
     total_sharded = sum(shard_counts.values())
 
     print(f"  {'Database':<35} {'Row Count':>10}")
@@ -101,8 +101,7 @@ def check_1_row_counts(shards):
     print(f"  {'Original (module_b.db)':<35} {original_count:>10}")
     print(f"  {'─'*35} {'─'*10}")
     for shard_id, count in shard_counts.items():
-        min_id, max_id = SHARD_RANGES[shard_id]
-        label = f"shard_db_{shard_id} (student_id {min_id}–{max_id})"
+        label = f"shard_db_{shard_id} (hash: student_id % 3 == {shard_id})"
         print(f"  {label:<35} {count:>10}")
     print(f"  {'─'*35} {'─'*10}")
     print(f"  {'TOTAL ACROSS SHARDS':<35} {total_sharded:>10}")
@@ -117,21 +116,20 @@ def check_1_row_counts(shards):
     return original_count == total_sharded
 
 def check_2_shard_isolation(shards):
-    """Check each shard contains only student_ids in its range."""
+    """Check each shard contains only student_ids in its hash partition."""
     print("─" * 60)
-    print("  CHECK 2: RANGE ISOLATION — No Out-of-Range Records")
+    print("  CHECK 2: HASH PARTITION ISOLATION — No Wrong-Partition Records")
     print("─" * 60)
     print()
 
     all_passed = True
     for shard_id, conn in shards.items():
-        min_id, max_id = SHARD_RANGES[shard_id]
         cur = conn.cursor()
 
-        # Count rows outside the valid range
+        # Count rows where student_id % 3 != shard_id
         cur.execute(
             f"SELECT COUNT(*) FROM shard_{shard_id}_attendance_records "
-            f"WHERE student_id NOT BETWEEN {min_id} AND {max_id}"
+            f"WHERE MOD(student_id, 3) != {shard_id}"
         )
         wrong_count = cur.fetchone()[0]
 
@@ -143,17 +141,17 @@ def check_2_shard_isolation(shards):
 
         if wrong_count == 0:
             print(f"  ✓ shard_{shard_id} (shard_db_{shard_id}) — "
-                  f"All {total} records have student_id in [{min_id}, {max_id}]")
+                  f"All {total} records satisfy student_id % 3 == {shard_id}")
         else:
             print(f"  ✗ shard_{shard_id} (shard_db_{shard_id}) — "
-                  f"{wrong_count} records out of range [{min_id}, {max_id}]!")
+                  f"{wrong_count} records have incorrect hash partition!")
             all_passed = False
 
     print()
     if all_passed:
-        print("  ✓ PASS — All shards contain only their designated range.")
+        print("  ✓ PASS — All shards contain only their designated hash partition.")
     else:
-        print("  ✗ FAIL — Some shards have out-of-range records.")
+        print("  ✗ FAIL — Some shards have wrong-partition records.")
     print()
     return all_passed
 
@@ -193,23 +191,22 @@ def check_3_no_duplicates(shards):
     return duplicates == 0
 
 def check_4_constraint_enforcement(shards):
-    """Verify CHECK constraint rejects out-of-range inserts."""
+    """Verify CHECK constraint rejects out-of-hash-partition inserts."""
     print("─" * 60)
-    print("  CHECK 4: CONSTRAINT ENFORCEMENT — Wrong Range Rejected")
+    print("  CHECK 4: CONSTRAINT ENFORCEMENT — Wrong Partition Rejected")
     print("─" * 60)
     print()
-    print("  Testing: Insert student_id=52 into shard_0")
-    print("  Expected: REJECTED  "
-          "(52 is in range 52–71, belongs in shard_2 not shard_0)")
+    print("  Testing: Insert student_id=5 into shard_0")
+    print("  Expected: REJECTED  (5 % 3 = 2, belongs in shard_2 not shard_0)")
     print()
 
     passed = False
     try:
         cur = shards[0].cursor()
-        # student_id=52 belongs in shard_2 (range 52–71), not shard_0 (12–31)
+        # student_id=5: 5 % 3 = 2, so belongs in shard_2, not shard_0 (which needs student_id % 3 == 0)
         cur.execute("""
             INSERT INTO shard_0_attendance_records
-            VALUES (99999, 1, 52, 'present')
+            VALUES (99999, 1, 5, 'present')
         """)
         shards[0].commit()
         print("  ✗ FAIL — Insert was wrongly accepted! Constraint not working.")
@@ -251,9 +248,8 @@ def check_5_student_id_completeness(shards):
         )
         ids = set(row[0] for row in cur.fetchall())
         sharded_ids.update(ids)
-        min_id, max_id = SHARD_RANGES[shard_id]
         print(f"  shard_{shard_id} — {len(ids)} distinct student_ids "
-              f"in range [{min_id}, {max_id}]")
+              f"(hash: student_id % 3 == {shard_id})")
 
     missing  = original_ids - sharded_ids
     extra    = sharded_ids - original_ids
@@ -283,7 +279,6 @@ def show_sample_records(shards):
     print()
 
     for shard_id, conn in shards.items():
-        min_id, max_id = SHARD_RANGES[shard_id]
         cur = conn.cursor()
         cur.execute(
             f"SELECT record_id, att_session_id, student_id, status "
@@ -299,14 +294,15 @@ def show_sample_records(shards):
 
         print(f"  shard_{shard_id} (shard_db_{shard_id}, "
               f"port {SHARD_CONFIGS[shard_id]['port']}) "
-              f"| student_id {min_id} to {max_id}:")
+              f"| partition: student_id % 3 == {shard_id}:")
         print(f"  {'record_id':>10} {'att_session_id':>15} "
-              f"{'student_id':>12} {'status':>10}  {'In Range?':>10}")
-        print(f"  {'─'*10} {'─'*15} {'─'*12} {'─'*10}  {'─'*10}")
+              f"{'student_id':>12} {'status':>10}  {'Partition?':>12}")
+        print(f"  {'─'*10} {'─'*15} {'─'*12} {'─'*10}  {'─'*12}")
         for row in rows:
-            in_range = "✓ Yes" if min_id <= row[2] <= max_id else "✗ No"
+            partition = row[2] % 3
+            is_correct = "✓ Yes" if partition == shard_id else "✗ No"
             print(f"  {row[0]:>10} {row[1]:>15} "
-                  f"{row[2]:>12} {row[3]:>10}  {in_range:>10}")
+                  f"{row[2]:>12} {row[3]:>10}  {is_correct:>12}")
         print(f"  Sample student_ids: {sample_students}")
         print()
 
@@ -319,9 +315,9 @@ def print_final_summary(results):
 
     labels = [
         "Check 1 — No data loss (row counts match)",
-        "Check 2 — Range isolation (no out-of-range records)",
+        "Check 2 — Hash partition isolation (no wrong-partition records)",
         "Check 3 — No duplicate record_ids across shards",
-        "Check 4 — CHECK constraint rejects wrong-range inserts",
+        "Check 4 — CHECK constraint rejects wrong-partition inserts",
         "Check 5 — All original student_ids present",
     ]
 
@@ -337,11 +333,12 @@ def print_final_summary(results):
         print("  ✓ ALL CHECKS PASSED.")
         print()
         print("  Sharding implementation is verified correct:")
-        print("    • Data partitioned using range-based strategy on student_id")
+        print("    • Data partitioned using hash-based strategy on student_id")
+        print("    • Partitioning formula: student_id % 3")
         print("    • No records lost during migration from module_b.db")
         print("    • No record exists in more than one shard")
-        print("    • Each shard physically enforces its range via CHECK constraint")
-        print("    • All 60 students accounted for across shards")
+        print("    • Each shard physically enforces its partition via CHECK constraint")
+        print("    • All students accounted for across shards with balanced distribution")
     else:
         print("  ✗ SOME CHECKS FAILED. Review errors above.")
     print()

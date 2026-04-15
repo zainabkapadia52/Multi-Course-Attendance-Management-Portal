@@ -2,6 +2,7 @@ from flask import Flask
 from .db import init_app
 from concurrent.futures import ThreadPoolExecutor
 import threading
+from app.shard_router import close_shard_connections
 
 def create_app():
     app = Flask(__name__)
@@ -45,4 +46,5 @@ def create_app():
     app.register_blueprint(stream_bp)     # ← new (no prefix, /stream is the url)
     app.register_blueprint(page_bp)
 
+    app.teardown_appcontext(close_shard_connections)
     return app

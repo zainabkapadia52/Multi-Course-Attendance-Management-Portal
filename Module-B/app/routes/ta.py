@@ -92,17 +92,19 @@ def create_session():
     sid = cur.lastrowid
 
     inserted_records = []
+    
+    # INSERT — route each record to correct shard by student_id
+    from ..shard_router import insert_record as shard_insert
     for rec in records:
         s  = rec.get("student_id")
         st = rec.get("status", "absent")
         if s and st in ("present", "absent", "late"):
-            db.execute(
-                "INSERT INTO attendance_records (att_session_id, student_id, status) VALUES (?,?,?)",
-                (sid, s, st)
+            shard_insert(
+                att_session_id = sid,
+                student_id     = s,
+                status         = st
             )
             inserted_records.append({"student_id": s, "status": st})
-
-    db.commit()
 
     broadcast("attendance_session_created", {
         "course_id":      course_id,
@@ -133,12 +135,28 @@ def create_session():
 @bp.get("/attendance-sessions/<int:sid>/records")
 @require_role("ta")
 def session_records(sid):
-    rows = get_db().execute(
-        """SELECT ar.record_id, u.username, ar.status
-           FROM attendance_records ar JOIN users u ON u.user_id=ar.student_id
-           WHERE ar.att_session_id=? ORDER BY u.username""", (sid,)
-    ).fetchall()
-    return jsonify([dict(r) for r in rows])
+    db = get_db()
+    
+    # RANGE QUERY — fan-out across all 3 shards, merge results
+    from ..shard_router import get_records_for_session
+    shard_rows = get_records_for_session(sid)   # list of dicts from MySQL
+    
+    # Enrich with profile data from main SQLite db
+    result = []
+    for row in shard_rows:
+        profile = db.execute(
+            "SELECT u.username FROM users u WHERE u.user_id = ?",
+            (row["student_id"],)
+        ).fetchone()
+        
+        result.append({
+            "record_id":  row["record_id"],
+            "student_id": row["student_id"],
+            "status":     row["status"],
+            "username":   profile["username"] if profile else "—",
+        })
+    
+    return jsonify(result)
 
 # @bp.put("/records/<int:rid>")
 # @require_role("ta")
@@ -246,11 +264,18 @@ def accept_correction(req_id):
         return jsonify({"error": "Not found or forbidden"}), 404
     if req["status"] != "pending":
         return jsonify({"error": "Already resolved"}), 400
+    # LOOKUP: Find the attendance record for this student in this session
+    from ..shard_router import get_records_for_student
+    student_records = get_records_for_student(req["student_id"])
+    att_row = next((r for r in student_records if r["att_session_id"] == req["att_session_id"]), None)
+    
     # Update both — shared status visible to instructor and TA immediately
     db.execute("UPDATE correction_requests SET status='accepted' WHERE req_id=?", (req_id,))
-    db.execute("UPDATE attendance_records SET status='present' WHERE att_session_id=? AND student_id=?",
-               (req["att_session_id"], req["student_id"]))
-    db.commit()
+    
+    # UPDATE: Use shard router to update the record
+    if att_row:
+        from ..shard_router import update_record as shard_update
+        shard_update(att_row["record_id"], "present")
     db.execute(
         "INSERT INTO correction_logs (req_id, action, acted_by, role) VALUES (?,?,?,?)",
         (req_id, "accepted", g.user["user_id"], "ta")

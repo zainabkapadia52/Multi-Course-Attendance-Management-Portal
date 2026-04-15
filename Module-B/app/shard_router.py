@@ -1,0 +1,567 @@
+# app/shard_router.py
+"""
+Query router for MySQL shards on 10.0.116.184 (Scalix team database).
+
+Hash-based partitioning on student_id (Team: Scalix):
+    Shard 0  student_id % 3 == 0  →  10.0.116.184:3307
+    Shard 1  student_id % 3 == 1  →  10.0.116.184:3308
+    Shard 2  student_id % 3 == 2  →  10.0.116.184:3309
+"""
+
+import mysql.connector
+from flask import g
+import logging
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+logger = logging.getLogger(__name__)
+
+SHARD_CONFIGS = {
+    0: {"host": "10.0.116.184", "port": 3307,
+        "database": "Scalix", "user": "Scalix", "password": "password@123"},
+    1: {"host": "10.0.116.184", "port": 3308,
+        "database": "Scalix", "user": "Scalix", "password": "password@123"},
+    2: {"host": "10.0.116.184", "port": 3309,
+        "database": "Scalix", "user": "Scalix", "password": "password@123"},
+}
+
+# ── Routing logic ─────────────────────────────────────────────────────────────
+
+def get_shard_id(student_id: int) -> int:
+    """Return shard index for a student_id using modulo 3 partitioning."""
+    return student_id % 3
+
+def get_shards_for_range(min_id: int, max_id: int) -> list:
+    """
+    Return list of shard_ids for a range of student_ids.
+    With modulo 3 partitioning, any student_id in a range could be on any shard,
+    so we always return all shards for range queries.
+    """
+    return list(SHARD_CONFIGS.keys())  # Always query all shards for ranges
+
+# ── Connection management (one connection per shard per request) ───────────────
+
+def get_shard_conn(shard_id: int):
+    """
+    Return a MySQL connection for the given shard.
+    Connection is cached on Flask's g object for the lifetime of the request.
+    Raises: mysql.connector.Error if connection fails
+    """
+    key = f"_shard_conn_{shard_id}"
+    if not hasattr(g, key):
+        cfg = SHARD_CONFIGS[shard_id]
+        try:
+            conn = mysql.connector.connect(
+                host=cfg["host"],
+                port=cfg["port"],
+                user=cfg["user"],
+                password=cfg["password"],
+                database=cfg["database"],
+                connection_timeout=10,
+                autocommit=False
+            )
+            logger.info(f"✓ Connected to shard {shard_id} (port {cfg['port']})")
+            setattr(g, key, conn)
+        except mysql.connector.Error as e:
+            logger.error(f"✗ FAILED to connect to shard {shard_id} (port {cfg['port']}): {str(e)}")
+            raise
+    return getattr(g, key)
+
+def close_shard_connections(exception=None):
+    """
+    Call this from app teardown to close all shard connections.
+    Register in app/__init__.py:
+        app.teardown_appcontext(close_shard_connections)
+    """
+    for shard_id in SHARD_CONFIGS:
+        key = f"_shard_conn_{shard_id}"
+        conn = g.pop(key, None)
+        if conn is not None:
+            try:
+                conn.close()
+                logger.debug(f"✓ Closed shard {shard_id} connection")
+            except Exception as e:
+                logger.warning(f"⚠ Error closing shard {shard_id} connection: {str(e)}")
+
+# ── High-level query helpers ───────────────────────────────────────────────────
+
+def get_records_for_student(student_id: int) -> list:
+    """
+    LOOKUP QUERY — single shard.
+    Returns all attendance_records rows for one student as list of dicts.
+    Returns empty list if not found or on error.
+    """
+    shard_id = get_shard_id(student_id)
+
+    try:
+        conn   = get_shard_conn(shard_id)
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute(
+            f"SELECT * FROM shard_{shard_id}_attendance_records "
+            "WHERE student_id = %s",
+            (student_id,)
+        )
+        rows = cursor.fetchall()
+        cursor.close()
+        logger.debug(f"✓ Retrieved {len(rows)} records for student {student_id} from shard {shard_id}")
+        return rows
+    except mysql.connector.Error as e:
+        logger.error(f"✗ Query error for student {student_id} on shard {shard_id}: {str(e)}")
+        return []
+    except Exception as e:
+        logger.error(f"✗ Unexpected error for student {student_id}: {str(e)}")
+        return []
+
+
+def get_records_for_session(att_session_id: int) -> list:
+    """
+    RANGE QUERY — queries all 3 shards in parallel.
+    With modulo 3 partitioning, students are uniformly distributed across shards,
+    so we must query all shards to get complete session records.
+    
+    Returns merged attendance_records for one session across all shards.
+    Returns partial results if shard fails; logs errors.
+    """
+    rows = []
+    failed_shards = []
+    
+    # With modulo 3, always query all shards (data uniformly distributed)
+    relevant_shards = list(SHARD_CONFIGS.keys())
+    
+    def query_shard(shard_id):
+        """Query one shard (executed in parallel). Creates its own connection."""
+        try:
+            # Create direct connection (can't use g object in thread pool)
+            cfg = SHARD_CONFIGS[shard_id]
+            conn = mysql.connector.connect(
+                host=cfg["host"],
+                port=cfg["port"],
+                user=cfg["user"],
+                password=cfg["password"],
+                database=cfg["database"],
+                connection_timeout=10,
+                autocommit=False
+            )
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute(
+                f"SELECT * FROM shard_{shard_id}_attendance_records "
+                "WHERE att_session_id = %s",
+                (att_session_id,)
+            )
+            shard_rows = cursor.fetchall()
+            cursor.close()
+            conn.close()
+            logger.debug(f"✓ Retrieved {len(shard_rows)} records from shard {shard_id} for session {att_session_id}")
+            return shard_rows
+        except Exception as e:
+            logger.error(f"✗ Query error on shard {shard_id} for session {att_session_id}: {str(e)}")
+            return []
+    
+    try:
+        with ThreadPoolExecutor(max_workers=len(relevant_shards)) as executor:
+            futures = {executor.submit(query_shard, shard_id): shard_id 
+                      for shard_id in relevant_shards}
+            
+            for future in as_completed(futures):
+                shard_id = futures[future]
+                try:
+                    shard_rows = future.result(timeout=10)
+                    rows.extend(shard_rows)
+                except Exception as e:
+                    logger.error(f"✗ Shard {shard_id} query failed: {str(e)}")
+                    failed_shards.append(shard_id)
+    except Exception as e:
+        logger.error(f"✗ ThreadPoolExecutor error for session {att_session_id}: {str(e)}")
+        # Fallback to sequential
+        for shard_id in relevant_shards:
+            rows.extend(query_shard(shard_id))
+            failed_shards.append(shard_id)
+    
+    if failed_shards:
+        logger.warning(f"⚠ Partial results for session {att_session_id} (failed shards: {failed_shards})")
+    
+    return rows
+
+
+def get_student_id_for_record(record_id: int) -> int:
+    """
+    HELPER: Fetch student_id for a given record_id across all shards.
+    Scans all shards to find which one has this record_id.
+    
+    Returns student_id if found, -1 if not found.
+    """
+    try:
+        for shard_id in SHARD_CONFIGS:
+            try:
+                conn   = get_shard_conn(shard_id)
+                cursor = conn.cursor()
+                cursor.execute(
+                    f"SELECT student_id FROM shard_{shard_id}_attendance_records "
+                    "WHERE record_id = %s LIMIT 1",
+                    (record_id,)
+                )
+                row = cursor.fetchone()
+                cursor.close()
+                if row:
+                    student_id = row[0]
+                    logger.debug(f"  Found record {record_id} in shard {shard_id} with student_id={student_id}")
+                    return student_id
+            except Exception as e:
+                logger.debug(f"  Shard {shard_id} scan for record: {str(e)}")
+                continue
+        
+        logger.warning(f"⚠ Record {record_id} not found in any shard")
+        return -1
+    except Exception as e:
+        logger.error(f"✗ Error fetching student_id for record {record_id}: {str(e)}")
+        return -1
+
+
+def update_record(record_id: int, new_status: str, student_id: int = None) -> bool:
+    """
+    UPDATE — route to correct shard using student_id if provided.
+    If student_id provided: Route directly (OPTIMAL - single shard query)
+    If student_id not provided: Scan all shards (FALLBACK - less efficient)
+    
+    Returns True if the record was found and updated, False otherwise.
+    
+    Args:
+        record_id: ID of the attendance record to update
+        new_status: New status value (present, absent, late)
+        student_id: (Optional) Student ID to optimize routing. If provided, 
+                   queries only the shard containing that student.
+    """
+    try:
+        # OPTIMIZATION: If student_id provided, route directly to one shard
+        if student_id is not None:
+            shard_id = get_shard_id(student_id)
+            
+            try:
+                conn   = get_shard_conn(shard_id)
+                cursor = conn.cursor()
+                cursor.execute(
+                    f"UPDATE shard_{shard_id}_attendance_records "
+                    "SET status = %s WHERE record_id = %s",
+                    (new_status, record_id)
+                )
+                conn.commit()
+                affected = cursor.rowcount
+                cursor.close()
+                
+                if affected > 0:
+                    logger.info(f"✓ Direct update: record {record_id} in shard {shard_id} to status={new_status}")
+                    return True
+                else:
+                    logger.warning(f"⚠ Record {record_id} not found in shard {shard_id}")
+                    return False
+            except Exception as e:
+                logger.error(f"✗ Direct update failed for record {record_id}: {str(e)}")
+                return False
+        
+        # FALLBACK: No student_id provided, scan all shards (less efficient)
+        logger.warning(f"⚠ Scanning all shards for record {record_id} (student_id not provided)")
+        for shard_id in SHARD_CONFIGS:
+            try:
+                conn   = get_shard_conn(shard_id)
+                cursor = conn.cursor()
+                cursor.execute(
+                    f"UPDATE shard_{shard_id}_attendance_records "
+                    "SET status = %s WHERE record_id = %s",
+                    (new_status, record_id)
+                )
+                conn.commit()
+                affected = cursor.rowcount
+                cursor.close()
+                if affected > 0:
+                    logger.info(f"✓ Scan update: record {record_id} found in shard {shard_id} to status={new_status}")
+                    return True
+            except Exception as e:
+                logger.debug(f"  Shard {shard_id} scan: {str(e)}")
+                continue
+        
+        logger.warning(f"⚠ Record {record_id} not found in any shard")
+        return False
+        
+    except Exception as e:
+        logger.error(f"✗ Unexpected error updating record {record_id}: {str(e)}")
+        return False
+
+
+def insert_record(att_session_id: int, student_id: int,
+                  status: str, record_id: int = None) -> bool:
+    """
+    INSERT — route to correct shard by student_id.
+    Returns True on success, False if student_id is out of range or error.
+    """
+    shard_id = get_shard_id(student_id)
+    if shard_id == -1:
+        logger.warning(f"⚠ Cannot insert: student_id {student_id} out of range")
+        return False
+
+    try:
+        conn   = get_shard_conn(shard_id)
+        cursor = conn.cursor()
+
+        if record_id:
+            cursor.execute(
+                f"INSERT IGNORE INTO shard_{shard_id}_attendance_records "
+                "(record_id, att_session_id, student_id, status) "
+                "VALUES (%s, %s, %s, %s)",
+                (record_id, att_session_id, student_id, status)
+            )
+        else:
+            cursor.execute(
+                f"INSERT INTO shard_{shard_id}_attendance_records "
+                "(att_session_id, student_id, status) "
+                "VALUES (%s, %s, %s)",
+                (att_session_id, student_id, status)
+            )
+        conn.commit()
+        affected = cursor.rowcount
+        cursor.close()
+        logger.debug(f"✓ Inserted {affected} record(s) for student {student_id} into shard {shard_id}")
+        return True
+    except mysql.connector.Error as e:
+        logger.error(f"✗ Insert error for student {student_id}: {str(e)}")
+        return False
+    except Exception as e:
+        logger.error(f"✗ Unexpected error inserting record for student {student_id}: {str(e)}")
+        return False
+
+
+def delete_records_for_student(student_id: int) -> int:
+    """
+    CASCADE DELETE — delete all attendance_records for a student across all shards.
+    Called when a student is deleted from the system.
+    Returns count of records deleted.
+    """
+    shard_id = get_shard_id(student_id)
+    if shard_id == -1:
+        logger.warning(f"⚠ Cannot delete: student_id {student_id} out of range")
+        return 0   # student_id out of range
+    
+    try:
+        conn   = get_shard_conn(shard_id)
+        cursor = conn.cursor()
+        
+        cursor.execute(
+            f"DELETE FROM shard_{shard_id}_attendance_records "
+            "WHERE student_id = %s",
+            (student_id,)
+        )
+        deleted_count = cursor.rowcount
+        conn.commit()
+        cursor.close()
+        logger.info(f"✓ Cascade deleted {deleted_count} attendance records for student {student_id} from shard {shard_id}")
+        return deleted_count
+    except mysql.connector.Error as e:
+        logger.error(f"✗ Delete error for student {student_id}: {str(e)}")
+        return 0
+    except Exception as e:
+        logger.error(f"✗ Unexpected error deleting records for student {student_id}: {str(e)}")
+        return 0
+
+
+def delete_records_for_session(att_session_id: int) -> int:
+    """
+    CASCADE DELETE — delete all attendance_records for a session across all shards.
+    OPTIMIZED: Uses parallel ThreadPoolExecutor to query all shards simultaneously.
+    Called when an attendance session is deleted.
+    Returns count of records deleted across all shards.
+    """
+    def delete_from_shard(shard_id):
+        """Delete from one shard (executed in parallel). Creates its own connection."""
+        try:
+            # Create direct connection (can't use g object in thread pool)
+            cfg = SHARD_CONFIGS[shard_id]
+            conn = mysql.connector.connect(
+                host=cfg["host"],
+                port=cfg["port"],
+                user=cfg["user"],
+                password=cfg["password"],
+                database=cfg["database"],
+                connection_timeout=10,
+                autocommit=False
+            )
+            cursor = conn.cursor()
+            cursor.execute(
+                f"DELETE FROM shard_{shard_id}_attendance_records "
+                "WHERE att_session_id = %s",
+                (att_session_id,)
+            )
+            deleted_count = cursor.rowcount
+            conn.commit()
+            cursor.close()
+            conn.close()
+            logger.debug(f"✓ Deleted {deleted_count} records from shard {shard_id} for session {att_session_id}")
+            return deleted_count
+        except Exception as e:
+            logger.error(f"✗ Delete error on shard {shard_id} for session {att_session_id}: {str(e)}")
+            return 0
+    
+    # PARALLELIZATION: Query all 3 shards simultaneously instead of sequentially
+    total_deleted = 0
+    failed_shards = []
+    
+    try:
+        with ThreadPoolExecutor(max_workers=3) as executor:
+            futures = {executor.submit(delete_from_shard, shard_id): shard_id 
+                      for shard_id in SHARD_CONFIGS}
+            
+            for future in as_completed(futures):
+                shard_id = futures[future]
+                try:
+                    deleted_count = future.result(timeout=10)
+                    total_deleted += deleted_count
+                except Exception as e:
+                    logger.error(f"✗ Shard {shard_id} delete failed: {str(e)}")
+                    failed_shards.append(shard_id)
+    except Exception as e:
+        logger.error(f"✗ ThreadPoolExecutor error for session {att_session_id}: {str(e)}")
+        # Fallback to sequential
+        for shard_id in SHARD_CONFIGS:
+            total_deleted += delete_from_shard(shard_id)
+    
+    if failed_shards:
+        logger.warning(f"⚠ Partial delete for session {att_session_id} (failed shards: {failed_shards})")
+    
+    logger.info(f"✓ Cascade deleted total {total_deleted} records for session {att_session_id} (parallel)")
+    return total_deleted
+
+
+def delete_records_for_course(course_id: int, db) -> tuple:
+    """
+    CASCADE DELETE — delete all attendance_records for all sessions of a course
+    across all shards in parallel using batch DELETE with IN clause.
+    OPTIMIZED: Instead of 20 sessions × 3 shards = 60 serial roundtrips, 
+               now uses 1 batch per shard in parallel = 3 parallel queries total.
+    
+    Called when a course is deleted.
+    Returns (sessions_deleted, records_deleted).
+    """
+    # Get all sessions for this course
+    sessions = db.execute(
+        "SELECT att_session_id FROM attendance_sessions WHERE course_id = ?",
+        (course_id,)
+    ).fetchall()
+    
+    if not sessions:
+        logger.info(f"✓ No sessions found for course {course_id}")
+        return (0, 0)
+    
+    session_ids = [session["att_session_id"] for session in sessions]
+    sessions_deleted = len(sessions)
+    
+    def batch_delete_from_shard(shard_id):
+        """Delete all records for these sessions from one shard (in parallel). Creates its own connection."""
+        try:
+            # Create direct connection (can't use g object in thread pool)
+            cfg = SHARD_CONFIGS[shard_id]
+            conn = mysql.connector.connect(
+                host=cfg["host"],
+                port=cfg["port"],
+                user=cfg["user"],
+                password=cfg["password"],
+                database=cfg["database"],
+                connection_timeout=10,
+                autocommit=False
+            )
+            cursor = conn.cursor()
+            
+            # Batch DELETE: delete all records with session_id IN (list) in a single query
+            placeholders = ",".join(["%s"] * len(session_ids))
+            cursor.execute(
+                f"DELETE FROM shard_{shard_id}_attendance_records "
+                f"WHERE att_session_id IN ({placeholders})",
+                tuple(session_ids)
+            )
+            deleted_count = cursor.rowcount
+            conn.commit()
+            cursor.close()
+            conn.close()
+            logger.debug(f"✓ Batch deleted {deleted_count} records from shard {shard_id} for course {course_id}")
+            return deleted_count
+        except Exception as e:
+            logger.error(f"✗ Batch delete error on shard {shard_id} for course {course_id}: {str(e)}")
+            return 0
+    
+    # PARALLELIZATION: Delete from all 3 shards simultaneously using batch query
+    total_deleted = 0
+    failed_shards = []
+    
+    try:
+        with ThreadPoolExecutor(max_workers=3) as executor:
+            futures = {executor.submit(batch_delete_from_shard, shard_id): shard_id 
+                      for shard_id in SHARD_CONFIGS}
+            
+            for future in as_completed(futures):
+                shard_id = futures[future]
+                try:
+                    deleted_count = future.result(timeout=10)
+                    total_deleted += deleted_count
+                except Exception as e:
+                    logger.error(f"✗ Shard {shard_id} batch delete failed: {str(e)}")
+                    failed_shards.append(shard_id)
+    except Exception as e:
+        logger.error(f"✗ ThreadPoolExecutor error for course {course_id}: {str(e)}")
+        # Fallback to sequential
+        for shard_id in SHARD_CONFIGS:
+            total_deleted += batch_delete_from_shard(shard_id)
+    
+    if failed_shards:
+        logger.warning(f"⚠ Partial delete for course {course_id} (failed shards: {failed_shards})")
+    
+    logger.info(f"✓ Cascade deleted {sessions_deleted} sessions and {total_deleted} records for course {course_id} (batch+parallel)")
+    return (sessions_deleted, total_deleted)
+
+
+def delete_records_for_student_in_course(student_id: int, course_id: int, db) -> int:
+    """
+    CASCADE DELETE — delete attendance_records for a specific student in a specific course
+    across all shards in batch (for all sessions of this course).
+    OPTIMIZED: Uses batch DELETE with IN clause instead of looping sessions.
+    
+    Called when a student is unenrolled from a course.
+    Returns count of records deleted.
+    """
+    try:
+        # Get all sessions for this course
+        sessions = db.execute(
+            "SELECT att_session_id FROM attendance_sessions WHERE course_id = ?",
+            (course_id,)
+        ).fetchall()
+        
+        if not sessions:
+            logger.info(f"⚠ No sessions found for course {course_id}")
+            return 0
+        
+        session_ids = [session["att_session_id"] for session in sessions]
+        
+        shard_id = get_shard_id(student_id)
+        if shard_id == -1:
+            logger.warning(f"⚠ Cannot delete: student_id {student_id} out of range")
+            return 0   # student_id out of range
+        
+        conn   = get_shard_conn(shard_id)
+        cursor = conn.cursor()
+        
+        # Batch DELETE: delete all records for this student in any of these sessions
+        placeholders = ",".join(["%s"] * len(session_ids))
+        cursor.execute(
+            f"DELETE FROM shard_{shard_id}_attendance_records "
+            f"WHERE student_id = %s AND att_session_id IN ({placeholders})",
+            (student_id, *session_ids)
+        )
+        total_deleted = cursor.rowcount
+        
+        conn.commit()
+        cursor.close()
+        
+        logger.info(f"✓ Batch deleted {total_deleted} records for student {student_id} from course {course_id}")
+        return total_deleted
+    except mysql.connector.Error as e:
+        logger.error(f"✗ Delete error for student {student_id} in course {course_id}: {str(e)}")
+        return 0
+    except Exception as e:
+        logger.error(f"✗ Unexpected error deleting records for student {student_id}: {str(e)}")
+        return 0

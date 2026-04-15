@@ -1,6 +1,6 @@
 {
   "level": "database",
-  "timestamp": "2026-04-05T17:01:26.311784",
+  "timestamp": "2026-04-14T10:33:29.596779",
   "summary": {
     "total": 23,
     "passed": 23,
@@ -10,161 +10,161 @@
   },
   "results": [
     {
-      "timestamp": "2026-04-05T17:01:26.074944",
+      "timestamp": "2026-04-14T10:33:29.379828",
       "action": "admin_add_instructor_to_course",
       "test": "atomicity",
       "status": "PASS",
       "message": "Instructor added atomically"
     },
     {
-      "timestamp": "2026-04-05T17:01:26.086389",
+      "timestamp": "2026-04-14T10:33:29.390739",
       "action": "admin_remove_instructor_from_course",
       "test": "atomicity",
       "status": "PASS",
       "message": "Instructor removed atomically"
     },
     {
-      "timestamp": "2026-04-05T17:01:26.098726",
+      "timestamp": "2026-04-14T10:33:29.397402",
       "action": "admin_add_ta_to_course",
       "test": "atomicity",
       "status": "PASS",
       "message": "TA added atomically"
     },
     {
-      "timestamp": "2026-04-05T17:01:26.110476",
+      "timestamp": "2026-04-14T10:33:29.407361",
       "action": "admin_remove_ta_from_course",
       "test": "atomicity",
       "status": "PASS",
       "message": "TA removed atomically"
     },
     {
-      "timestamp": "2026-04-05T17:01:26.121065",
+      "timestamp": "2026-04-14T10:33:29.414439",
       "action": "admin_add_enrolled_student",
       "test": "atomicity",
       "status": "PASS",
       "message": "Student enrolled atomically"
     },
     {
-      "timestamp": "2026-04-05T17:01:26.133489",
+      "timestamp": "2026-04-14T10:33:29.429326",
       "action": "admin_remove_enrolled_student",
       "test": "atomicity",
       "status": "PASS",
       "message": "Student removed atomically"
     },
     {
-      "timestamp": "2026-04-05T17:01:26.145373",
+      "timestamp": "2026-04-14T10:33:29.460082",
       "action": "admin_delete_course",
       "test": "atomicity",
       "status": "PASS",
       "message": "Course deleted atomically with cascade"
     },
     {
-      "timestamp": "2026-04-05T17:01:26.156675",
+      "timestamp": "2026-04-14T10:33:29.470950",
       "action": "admin_create_semester",
       "test": "atomicity",
       "status": "PASS",
       "message": "Semester created atomically"
     },
     {
-      "timestamp": "2026-04-05T17:01:26.167980",
+      "timestamp": "2026-04-14T10:33:29.480651",
       "action": "admin_add_course",
       "test": "atomicity",
       "status": "PASS",
       "message": "Course added atomically"
     },
     {
-      "timestamp": "2026-04-05T17:01:26.179352",
+      "timestamp": "2026-04-14T10:33:29.486876",
       "action": "admin_create_user",
       "test": "atomicity",
       "status": "PASS",
       "message": "User created atomically"
     },
     {
-      "timestamp": "2026-04-05T17:01:26.192684",
+      "timestamp": "2026-04-14T10:33:29.493316",
       "action": "admin_delete_user",
       "test": "atomicity",
       "status": "PASS",
       "message": "User deleted atomically"
     },
     {
-      "timestamp": "2026-04-05T17:01:26.203563",
+      "timestamp": "2026-04-14T10:33:29.505736",
       "action": "admin_delete_past_semester",
       "test": "atomicity",
       "status": "PASS",
       "message": "Past semester deleted atomically"
     },
     {
-      "timestamp": "2026-04-05T17:01:26.214110",
+      "timestamp": "2026-04-14T10:33:29.512919",
       "action": "admin_override_attendance_batch",
       "test": "atomicity",
       "status": "PASS",
       "message": "Batch override 3 records atomically"
     },
     {
-      "timestamp": "2026-04-05T17:01:26.229329",
+      "timestamp": "2026-04-14T10:33:29.524152",
       "action": "instructor_create_attendance_session",
       "test": "atomicity",
       "status": "PASS",
       "message": "Attendance session created atomically"
     },
     {
-      "timestamp": "2026-04-05T17:01:26.238914",
+      "timestamp": "2026-04-14T10:33:29.530427",
       "action": "instructor_accept_correction_request",
       "test": "atomicity",
       "status": "PASS",
       "message": "Correction request accepted atomically"
     },
     {
-      "timestamp": "2026-04-05T17:01:26.248663",
+      "timestamp": "2026-04-14T10:33:29.536994",
       "action": "instructor_reject_correction_request",
       "test": "atomicity",
       "status": "PASS",
       "message": "Correction request rejected atomically"
     },
     {
-      "timestamp": "2026-04-05T17:01:26.257840",
+      "timestamp": "2026-04-14T10:33:29.542980",
       "action": "instructor_add_ta_to_course",
       "test": "atomicity",
       "status": "PASS",
       "message": "TA added to course atomically"
     },
     {
-      "timestamp": "2026-04-05T17:01:26.267076",
+      "timestamp": "2026-04-14T10:33:29.549549",
       "action": "instructor_remove_ta_from_course",
       "test": "atomicity",
       "status": "PASS",
       "message": "TA removed from course atomically"
     },
     {
-      "timestamp": "2026-04-05T17:01:26.274052",
+      "timestamp": "2026-04-14T10:33:29.557070",
       "action": "ta_save_attendance_changes",
       "test": "atomicity",
       "status": "PASS",
       "message": "Saved 3 changes atomically"
     },
     {
-      "timestamp": "2026-04-05T17:01:26.281418",
+      "timestamp": "2026-04-14T10:33:29.565067",
       "action": "ta_create_attendance_session",
       "test": "atomicity",
       "status": "PASS",
       "message": "Attendance session created atomically by TA"
     },
     {
-      "timestamp": "2026-04-05T17:01:26.288241",
+      "timestamp": "2026-04-14T10:33:29.572724",
       "action": "ta_accept_correction_request",
       "test": "atomicity",
       "status": "PASS",
       "message": "Correction accepted atomically by TA"
     },
     {
-      "timestamp": "2026-04-05T17:01:26.294978",
+      "timestamp": "2026-04-14T10:33:29.578333",
       "action": "ta_reject_correction_request",
       "test": "atomicity",
       "status": "PASS",
       "message": "Correction rejected atomically by TA"
     },
     {
-      "timestamp": "2026-04-05T17:01:26.311171",
+      "timestamp": "2026-04-14T10:33:29.594860",
       "action": "student_submit_correction_request",
       "test": "atomicity",
       "status": "PASS",
