@@ -4625,3 +4625,76 @@
 127.0.0.1 - - [15/Apr/2026 18:59:20] "GET /api/student/corrections/current HTTP/1.1" 200 -
 ✓ Connected to shard 0 (port 3307)
 127.0.0.1 - - [15/Apr/2026 18:59:21] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5050
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 637-473-595
+127.0.0.1 - - [15/Apr/2026 19:26:38] "[32mGET / HTTP/1.1[0m" 302 -
+127.0.0.1 - - [15/Apr/2026 19:26:38] "GET /login HTTP/1.1" 200 -
+2026-04-15T13:56:48.691204 | ACTION=LOGIN_OK | USER=12 | ENDPOINT=/login | username=aarav_verma0
+127.0.0.1 - - [15/Apr/2026 19:26:48] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [15/Apr/2026 19:26:48] "GET /student HTTP/1.1" 200 -
+127.0.0.1 - - [15/Apr/2026 19:26:48] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [15/Apr/2026 19:26:48] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [15/Apr/2026 19:26:48] "GET /stream?session_id=f841683c-51b2-420b-be9f-87e53c431a82&mac=d2b642cab4a52ec24c9797503ac2dc4b49eb2370f46246c02f8bf606113df2a7 HTTP/1.1" 200 -
+127.0.0.1 - - [15/Apr/2026 19:26:48] "GET /api/student/profile HTTP/1.1" 200 -
+127.0.0.1 - - [15/Apr/2026 19:26:48] "GET /api/student/corrections/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [15/Apr/2026 19:26:49] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+127.0.0.1 - - [15/Apr/2026 19:27:00] "GET /student HTTP/1.1" 200 -
+127.0.0.1 - - [15/Apr/2026 19:27:00] "GET /login HTTP/1.1" 200 -
+2026-04-15T13:57:06.079777 | ACTION=LOGIN_OK | USER=3 | ENDPOINT=/login | username=prof_singh
+127.0.0.1 - - [15/Apr/2026 19:27:06] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [15/Apr/2026 19:27:06] "GET /instructor HTTP/1.1" 200 -
+127.0.0.1 - - [15/Apr/2026 19:27:06] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [15/Apr/2026 19:27:06] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [15/Apr/2026 19:27:06] "GET /stream?session_id=468c4442-b3b4-4672-aac2-3cae1c31dde9&mac=23bc5d089422c69b85846705d901af3b42e25ea87ccc036d926214365907684a HTTP/1.1" 200 -
+127.0.0.1 - - [15/Apr/2026 19:27:06] "GET /api/instructor/courses HTTP/1.1" 200 -
+127.0.0.1 - - [15/Apr/2026 19:27:09] "GET /api/instructor/courses/1/students HTTP/1.1" 200 -
+127.0.0.1 - - [15/Apr/2026 19:27:11] "GET /api/instructor/courses/11/students HTTP/1.1" 200 -
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5050
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 637-473-595
+127.0.0.1 - - [15/Apr/2026 19:32:44] "[31m[1mGET /stream?session_id=468c4442-b3b4-4672-aac2-3cae1c31dde9&mac=23bc5d089422c69b85846705d901af3b42e25ea87ccc036d926214365907684a HTTP/1.1[0m" 401 -
+127.0.0.1 - - [15/Apr/2026 19:32:44] "[32mGET / HTTP/1.1[0m" 302 -
+127.0.0.1 - - [15/Apr/2026 19:32:44] "GET /login HTTP/1.1" 200 -
+2026-04-15T14:02:50.146997 | ACTION=LOGIN_OK | USER=3 | ENDPOINT=/login | username=prof_singh
+127.0.0.1 - - [15/Apr/2026 19:32:50] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [15/Apr/2026 19:32:50] "GET /instructor HTTP/1.1" 200 -
+127.0.0.1 - - [15/Apr/2026 19:32:50] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [15/Apr/2026 19:32:50] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [15/Apr/2026 19:32:50] "GET /api/instructor/courses HTTP/1.1" 200 -
+127.0.0.1 - - [15/Apr/2026 19:32:50] "GET /stream?session_id=a28487d7-0fc4-42af-a955-a3574deb52c6&mac=a9f34e70f86b98f3626118550171aa6040d2605e2de8d0088bcfc690690d46d1 HTTP/1.1" 200 -
+127.0.0.1 - - [15/Apr/2026 19:32:52] "GET /api/instructor/courses/1/students HTTP/1.1" 200 -
+127.0.0.1 - - [15/Apr/2026 19:32:52] "GET /api/instructor/courses/1/tas HTTP/1.1" 200 -
+127.0.0.1 - - [15/Apr/2026 19:32:52] "GET /api/instructor/available-tas/1 HTTP/1.1" 200 -
+127.0.0.1 - - [15/Apr/2026 19:32:55] "GET /student HTTP/1.1" 200 -
+127.0.0.1 - - [15/Apr/2026 19:32:55] "[31m[1mGET /isAuth HTTP/1.1[0m" 401 -
+2026-04-15T14:02:55.563339 | ACTION=UNAUTHORIZED | USER=None | ENDPOINT=/api/student/attendance-stats/current | 
+2026-04-15T14:02:55.563869 | ACTION=UNAUTHORIZED | USER=None | ENDPOINT=/api/student/corrections/current | 
+127.0.0.1 - - [15/Apr/2026 19:32:55] "[31m[1mGET /api/student/attendance-stats/current HTTP/1.1[0m" 401 -
+127.0.0.1 - - [15/Apr/2026 19:32:55] "[31m[1mGET /api/student/corrections/current HTTP/1.1[0m" 401 -
+2026-04-15T14:02:55.566597 | ACTION=UNAUTHORIZED | USER=None | ENDPOINT=/api/student/profile | 
+127.0.0.1 - - [15/Apr/2026 19:32:55] "[31m[1mGET /api/student/profile HTTP/1.1[0m" 401 -
+127.0.0.1 - - [15/Apr/2026 19:32:55] "[31m[1mGET /isAuth HTTP/1.1[0m" 401 -
+127.0.0.1 - - [15/Apr/2026 19:32:55] "[31m[1mGET /stream?session_id=f841683c-51b2-420b-be9f-87e53c431a82&mac=d2b642cab4a52ec24c9797503ac2dc4b49eb2370f46246c02f8bf606113df2a7 HTTP/1.1[0m" 401 -
+127.0.0.1 - - [15/Apr/2026 19:32:55] "GET /login HTTP/1.1" 200 -
+127.0.0.1 - - [15/Apr/2026 19:32:55] "GET /login HTTP/1.1" 200 -
+2026-04-15T14:02:58.545436 | ACTION=LOGIN_OK | USER=12 | ENDPOINT=/login | username=aarav_verma0
+127.0.0.1 - - [15/Apr/2026 19:32:58] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [15/Apr/2026 19:32:58] "GET /student HTTP/1.1" 200 -
+127.0.0.1 - - [15/Apr/2026 19:32:58] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [15/Apr/2026 19:32:58] "GET /stream?session_id=1c541447-6ab2-43d9-a811-f48738b12086&mac=9dacd19a1894aa8309a96c7b75f8ac25ebfdfdd0d37f875c2a7f35daf9865291 HTTP/1.1" 200 -
+127.0.0.1 - - [15/Apr/2026 19:32:58] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [15/Apr/2026 19:32:58] "GET /api/student/profile HTTP/1.1" 200 -
+127.0.0.1 - - [15/Apr/2026 19:32:58] "GET /api/student/corrections/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [15/Apr/2026 19:32:59] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+127.0.0.1 - - [15/Apr/2026 19:33:24] "GET /api/student/corrections/archive HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [15/Apr/2026 19:33:25] "GET /api/student/attendance-stats/archive HTTP/1.1" 200 -
