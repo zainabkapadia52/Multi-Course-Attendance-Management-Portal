@@ -124,12 +124,12 @@ def migrate_to_mysql_shards():
                 connection_timeout=10
             )
             
-            # Drop and recreate table with proper AUTO_INCREMENT
-            # Execute DROP and CREATE separately to avoid "Commands out of sync"
+            # Drop old table (clears all previous data)
             cursor = conn.cursor()
             cursor.execute(SHARD_SCHEMA_DROP.format(shard_id=shard_id))
             cursor.close()
             
+            # Create fresh table with proper AUTO_INCREMENT
             cursor = conn.cursor()
             cursor.execute(SHARD_SCHEMA_CREATE.format(shard_id=shard_id))
             cursor.close()
@@ -137,7 +137,7 @@ def migrate_to_mysql_shards():
             conn.commit()
             
             mysql_conns[shard_id] = conn
-            print(f"    ✓  Shard {shard_id} ready (port {config['port']})")
+            print(f"    ✓  Shard {shard_id} ready (cleared old data, port {config['port']})")
         except mysql.connector.Error as e:
             print(f"    ✗  Shard {shard_id} failed: {e}")
             for c in mysql_conns.values():
