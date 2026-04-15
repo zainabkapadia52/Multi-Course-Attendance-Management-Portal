@@ -477,38 +477,52 @@ def course_sessions(cid):
 @require_role("admin")
 @thread_safe_db("attendance")
 def session_records(sid):
-    rows = get_db().execute(
-        """SELECT ar.record_id, ar.student_id, u.username, ar.status
-           FROM attendance_records ar JOIN users u ON u.user_id=ar.student_id
-           WHERE ar.att_session_id=? ORDER BY u.username""", (sid,)
-    ).fetchall()
-    return jsonify([dict(r) for r in rows])
+    db = get_db()
+    
+    # RANGE QUERY — fan-out across all 3 shards, merge results
+    from ..shard_router import get_records_for_session
+    shard_rows = get_records_for_session(sid)   # list of dicts from MySQL
+    
+    # Enrich with username from main SQLite db
+    result = []
+    for row in shard_rows:
+        user = db.execute(
+            "SELECT username FROM users WHERE user_id = ?",
+            (row["student_id"],)
+        ).fetchone()
+        
+        result.append({
+            "record_id":  row["record_id"],
+            "student_id": row["student_id"],
+            "status":     row["status"],
+            "username":   user["username"] if user else "—",
+        })
+    
+    return jsonify(result)
 
 @bp.put("/records/<int:rid>")
 @require_role("admin")
 @thread_safe_db("attendance")
 def update_record(rid):
     status = (request.json or {}).get("status")
-    if status not in ("present","absent"):
+    if status not in ("present","absent", "late"):
         return jsonify({"error": "Invalid status"}), 400
-    db  = get_db()
-    row = db.execute(
-        "SELECT status, student_id, att_session_id FROM attendance_records WHERE record_id=?",
-        (rid,)
-    ).fetchone()
-    if not row:
-        return jsonify({"error": "Record not found"}), 404
-    old_status = row["status"]
-    db.execute("UPDATE attendance_records SET status=? WHERE record_id=?", (status, rid))
-    db.commit()
+    
+    # UPDATE — router scans all shards, updates the correct one
+    from ..shard_router import update_record as shard_update
+    found = shard_update(rid, status)
+    
+    if not found:
+        return jsonify({"error": "Record not found in any shard"}), 404
+    
     broadcast("attendance_updated", {"record_id": rid, "status": status})
     audit_log(
         "ADMIN_ATT_OVERRIDE",
         f"/api/admin/records/{rid}",
         g.user["user_id"],
         details=f"record_id={rid}",
-        old_value={"record_id": rid, "student_id": row["student_id"], "att_session_id": row["att_session_id"], "status": old_status},
-        new_value={"record_id": rid, "student_id": row["student_id"], "att_session_id": row["att_session_id"], "status": status}
+        old_value={"record_id": rid, "status": "(previous)"},
+        new_value={"record_id": rid, "status": status}
     )
     return jsonify({"message": "Record updated"})
 

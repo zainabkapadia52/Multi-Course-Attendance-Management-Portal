@@ -166,18 +166,24 @@ def attendance_stats_archive():
 
 def _build_stats(db, courses, student_id, archive=False):
     """Shared helper — builds per-course attendance stats."""
+    from ..shard_router import get_records_for_student
     MIN_SESSIONS_TO_WARN = 5
     result = []
+    
+    # LOOKUP: Get all records for this student from the correct shard
+    all_student_records = get_records_for_student(student_id)
+    
     for course in courses:
-        records = db.execute(
-            """SELECT ar.record_id, ar.status, att.session_date, att.topic,
-                      att.att_session_id
-               FROM attendance_records ar
-               JOIN attendance_sessions att ON att.att_session_id=ar.att_session_id
-               WHERE att.course_id=? AND ar.student_id=?
-               ORDER BY att.session_date DESC""",
-            (course["course_id"], student_id)
-        ).fetchall()
+        # Filter to this course using session lookup in main SQLite db
+        session_ids_for_course = {
+            r["att_session_id"] for r in db.execute(
+                "SELECT att_session_id FROM attendance_sessions WHERE course_id = ?",
+                (course["course_id"],)
+            ).fetchall()
+        }
+        
+        records = [r for r in all_student_records
+                   if r["att_session_id"] in session_ids_for_course]
 
         total   = len(records)
         present = sum(1 for r in records if r["status"] == "present")
@@ -226,15 +232,38 @@ def course_sessions(cid):
     if not db.execute("SELECT 1 FROM course_enrollments WHERE course_id=? AND student_id=?",
                       (cid, g.user["user_id"])).fetchone():
         return jsonify({"error": "Not enrolled"}), 403
-    rows = db.execute(
-        """SELECT att.att_session_id, att.session_date, att.topic, ar.status
-           FROM attendance_sessions att
-           JOIN attendance_records ar ON ar.att_session_id=att.att_session_id
-           WHERE att.course_id=? AND ar.student_id=? AND ar.status='absent'
-           ORDER BY att.session_date DESC""",
-        (cid, g.user["user_id"])
-    ).fetchall()
-    return jsonify([dict(r) for r in rows])
+    
+    # LOOKUP: Get all records for this student from the correct shard
+    from ..shard_router import get_records_for_student
+    all_student_records = get_records_for_student(g.user["user_id"])
+    
+    # Filter by course and absent status
+    session_ids_for_course = {
+        r["att_session_id"] for r in db.execute(
+            "SELECT att_session_id FROM attendance_sessions WHERE course_id = ?",
+            (cid,)
+        ).fetchall()
+    }
+    
+    absent_records = [r for r in all_student_records
+                      if r["att_session_id"] in session_ids_for_course and r["status"] == "absent"]
+    
+    # Enrich with session details from main db
+    result = []
+    for rec in absent_records:
+        session = db.execute(
+            "SELECT att_session_id, session_date, topic FROM attendance_sessions WHERE att_session_id = ?",
+            (rec["att_session_id"],)
+        ).fetchone()
+        if session:
+            result.append({
+                "att_session_id": session["att_session_id"],
+                "session_date":   session["session_date"],
+                "topic":          session["topic"],
+                "status":         rec["status"],
+            })
+    
+    return jsonify(sorted(result, key=lambda x: x["session_date"], reverse=True))
 
 @bp.get("/corrections")
 @require_role("student")
