@@ -77,6 +77,9 @@ def create_session():
                 status         = st
             )
             inserted_records.append({"student_id": s, "status": st})
+
+    db.commit()  # CRITICAL: Commit attendance_sessions to SQLite so students can join
+
     broadcast("attendance_session_created", {
         "course_id":      course_id,
         "att_session_id": sid,

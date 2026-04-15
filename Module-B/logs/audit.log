@@ -4698,3 +4698,65 @@
 127.0.0.1 - - [15/Apr/2026 19:33:24] "GET /api/student/corrections/archive HTTP/1.1" 200 -
 ✓ Connected to shard 0 (port 3307)
 127.0.0.1 - - [15/Apr/2026 19:33:25] "GET /api/student/attendance-stats/archive HTTP/1.1" 200 -
+ * Debugger is active!
+ * Debugger PIN: 114-926-886
+127.0.0.1 - - [16/Apr/2026 02:27:23] "GET /stream?session_id=966a4bac-e444-4b89-a7eb-507b5b48323c&mac=0e0c74a49ca8e4ca81acbc90638ad3faee5397998e542ba14a2516f744dcec38 HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 02:27:23] "GET /stream?session_id=97a6c839-ba07-4c4a-a59e-e3a1f9a2dee4&mac=297bfa07d1debb9ade34a531ba685623314ab468304a99b9814e533dc65278ee HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 02:27:23] "GET /stream?session_id=6c1d7e51-2fdc-4d02-a1bc-b7e3b45de5d6&mac=ec28c05b05838209903713d139b7cef7496ac3de808b7727610435b6e74809aa HTTP/1.1" 200 -
+ * Detected change in '/Users/zainab/Multi-Course-Attendance-Management-Portal/Module-B/app/routes/ta.py', reloading
+ * Debugger is active!
+ * Debugger PIN: 114-926-886
+127.0.0.1 - - [16/Apr/2026 02:27:30] "GET /stream?session_id=6c1d7e51-2fdc-4d02-a1bc-b7e3b45de5d6&mac=ec28c05b05838209903713d139b7cef7496ac3de808b7727610435b6e74809aa HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 02:27:30] "GET /stream?session_id=966a4bac-e444-4b89-a7eb-507b5b48323c&mac=0e0c74a49ca8e4ca81acbc90638ad3faee5397998e542ba14a2516f744dcec38 HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 02:27:30] "GET /stream?session_id=97a6c839-ba07-4c4a-a59e-e3a1f9a2dee4&mac=297bfa07d1debb9ade34a531ba685623314ab468304a99b9814e533dc65278ee HTTP/1.1" 200 -
+ * Detected change in '/Users/zainab/Multi-Course-Attendance-Management-Portal/Module-B/app/routes/instructor.py', reloading
+ * Debugger is active!
+ * Debugger PIN: 114-926-886
+ * Detected change in '/Users/zainab/Multi-Course-Attendance-Management-Portal/Module-B/app/routes/ta.py', reloading
+ * Debugger is active!
+ * Debugger PIN: 114-926-886
+127.0.0.1 - - [16/Apr/2026 03:17:01] "[32mGET / HTTP/1.1[0m" 302 -
+127.0.0.1 - - [16/Apr/2026 03:17:01] "GET /login HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:17:03] "[32mGET / HTTP/1.1[0m" 302 -
+127.0.0.1 - - [16/Apr/2026 03:17:03] "GET /login HTTP/1.1" 200 -
+2026-04-15T21:47:12.616963 | ACTION=LOGIN_OK | USER=3 | ENDPOINT=/login | username=prof_singh
+127.0.0.1 - - [16/Apr/2026 03:17:12] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:17:13] "GET /instructor HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:17:13] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+127.0.0.1 - - [16/Apr/2026 03:17:13] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:17:13] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:17:13] "GET /api/instructor/courses HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:17:13] "GET /stream?session_id=89d3b289-f70c-4172-87c8-f16a884c3e48&mac=6cf46743a955b0789e9c1d9ff26f364a4653daf57516f58c5d5f7281d1110f98 HTTP/1.1" 200 -
+2026-04-15T21:47:25.280379 | ACTION=LOGIN_OK | USER=12 | ENDPOINT=/login | username=aarav_verma0
+127.0.0.1 - - [16/Apr/2026 03:17:25] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:17:25] "GET /student HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:17:25] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+127.0.0.1 - - [16/Apr/2026 03:17:25] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:17:25] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:17:25] "GET /api/student/profile HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:17:25] "GET /stream?session_id=8a1d17f9-8378-4a0d-a67f-cea649ca2e83&mac=f01e5fb6b5874bd435f3691ffba7fa91a66be307ecf4ed127d8e7a442b01c4e1 HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:17:25] "GET /api/student/corrections/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:17:25] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:17:31] "GET /api/instructor/courses/1/students HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Connected to shard 2 (port 3309)
+✓ Connected to shard 1 (port 3308)
+2026-04-15T21:47:46.574715 | ACTION=CREATE_ATT_SESSION | USER=3 | ENDPOINT=/api/instructor/attendance-sessions | att_session_id=103 | OLD=None | NEW={'att_session_id': 103, 'course_id': 1, 'session_date': '2026-04-17', 'topic': 'Hard topic ', 'records': [{'student_id': 12, 'status': 'present'}, {'student_id': 62, 'status': 'absent'}, {'student_id': 15, 'status': 'absent'}, {'student_id': 16, 'status': 'absent'}, {'student_id': 19, 'status': 'absent'}, {'student_id': 67, 'status': 'absent'}, {'student_id': 23, 'status': 'absent'}, {'student_id': 24, 'status': 'absent'}, {'student_id': 25, 'status': 'absent'}, {'student_id': 26, 'status': 'absent'}, {'student_id': 27, 'status': 'absent'}, {'student_id': 28, 'status': 'absent'}, {'student_id': 29, 'status': 'absent'}, {'student_id': 30, 'status': 'absent'}, {'student_id': 32, 'status': 'absent'}, {'student_id': 33, 'status': 'absent'}, {'student_id': 35, 'status': 'absent'}, {'student_id': 38, 'status': 'absent'}, {'student_id': 40, 'status': 'absent'}, {'student_id': 43, 'status': 'absent'}, {'student_id': 45, 'status': 'absent'}, {'student_id': 46, 'status': 'absent'}, {'student_id': 47, 'status': 'absent'}, {'student_id': 48, 'status': 'absent'}, {'student_id': 51, 'status': 'absent'}, {'student_id': 54, 'status': 'absent'}, {'student_id': 56, 'status': 'absent'}, {'student_id': 59, 'status': 'absent'}]}
+127.0.0.1 - - [16/Apr/2026 03:17:46] "[35m[1mPOST /api/instructor/attendance-sessions HTTP/1.1[0m" 201 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:17:46] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Connected to shard 2 (port 3309)
+✓ Connected to shard 1 (port 3308)
+2026-04-15T21:48:05.189098 | ACTION=CREATE_ATT_SESSION | USER=3 | ENDPOINT=/api/instructor/attendance-sessions | att_session_id=104 | OLD=None | NEW={'att_session_id': 104, 'course_id': 1, 'session_date': '2026-04-18', 'topic': 'Hard topic ', 'records': [{'student_id': 12, 'status': 'present'}, {'student_id': 62, 'status': 'absent'}, {'student_id': 15, 'status': 'absent'}, {'student_id': 16, 'status': 'absent'}, {'student_id': 19, 'status': 'absent'}, {'student_id': 67, 'status': 'absent'}, {'student_id': 23, 'status': 'absent'}, {'student_id': 24, 'status': 'absent'}, {'student_id': 25, 'status': 'absent'}, {'student_id': 26, 'status': 'absent'}, {'student_id': 27, 'status': 'absent'}, {'student_id': 28, 'status': 'absent'}, {'student_id': 29, 'status': 'absent'}, {'student_id': 30, 'status': 'absent'}, {'student_id': 32, 'status': 'absent'}, {'student_id': 33, 'status': 'absent'}, {'student_id': 35, 'status': 'absent'}, {'student_id': 38, 'status': 'absent'}, {'student_id': 40, 'status': 'absent'}, {'student_id': 43, 'status': 'absent'}, {'student_id': 45, 'status': 'absent'}, {'student_id': 46, 'status': 'absent'}, {'student_id': 47, 'status': 'absent'}, {'student_id': 48, 'status': 'absent'}, {'student_id': 51, 'status': 'absent'}, {'student_id': 54, 'status': 'absent'}, {'student_id': 56, 'status': 'absent'}, {'student_id': 59, 'status': 'absent'}]}
+127.0.0.1 - - [16/Apr/2026 03:18:05] "[35m[1mPOST /api/instructor/attendance-sessions HTTP/1.1[0m" 201 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:18:05] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Connected to shard 2 (port 3309)
+✓ Connected to shard 1 (port 3308)
+2026-04-15T21:48:06.864059 | ACTION=CREATE_ATT_SESSION | USER=3 | ENDPOINT=/api/instructor/attendance-sessions | att_session_id=105 | OLD=None | NEW={'att_session_id': 105, 'course_id': 1, 'session_date': '2026-04-18', 'topic': 'Hard topic ', 'records': [{'student_id': 12, 'status': 'present'}, {'student_id': 62, 'status': 'absent'}, {'student_id': 15, 'status': 'absent'}, {'student_id': 16, 'status': 'absent'}, {'student_id': 19, 'status': 'absent'}, {'student_id': 67, 'status': 'absent'}, {'student_id': 23, 'status': 'absent'}, {'student_id': 24, 'status': 'absent'}, {'student_id': 25, 'status': 'absent'}, {'student_id': 26, 'status': 'absent'}, {'student_id': 27, 'status': 'absent'}, {'student_id': 28, 'status': 'absent'}, {'student_id': 29, 'status': 'absent'}, {'student_id': 30, 'status': 'absent'}, {'student_id': 32, 'status': 'absent'}, {'student_id': 33, 'status': 'absent'}, {'student_id': 35, 'status': 'absent'}, {'student_id': 38, 'status': 'absent'}, {'student_id': 40, 'status': 'absent'}, {'student_id': 43, 'status': 'absent'}, {'student_id': 45, 'status': 'absent'}, {'student_id': 46, 'status': 'absent'}, {'student_id': 47, 'status': 'absent'}, {'student_id': 48, 'status': 'absent'}, {'student_id': 51, 'status': 'absent'}, {'student_id': 54, 'status': 'absent'}, {'student_id': 56, 'status': 'absent'}, {'student_id': 59, 'status': 'absent'}]}
+127.0.0.1 - - [16/Apr/2026 03:18:06] "[35m[1mPOST /api/instructor/attendance-sessions HTTP/1.1[0m" 201 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:18:06] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
