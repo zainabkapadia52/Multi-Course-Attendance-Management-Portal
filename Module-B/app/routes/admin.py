@@ -536,12 +536,16 @@ def update_record(rid):
     if status not in ("present","absent", "late"):
         return jsonify({"error": "Invalid status"}), 400
     
-    # UPDATE — router scans all shards, updates the correct one
-    from ..shard_router import update_record as shard_update
-    found = shard_update(rid, status)
+    # UPDATE — optimize by fetching student_id first, then routing directly
+    from ..shard_router import update_record as shard_update, get_student_id_for_record
+    student_id = get_student_id_for_record(rid)
+    if student_id == -1:
+        return jsonify({"error": "Record not found in any shard"}), 404
+    
+    found = shard_update(rid, status, student_id)  # Pass student_id for direct routing
     
     if not found:
-        return jsonify({"error": "Record not found in any shard"}), 404
+        return jsonify({"error": "Update failed"}), 500
     
     broadcast("attendance_updated", {"record_id": rid, "status": status})
     audit_log(

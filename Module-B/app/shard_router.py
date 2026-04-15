@@ -128,14 +128,52 @@ def get_records_for_student(student_id: int) -> list:
 
 def get_records_for_session(att_session_id: int) -> list:
     """
-    RANGE QUERY — all 3 shards (we don't know student_id up front).
+    RANGE QUERY — queries shards intelligently based on session's student range.
+    
+    OPTIMIZATION: Instead of always querying all 3 shards, fetch the student_id
+    range for this session from the main DB, then determine which shards to query.
+    
+    Note: Most sessions will still span all shards since students are distributed
+    by ID, so this optimization provides limited benefit but is more correct.
+    
     Returns merged attendance_records for one session across all shards.
     Returns partial results if shard fails; logs errors.
     """
     rows = []
     failed_shards = []
     
-    for shard_id in SHARD_CONFIGS:
+    # OPTIMIZATION: Determine relevant shards by checking which student_ids are in this session
+    from flask import g
+    try:
+        db = g.get('db')
+        if db:
+            # Fetch min/max student_id for this session from main DB
+            result = db.execute(
+                "SELECT MIN(student_id) as min_id, MAX(student_id) as max_id "
+                "FROM attendance_records WHERE att_session_id = ?",
+                (att_session_id,)
+            ).fetchone()
+            
+            if result and result['min_id'] is not None:
+                min_id = result['min_id']
+                max_id = result['max_id']
+                relevant_shards = get_shards_for_range(min_id, max_id)
+                logger.debug(f"  Session {att_session_id}: students {min_id}-{max_id} → shards {relevant_shards}")
+            else:
+                # No records in this session
+                logger.debug(f"  Session {att_session_id}: no records in main DB")
+                return []
+        else:
+            # No main DB available, query all shards (fallback)
+            relevant_shards = list(SHARD_CONFIGS.keys())
+            logger.debug(f"  Session {att_session_id}: no main DB, querying all shards")
+    except Exception as e:
+        # On any error, fall back to querying all shards
+        logger.warning(f"  Session {att_session_id}: error determining relevant shards, querying all: {str(e)}")
+        relevant_shards = list(SHARD_CONFIGS.keys())
+    
+    # Query only the relevant shards
+    for shard_id in relevant_shards:
         try:
             conn   = get_shard_conn(shard_id)
             cursor = conn.cursor(dictionary=True)
@@ -161,32 +199,108 @@ def get_records_for_session(att_session_id: int) -> list:
     return rows
 
 
-def update_record(record_id: int, new_status: str) -> bool:
+def get_student_id_for_record(record_id: int) -> int:
     """
-    UPDATE — scan all shards to find the record, then update it.
-    Returns True if the record was found and updated, False otherwise.
+    HELPER: Fetch student_id for a given record_id across all shards.
+    Scans all shards to find which one has this record_id.
+    
+    Returns student_id if found, -1 if not found.
     """
     try:
         for shard_id in SHARD_CONFIGS:
-            conn   = get_shard_conn(shard_id)
-            cursor = conn.cursor()
-            cursor.execute(
-                f"UPDATE shard_{shard_id}_attendance_records "
-                "SET status = %s WHERE record_id = %s",
-                (new_status, record_id)
-            )
-            conn.commit()
-            affected = cursor.rowcount
-            cursor.close()
-            if affected > 0:
-                logger.info(f"✓ Updated record {record_id} in shard {shard_id} to status={new_status}")
-                return True   # found and updated — stop scanning
+            try:
+                conn   = get_shard_conn(shard_id)
+                cursor = conn.cursor()
+                cursor.execute(
+                    f"SELECT student_id FROM shard_{shard_id}_attendance_records "
+                    "WHERE record_id = %s LIMIT 1",
+                    (record_id,)
+                )
+                row = cursor.fetchone()
+                cursor.close()
+                if row:
+                    student_id = row[0]
+                    logger.debug(f"  Found record {record_id} in shard {shard_id} with student_id={student_id}")
+                    return student_id
+            except Exception as e:
+                logger.debug(f"  Shard {shard_id} scan for record: {str(e)}")
+                continue
         
         logger.warning(f"⚠ Record {record_id} not found in any shard")
-        return False          # not found in any shard
-    except mysql.connector.Error as e:
-        logger.error(f"✗ Update error for record {record_id}: {str(e)}")
+        return -1
+    except Exception as e:
+        logger.error(f"✗ Error fetching student_id for record {record_id}: {str(e)}")
+        return -1
+
+
+def update_record(record_id: int, new_status: str, student_id: int = None) -> bool:
+    """
+    UPDATE — route to correct shard using student_id if provided.
+    If student_id provided: Route directly (OPTIMAL - single shard query)
+    If student_id not provided: Scan all shards (FALLBACK - less efficient)
+    
+    Returns True if the record was found and updated, False otherwise.
+    
+    Args:
+        record_id: ID of the attendance record to update
+        new_status: New status value (present, absent, late)
+        student_id: (Optional) Student ID to optimize routing. If provided, 
+                   queries only the shard containing that student.
+    """
+    try:
+        # OPTIMIZATION: If student_id provided, route directly to one shard
+        if student_id is not None:
+            shard_id = get_shard_id(student_id)
+            if shard_id == -1:
+                logger.warning(f"⚠ Cannot update: student_id {student_id} out of range")
+                return False
+            
+            try:
+                conn   = get_shard_conn(shard_id)
+                cursor = conn.cursor()
+                cursor.execute(
+                    f"UPDATE shard_{shard_id}_attendance_records "
+                    "SET status = %s WHERE record_id = %s",
+                    (new_status, record_id)
+                )
+                conn.commit()
+                affected = cursor.rowcount
+                cursor.close()
+                
+                if affected > 0:
+                    logger.info(f"✓ Direct update: record {record_id} in shard {shard_id} to status={new_status}")
+                    return True
+                else:
+                    logger.warning(f"⚠ Record {record_id} not found in shard {shard_id}")
+                    return False
+            except Exception as e:
+                logger.error(f"✗ Direct update failed for record {record_id}: {str(e)}")
+                return False
+        
+        # FALLBACK: No student_id provided, scan all shards (less efficient)
+        logger.warning(f"⚠ Scanning all shards for record {record_id} (student_id not provided)")
+        for shard_id in SHARD_CONFIGS:
+            try:
+                conn   = get_shard_conn(shard_id)
+                cursor = conn.cursor()
+                cursor.execute(
+                    f"UPDATE shard_{shard_id}_attendance_records "
+                    "SET status = %s WHERE record_id = %s",
+                    (new_status, record_id)
+                )
+                conn.commit()
+                affected = cursor.rowcount
+                cursor.close()
+                if affected > 0:
+                    logger.info(f"✓ Scan update: record {record_id} found in shard {shard_id} to status={new_status}")
+                    return True
+            except Exception as e:
+                logger.debug(f"  Shard {shard_id} scan: {str(e)}")
+                continue
+        
+        logger.warning(f"⚠ Record {record_id} not found in any shard")
         return False
+        
     except Exception as e:
         logger.error(f"✗ Unexpected error updating record {record_id}: {str(e)}")
         return False
