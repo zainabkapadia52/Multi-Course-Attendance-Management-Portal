@@ -3,11 +3,12 @@
   CS 432 - Assignment 4: Sharding
   SubTask 2: Create Shard Tables in Docker Containers
 =============================================================
-  Strategy  : Range-Based Partitioning
+  Strategy  : Hash-Based Partitioning
   Shard Key : student_id
-  Ranges    : Shard 0 → 12 to 30
-              Shard 1 → 31 to 50
-              Shard 2 → 51 to 71
+  Method    : student_id % 3
+              Shard 0 → student_id % 3 == 0
+              Shard 1 → student_id % 3 == 1
+              Shard 2 → student_id % 3 == 2
 =============================================================
 """
 
@@ -27,9 +28,6 @@ SHARD_CONFIGS = [
         "user": "Scalix",
         "password": "password@123",
         "container": "shard_0",
-        "min_id": 12,
-        "max_id": 30,
-        "condition": "student_id BETWEEN 12 AND 31",
     },
     {
         "shard_id": 1,
@@ -39,9 +37,6 @@ SHARD_CONFIGS = [
         "user": "Scalix",
         "password": "password@123",
         "container": "shard_1",
-        "min_id": 31,
-        "max_id": 50,
-        "condition": "student_id BETWEEN 32 AND 51",
     },
     {
         "shard_id": 2,
@@ -51,9 +46,6 @@ SHARD_CONFIGS = [
         "user": "Scalix",
         "password": "password@123",
         "container": "shard_2",
-        "min_id": 51,
-        "max_id": 71,
-        "condition": "student_id BETWEEN 52 AND 71",
     },
 ]
 
@@ -63,17 +55,17 @@ def print_header():
     print("  STEP 1: CREATING SHARD TABLES IN REMOTE MYSQL SHARDS")
     print("=" * 60)
     print()
-    print("  Sharding Strategy : Range-Based Partitioning")
+    print("  Sharding Strategy : Hash-Based Partitioning")
     print("  Shard Key         : student_id")
-    print("  Total Students    : 60 (student_id 12 to 71)")
+    print("  Method            : student_id % 3")
     print()
     print("  Shard Layout:")
     print("  ┌──────────┬────────────┬──────────┬─────────────────────┐")
-    print("  │  Shard   │  Database  │   Port   │   student_id Range  │")
+    print("  │  Shard   │  Database  │   Port   │    Partition Rule   │")
     print("  ├──────────┼────────────┼──────────┼─────────────────────┤")
-    print("  │ shard_0  │ Scalix     │   3307   │   12  to  30        │")
-    print("  │ shard_1  │ Scalix     │   3308   │   31  to  50        │")
-    print("  │ shard_2  │ Scalix     │   3309   │   51  to  71        │")
+    print("  │ shard_0  │ Scalix     │   3307   │   student_id % 3 == 0│")
+    print("  │ shard_1  │ Scalix     │   3308   │   student_id % 3 == 1│")
+    print("  │ shard_2  │ Scalix     │   3309   │   student_id % 3 == 2│")
     print("  └──────────┴────────────┴──────────┴─────────────────────┘")
     print()
 
@@ -101,10 +93,8 @@ def wait_for_mysql(config, retries=10, delay=5):
     return False
 
 def create_table(config):
-    """Create shard table with range-based CHECK constraint."""
+    """Create shard table with hash-based CHECK constraint."""
     shard_id = config["shard_id"]
-    min_id   = config["min_id"]
-    max_id   = config["max_id"]
 
     create_sql = f"""
         CREATE TABLE IF NOT EXISTS shard_{shard_id}_attendance_records (
@@ -113,10 +103,11 @@ def create_table(config):
             student_id      INT          NOT NULL,
             status          VARCHAR(10)  NOT NULL,
             CONSTRAINT chk_shard_{shard_id}
-                CHECK (student_id BETWEEN {min_id} AND {max_id}),
+                CHECK (MOD(student_id, 3) = {shard_id}),
             INDEX idx_att_session (att_session_id),
             INDEX idx_student_id (student_id),
             INDEX idx_session_student (att_session_id, student_id)
+    
         )
     """
 
@@ -167,8 +158,7 @@ def main():
             print(f"  ✓ shard_{shard_id} | Database : {config['database']} "
                   f"| Port : {config['port']}")
             print(f"    Table     : shard_{shard_id}_attendance_records")
-            print(f"    CHECK     : student_id BETWEEN "
-                  f"{config['min_id']} AND {config['max_id']}")
+            print(f"    CHECK     : MOD(student_id, 3) = {shard_id}")
             print()
             success_count += 1
         except Exception as e:

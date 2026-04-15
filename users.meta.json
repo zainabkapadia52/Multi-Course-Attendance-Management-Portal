@@ -1,0 +1,27 @@
+{
+  "primary_key": "id",
+  "schema": [
+    {
+      "name": "id",
+      "type_str": "INT",
+      "nullable": false,
+      "default": null
+    },
+    {
+      "name": "name",
+      "type_str": "VARCHAR(50)",
+      "nullable": true,
+      "default": null
+    },
+    {
+      "name": "age",
+      "type_str": "INT",
+      "nullable": true,
+      "default": null
+    }
+  ],
+  "next_slot": 6,
+  "free_list": [
+    0
+  ]
+}
