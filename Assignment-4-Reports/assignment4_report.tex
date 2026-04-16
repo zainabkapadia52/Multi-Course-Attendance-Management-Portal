@@ -755,4 +755,60 @@ This assignment successfully implements query routing for horizontally-partition
 \end{itemize}
 
 
+
+\section{SubTask 4: Scalability & Trade-offs Analysis}
+As the final phase of our custom DBMS implementation, we have implemented a sharded architecture using a hash-based distribution strategy ($student\_id \pmod 3$). This report analyzes the architectural trade-offs of this design, specifically focusing on our commitment to \textbf{Strong Global Consistency} and how this decision shapes the system's availability and resilience under the CAP theorem framework.
+
+\subsection{Scalability: Horizontal vs. Vertical Analysis}
+The transition to a sharded database allows our attendance system to scale out rather than up, overcoming the physical limitations of single-node hardware.
+
+\subsubsection{Vertical Scaling Limitations}
+While increasing the CPU and RAM of a single server is the simplest path to performance, it introduces a "hard ceiling." Once the maximum capacity of the hardware is reached, further growth becomes impossible. Additionally, vertical scaling maintains a single point of failure (SPOF) for all 2,128 attendance records.
+
+\subsubsection{Horizontal Scaling (Sharding)}
+By distributing data across three shards, we achieve:
+\begin{itemize}
+    \item \textbf{I/O Parallelism:} Query loads are distributed. Attendance marking for different students can occur on different shards simultaneously, preventing disk contention.
+    \item \textbf{Elastic Growth:} As enrollment grows beyond 60 students, we can re-shard the database to $N$ nodes. Because our logic is modular, the application layer can scale to handle increased throughput linearly.
+\end{itemize}
+
+\subsection{Consistency: Ensuring Atomic Global Operations}
+Our implementation distinguishes itself by guaranteeing \textbf{Strong Global Consistency} across the distributed environment.
+
+\subsubsection{Atomic Cross-Shard Operations}
+Unlike many distributed systems that settle for eventual consistency, our system ensures that operations spanning multiple shards are treated as a single atomic unit. 
+\begin{itemize}
+    \item \textbf{Example (Course Deletion):} If a course is removed from the system, our DBMS ensures that all associated student records across Shard 0, Shard 1, and Shard 2 are updated or deleted concurrently. 
+    \item \textbf{Integrity:} This prevents "orphan records" where a student might appear enrolled in a non-existent course on one shard while being correctly removed on another. We maintain the ACID properties (Atomicity, Consistency, Isolation, Durability) globally.
+\end{itemize}
+
+\subsubsection{Data Accuracy}
+By ensuring that every query—whether local to a shard or spanning the entire cluster—returns the most recent and accurate state, we eliminate the risk of "stale data" during course-wide reporting or administrative audits.
+
+\subsection{Availability: The CAP Theorem Trade-off}
+According to the CAP Theorem, a system can only provide two of the three guarantees: Consistency (C), Availability (A), and Partition Tolerance (P). By explicitly choosing \textbf{C} and \textbf{P}, we acknowledge a necessary reduction in Availability.
+
+\subsubsection{Impact of Shard Failure}
+Because we guarantee that all shards must return up-to-date and consistent data, the failure of a single shard (e.g., Shard 1) has significant implications:
+\begin{itemize}
+    \item \textbf{Restricted Operations:} If one shard goes down, any operation requiring a global view (like course-wide deletions or aggregate attendance reporting) must be blocked or failed to prevent an inconsistent system state.
+    \item \textbf{Zero-Tolerance for Inconsistency:} Since we cannot guarantee the integrity of the data on the unreachable shard, the system prioritizes data correctness over service uptime. This ensures that no "partial" or "incorrect" data is ever served to the user.
+\end{itemize}
+
+\subsection{Partition Tolerance: Responding to Shard Failures}
+Partition tolerance is the system's ability to remain operational (even if in a limited capacity) despite network breaks between nodes.
+
+\subsubsection{Failure Handling}
+In our simulated shard failure, the application identifies the loss of connectivity to a specific shard. 
+\begin{itemize}
+    \item \textbf{Behavior:} The system remains partition-tolerant by isolating the failure. However, to maintain the consistency mentioned in Section 3, the application will reject transactions that require the missing data. 
+    \item \textbf{Recovery:} Once the partition is resolved, the atomic nature of our update logic ensures that the system returns to a fully synchronized state without manual reconciliation.
+\end{itemize}
+
+\subsubsection{Future Improvements: Replication}
+To achieve true high availability, our next iteration would implement \textbf{Leader-Follower Replication}. By keeping a "Slave" copy of Shard 1 on a different physical network, we could automatically failover if the primary partition is lost, thereby maintaining  availability even during a shard failure.
+
+\subsection{Conclusion}
+The implementation of sharding has transformed our Multi-Course Attendance Management System from a rigid monolithic database into a flexible distributed system. While we have traded off "High Availability" for "Complete Consistency" and "Horizontal Scalability," this is a standard and necessary trade-off for any system intended to scale to thousands of records and concurrent users.
+
 \end{document}
