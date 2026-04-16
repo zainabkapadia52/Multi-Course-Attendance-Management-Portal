@@ -8,8 +8,23 @@
 \usepackage{xcolor}
 \usepackage{booktabs}
 \usepackage{array}
+\usepackage{listings} % Added for code blocks
 \usepackage{hyperref}
 
+% --- Custom Listings Configuration to fix formatting issues ---
+\lstset{
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,                 % Enables line breaking
+    postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space}, % Visual cue for wrapped lines
+    columns=fullflexible,
+    showstringspaces=false,
+    commentstyle=\color{gray},
+    keywordstyle=\color{blue},
+    stringstyle=\color{darkgray},
+    literate={_}{{\_}}1,            % Automatically escapes underscores in code
+    xleftmargin=0.5cm,
+    frame=single,
+    rulecolor=\color{lightgray}}
 \begin{document}
 
 \title{Assignment 4 Report: Sharding Design for Multi-Course Attendance Management Portal}
