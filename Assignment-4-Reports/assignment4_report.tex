@@ -536,7 +536,7 @@ def get_records_for_session(att_session_id: int) -> list:
     \item Shard 0: 9 records (student IDs with $i \bmod 3 = 0$)
     \item Shard 1: 7 records (student IDs with $i \bmod 3 = 1$)
     \item Shard 2: 10 records (student IDs with $i \bmod 3 = 2$)
-    \item Total: 26 records ✓
+    \item Total: 26 records $\checkmark$
 \end{itemize}
 
 \subsubsection{\texttt{delete\_records\_for\_session()}: Delete Session Records (Parallel)}
@@ -730,9 +730,9 @@ Maximum deviation: $\pm$5.0\%, indicating good uniform distribution.
 All three shards verified connected and accessible:
 
 \begin{lstlisting}
-Shard 0 (10.0.116.184:3307): 739 records  ✓
-Shard 1 (10.0.116.184:3308): 674 records  ✓
-Shard 2 (10.0.116.184:3309): 715 records  ✓
+Shard 0 (10.0.116.184:3307): 739 records  $\checkmark$
+Shard 1 (10.0.116.184:3308): 674 records  $\checkmark$
+Shard 2 (10.0.116.184:3309): 715 records  $\checkmark$
 Total: 2128 records
 \end{lstlisting}
 
@@ -744,16 +744,16 @@ Testing parallel query for session 1...
   Shard 0: 9 records
   Shard 1: 7 records
   Shard 2: 10 records
-  Total: 26 records ✓
+  Total: 26 records $\checkmark$
 \end{lstlisting}
 
 \subsection{Code Syntax Validation}
 
 All modified routing handlers syntax-verified:
 \begin{itemize}
-    \item \texttt{app/routes/ta.py} ✓
-    \item \texttt{app/routes/instructor.py} ✓
-    \item \texttt{app/shard\_router.py} ✓
+    \item \texttt{app/routes/ta.py} $\checkmark$
+    \item \texttt{app/routes/instructor.py} $\checkmark$
+    \item \texttt{app/shard\_router.py} $\checkmark$
 \end{itemize}
 
 \section{Conclusion}
@@ -771,7 +771,7 @@ This assignment successfully implements query routing for horizontally-partition
 
 
 
-\section{SubTask 4: Scalability & Trade-offs Analysis}
+\section{SubTask 4: Scalability \& Trade-offs Analysis}
 As the final phase of our custom DBMS implementation, we have implemented a sharded architecture using a hash-based distribution strategy ($student\_id \pmod 3$). This report analyzes the architectural trade-offs of this design, specifically focusing on our commitment to \textbf{Strong Global Consistency} and how this decision shapes the system's availability and resilience under the CAP theorem framework.
 
 \subsection{Scalability: Horizontal vs. Vertical Analysis}

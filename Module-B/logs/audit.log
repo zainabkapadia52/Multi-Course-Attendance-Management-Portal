@@ -4760,3 +4760,1008 @@
 127.0.0.1 - - [16/Apr/2026 03:18:06] "[35m[1mPOST /api/instructor/attendance-sessions HTTP/1.1[0m" 201 -
 ✓ Connected to shard 0 (port 3307)
 127.0.0.1 - - [16/Apr/2026 03:18:06] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5050
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 637-473-595
+127.0.0.1 - - [16/Apr/2026 03:28:27] "[32mGET / HTTP/1.1[0m" 302 -
+127.0.0.1 - - [16/Apr/2026 03:28:27] "GET /login HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:28:29] "GET /stream?session_id=70a33e2b-45f5-4e0f-b006-e509ce8691cc&mac=0d6fc003deb14a2fa0eb84538b41866ecf68415a20dcaf8a324bb7a2b6168c42 HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:28:29] "GET /stream?session_id=f9269e4d-8f46-4c2d-9830-2cdefbc4af8e&mac=87642defc752530b82970678d0ee4881186e326d8e426c0ab4f627329275893e HTTP/1.1" 200 -
+2026-04-15T21:58:32.439146 | ACTION=LOGIN_OK | USER=12 | ENDPOINT=/login | username=aarav_verma0
+127.0.0.1 - - [16/Apr/2026 03:28:32] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:28:32] "GET /student HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:28:32] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+127.0.0.1 - - [16/Apr/2026 03:28:32] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:28:32] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:28:32] "GET /api/student/profile HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:28:32] "GET /stream?session_id=6d43d030-c4e1-4e73-b209-5ff6d8f9b9e9&mac=79829795f004409c170c4b4f79b12fa162121e17a84c3e8dbb0158fcfc82ccae HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:28:32] "GET /api/student/corrections/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:28:32] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Connected to shard 2 (port 3309)
+✓ Connected to shard 1 (port 3308)
+2026-04-15T21:58:46.030124 | ACTION=CREATE_ATT_SESSION | USER=3 | ENDPOINT=/api/instructor/attendance-sessions | att_session_id=103 | OLD=None | NEW={'att_session_id': 103, 'course_id': 1, 'session_date': '2026-04-16', 'topic': 'New Topic', 'records': [{'student_id': 12, 'status': 'present'}, {'student_id': 62, 'status': 'present'}, {'student_id': 15, 'status': 'absent'}, {'student_id': 16, 'status': 'absent'}, {'student_id': 19, 'status': 'absent'}, {'student_id': 67, 'status': 'absent'}, {'student_id': 23, 'status': 'absent'}, {'student_id': 24, 'status': 'absent'}, {'student_id': 25, 'status': 'absent'}, {'student_id': 26, 'status': 'absent'}, {'student_id': 27, 'status': 'absent'}, {'student_id': 28, 'status': 'absent'}, {'student_id': 29, 'status': 'absent'}, {'student_id': 30, 'status': 'absent'}, {'student_id': 32, 'status': 'absent'}, {'student_id': 33, 'status': 'absent'}, {'student_id': 35, 'status': 'absent'}, {'student_id': 38, 'status': 'absent'}, {'student_id': 40, 'status': 'absent'}, {'student_id': 43, 'status': 'absent'}, {'student_id': 45, 'status': 'absent'}, {'student_id': 46, 'status': 'absent'}, {'student_id': 47, 'status': 'absent'}, {'student_id': 48, 'status': 'absent'}, {'student_id': 51, 'status': 'absent'}, {'student_id': 54, 'status': 'absent'}, {'student_id': 56, 'status': 'absent'}, {'student_id': 59, 'status': 'absent'}]}
+127.0.0.1 - - [16/Apr/2026 03:28:46] "[35m[1mPOST /api/instructor/attendance-sessions HTTP/1.1[0m" 201 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:28:46] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:28:46] "GET /api/instructor/courses/1/sessions HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:28:46] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+2026-04-15T21:59:10.363038 | ACTION=LOGOUT | USER=None | ENDPOINT=/logout | 
+127.0.0.1 - - [16/Apr/2026 03:29:10] "POST /logout HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:10] "GET /login HTTP/1.1" 200 -
+2026-04-15T21:59:12.762849 | ACTION=LOGIN_OK | USER=12 | ENDPOINT=/login | username=aarav_verma0
+127.0.0.1 - - [16/Apr/2026 03:29:12] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:12] "GET /student HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:12] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+127.0.0.1 - - [16/Apr/2026 03:29:12] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:12] "GET /stream?session_id=db76687f-8e59-454c-bcd2-4fd902d90eba&mac=0a92a6b5a2440fbfc90939c15a0b33339384c13f74018132787dd1b41ad73681 HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:12] "GET /api/student/corrections/current HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:12] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:12] "GET /api/student/profile HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:29:12] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:16] "GET /api/student/corrections/archive HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:29:16] "GET /api/student/attendance-stats/archive HTTP/1.1" 200 -
+2026-04-15T21:59:19.941518 | ACTION=LOGOUT | USER=None | ENDPOINT=/logout | 
+127.0.0.1 - - [16/Apr/2026 03:29:19] "POST /logout HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:19] "GET /login HTTP/1.1" 200 -
+2026-04-15T21:59:24.963894 | ACTION=LOGIN_OK | USER=2 | ENDPOINT=/login | username=dean_joshi
+127.0.0.1 - - [16/Apr/2026 03:29:24] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:24] "GET /dean HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:24] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+127.0.0.1 - - [16/Apr/2026 03:29:24] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:24] "GET /stream?session_id=2f1e6e51-ba79-4440-8375-7453fc1ec764&mac=2d84f3c8a4d116204e548964d04fec0a94631c53af9f390ca24f05b4992445d5 HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:24] "GET /api/dean/active-semester HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:24] "GET /api/dean/profile HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:24] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:25] "GET /api/dean/semesters/1/courses HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:26] "GET /api/dean/semesters HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:28] "GET /api/dean/semesters/2/courses HTTP/1.1" 200 -
+2026-04-15T21:59:29.789186 | ACTION=LOGOUT | USER=None | ENDPOINT=/logout | 
+127.0.0.1 - - [16/Apr/2026 03:29:29] "POST /logout HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:29] "GET /login HTTP/1.1" 200 -
+2026-04-15T21:59:44.247505 | ACTION=LOGIN_OK | USER=1 | ENDPOINT=/login | username=admin
+127.0.0.1 - - [16/Apr/2026 03:29:44] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:44] "GET /admin HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:44] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+127.0.0.1 - - [16/Apr/2026 03:29:44] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:44] "GET /api/admin/semesters HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:44] "GET /api/admin/active-semester HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:44] "GET /api/admin/courses HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:44] "GET /api/admin/users HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:44] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:44] "GET /stream?session_id=d558f605-b700-44c6-98e4-0e8ca2772ccf&mac=1be9085679479ba1bf11c79f39d90131af2af634bd20db3b086f6ce0ad4d79db HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:44] "GET /api/admin/profile HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:44] "GET /api/admin/semesters/1/courses HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:52] "GET /api/admin/courses/1/sessions HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:53] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 716 in shard 0 to status=absent
+2026-04-15T21:59:58.303604 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/716 | record_id=716 | OLD={'record_id': 716, 'status': '(previous)'} | NEW={'record_id': 716, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:29:58] "PUT /api/admin/records/716 HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:58] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:29:58] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 717 in shard 0 to status=absent
+2026-04-15T21:59:58.475214 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/717 | record_id=717 | OLD={'record_id': 717, 'status': '(previous)'} | NEW={'record_id': 717, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:29:58] "PUT /api/admin/records/717 HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:58] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:29:58] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 718 in shard 0 to status=absent
+2026-04-15T21:59:58.631592 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/718 | record_id=718 | OLD={'record_id': 718, 'status': '(previous)'} | NEW={'record_id': 718, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:29:58] "PUT /api/admin/records/718 HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:29:58] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:58] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 719 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:29:58] "[35m[1mPUT /api/admin/records/719 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 720 in shard 0 to status=absent
+2026-04-15T21:59:58.851771 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/720 | record_id=720 | OLD={'record_id': 720, 'status': '(previous)'} | NEW={'record_id': 720, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:29:58] "PUT /api/admin/records/720 HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:29:58] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 721 in shard 0 to status=absent
+2026-04-15T21:59:58.965490 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/721 | record_id=721 | OLD={'record_id': 721, 'status': '(previous)'} | NEW={'record_id': 721, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:29:58] "PUT /api/admin/records/721 HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:59] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:29:59] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 722 in shard 0 to status=absent
+2026-04-15T21:59:59.113814 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/722 | record_id=722 | OLD={'record_id': 722, 'status': '(previous)'} | NEW={'record_id': 722, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:29:59] "PUT /api/admin/records/722 HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:59] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:29:59] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 723 in shard 0 to status=absent
+2026-04-15T21:59:59.272429 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/723 | record_id=723 | OLD={'record_id': 723, 'status': '(previous)'} | NEW={'record_id': 723, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:29:59] "PUT /api/admin/records/723 HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:59] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:29:59] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 724 in shard 0 to status=absent
+2026-04-15T21:59:59.424630 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/724 | record_id=724 | OLD={'record_id': 724, 'status': '(previous)'} | NEW={'record_id': 724, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:29:59] "PUT /api/admin/records/724 HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:59] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:29:59] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 725 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:29:59] "[35m[1mPUT /api/admin/records/725 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [16/Apr/2026 03:29:59] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 726 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:29:59] "[35m[1mPUT /api/admin/records/726 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 727 in shard 0 to status=absent
+2026-04-15T21:59:59.728247 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/727 | record_id=727 | OLD={'record_id': 727, 'status': '(previous)'} | NEW={'record_id': 727, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:29:59] "PUT /api/admin/records/727 HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:59] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 728 in shard 0 to status=absent
+2026-04-15T21:59:59.840633 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/728 | record_id=728 | OLD={'record_id': 728, 'status': '(previous)'} | NEW={'record_id': 728, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:29:59] "PUT /api/admin/records/728 HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:29:59] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:29:59] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 729 in shard 0 to status=absent
+2026-04-15T21:59:59.998689 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/729 | record_id=729 | OLD={'record_id': 729, 'status': '(previous)'} | NEW={'record_id': 729, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:29:59] "PUT /api/admin/records/729 HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:00] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:00] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 730 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:00] "[35m[1mPUT /api/admin/records/730 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:00] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 731 in shard 0 to status=absent
+2026-04-15T22:00:00.237854 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/731 | record_id=731 | OLD={'record_id': 731, 'status': '(previous)'} | NEW={'record_id': 731, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:30:00] "PUT /api/admin/records/731 HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:00] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 732 in shard 0 to status=absent
+2026-04-15T22:00:00.355652 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/732 | record_id=732 | OLD={'record_id': 732, 'status': '(previous)'} | NEW={'record_id': 732, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:30:00] "PUT /api/admin/records/732 HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:00] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:00] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 733 in shard 0 to status=absent
+2026-04-15T22:00:00.529139 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/733 | record_id=733 | OLD={'record_id': 733, 'status': '(previous)'} | NEW={'record_id': 733, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:30:00] "PUT /api/admin/records/733 HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:00] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 734 in shard 0 to status=absent
+2026-04-15T22:00:00.639095 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/734 | record_id=734 | OLD={'record_id': 734, 'status': '(previous)'} | NEW={'record_id': 734, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:30:00] "PUT /api/admin/records/734 HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:00] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:00] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 735 in shard 0 to status=absent
+2026-04-15T22:00:00.793840 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/735 | record_id=735 | OLD={'record_id': 735, 'status': '(previous)'} | NEW={'record_id': 735, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:30:00] "PUT /api/admin/records/735 HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:00] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:00] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 736 in shard 0 to status=absent
+2026-04-15T22:00:00.949581 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/736 | record_id=736 | OLD={'record_id': 736, 'status': '(previous)'} | NEW={'record_id': 736, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:30:00] "PUT /api/admin/records/736 HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:01] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:01] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 737 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:01] "[35m[1mPUT /api/admin/records/737 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [16/Apr/2026 03:30:01] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:01] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 738 in shard 0 to status=absent
+2026-04-15T22:00:01.278680 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/738 | record_id=738 | OLD={'record_id': 738, 'status': '(previous)'} | NEW={'record_id': 738, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:30:01] "PUT /api/admin/records/738 HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:01] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:01] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 739 in shard 0 to status=absent
+2026-04-15T22:00:01.443749 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/739 | record_id=739 | OLD={'record_id': 739, 'status': '(previous)'} | NEW={'record_id': 739, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:30:01] "PUT /api/admin/records/739 HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:01] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 740 in shard 0 to status=absent
+2026-04-15T22:00:01.555628 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/740 | record_id=740 | OLD={'record_id': 740, 'status': '(previous)'} | NEW={'record_id': 740, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:30:01] "PUT /api/admin/records/740 HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:01] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 741 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:01] "[35m[1mPUT /api/admin/records/741 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:01] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:01] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 742 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:01] "[35m[1mPUT /api/admin/records/742 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 743 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:01] "[35m[1mPUT /api/admin/records/743 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 744 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:01] "[35m[1mPUT /api/admin/records/744 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 745 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:02] "[35m[1mPUT /api/admin/records/745 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 766 in shard 0 to status=present
+2026-04-15T22:00:02.096105 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/766 | record_id=766 | OLD={'record_id': 766, 'status': '(previous)'} | NEW={'record_id': 766, 'status': 'present'}
+127.0.0.1 - - [16/Apr/2026 03:30:02] "PUT /api/admin/records/766 HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:02] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 767 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:02] "[35m[1mPUT /api/admin/records/767 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [16/Apr/2026 03:30:02] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 768 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:02] "[35m[1mPUT /api/admin/records/768 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 769 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:02] "[35m[1mPUT /api/admin/records/769 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 770 in shard 0 to status=absent
+2026-04-15T22:00:02.416661 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/770 | record_id=770 | OLD={'record_id': 770, 'status': '(previous)'} | NEW={'record_id': 770, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:30:02] "PUT /api/admin/records/770 HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:02] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:02] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 771 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:02] "[35m[1mPUT /api/admin/records/771 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 772 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:02] "[35m[1mPUT /api/admin/records/772 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 773 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:02] "[35m[1mPUT /api/admin/records/773 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 774 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:02] "[35m[1mPUT /api/admin/records/774 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 775 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:02] "[35m[1mPUT /api/admin/records/775 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 675 in shard 0 to status=absent
+2026-04-15T22:00:02.880233 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/675 | record_id=675 | OLD={'record_id': 675, 'status': '(previous)'} | NEW={'record_id': 675, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:30:02] "PUT /api/admin/records/675 HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:02] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:02] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 676 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:03] "[35m[1mPUT /api/admin/records/676 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 677 in shard 0 to status=absent
+2026-04-15T22:00:03.101892 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/677 | record_id=677 | OLD={'record_id': 677, 'status': '(previous)'} | NEW={'record_id': 677, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:30:03] "PUT /api/admin/records/677 HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:03] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 678 in shard 0 to status=absent
+2026-04-15T22:00:03.217484 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/678 | record_id=678 | OLD={'record_id': 678, 'status': '(previous)'} | NEW={'record_id': 678, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:30:03] "PUT /api/admin/records/678 HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:03] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:03] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 679 in shard 0 to status=absent
+2026-04-15T22:00:03.381436 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/679 | record_id=679 | OLD={'record_id': 679, 'status': '(previous)'} | NEW={'record_id': 679, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:30:03] "PUT /api/admin/records/679 HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:03] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:03] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 680 in shard 0 to status=absent
+2026-04-15T22:00:03.540705 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/680 | record_id=680 | OLD={'record_id': 680, 'status': '(previous)'} | NEW={'record_id': 680, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:30:03] "PUT /api/admin/records/680 HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:03] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:03] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 681 in shard 0 to status=absent
+2026-04-15T22:00:03.708897 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/681 | record_id=681 | OLD={'record_id': 681, 'status': '(previous)'} | NEW={'record_id': 681, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:30:03] "PUT /api/admin/records/681 HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:03] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:03] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 682 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:03] "[35m[1mPUT /api/admin/records/682 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:03] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 683 in shard 0 to status=absent
+2026-04-15T22:00:03.962035 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/683 | record_id=683 | OLD={'record_id': 683, 'status': '(previous)'} | NEW={'record_id': 683, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:30:03] "PUT /api/admin/records/683 HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:04] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:04] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 684 in shard 0 to status=absent
+2026-04-15T22:00:04.133505 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/684 | record_id=684 | OLD={'record_id': 684, 'status': '(previous)'} | NEW={'record_id': 684, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:30:04] "PUT /api/admin/records/684 HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:04] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:04] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 685 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:04] "[35m[1mPUT /api/admin/records/685 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 686 in shard 0 to status=absent
+2026-04-15T22:00:04.353433 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/686 | record_id=686 | OLD={'record_id': 686, 'status': '(previous)'} | NEW={'record_id': 686, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:30:04] "PUT /api/admin/records/686 HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:04] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:04] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 687 in shard 0 to status=absent
+2026-04-15T22:00:04.530272 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/687 | record_id=687 | OLD={'record_id': 687, 'status': '(previous)'} | NEW={'record_id': 687, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:30:04] "PUT /api/admin/records/687 HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:04] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:04] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 688 in shard 0 to status=absent
+2026-04-15T22:00:04.718731 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/688 | record_id=688 | OLD={'record_id': 688, 'status': '(previous)'} | NEW={'record_id': 688, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:30:04] "PUT /api/admin/records/688 HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:04] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 689 in shard 0 to status=absent
+2026-04-15T22:00:04.844355 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/689 | record_id=689 | OLD={'record_id': 689, 'status': '(previous)'} | NEW={'record_id': 689, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:30:04] "PUT /api/admin/records/689 HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:04] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:04] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 690 in shard 0 to status=absent
+2026-04-15T22:00:05.003774 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/690 | record_id=690 | OLD={'record_id': 690, 'status': '(previous)'} | NEW={'record_id': 690, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:30:05] "PUT /api/admin/records/690 HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:05] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:05] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 691 in shard 0 to status=absent
+2026-04-15T22:00:05.179461 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/691 | record_id=691 | OLD={'record_id': 691, 'status': '(previous)'} | NEW={'record_id': 691, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:30:05] "PUT /api/admin/records/691 HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:05] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 692 in shard 0 to status=absent
+2026-04-15T22:00:05.279787 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/692 | record_id=692 | OLD={'record_id': 692, 'status': '(previous)'} | NEW={'record_id': 692, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:30:05] "PUT /api/admin/records/692 HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:05] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:05] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 693 in shard 0 to status=absent
+2026-04-15T22:00:05.453695 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/693 | record_id=693 | OLD={'record_id': 693, 'status': '(previous)'} | NEW={'record_id': 693, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:30:05] "PUT /api/admin/records/693 HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:05] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:05] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 694 in shard 0 to status=absent
+2026-04-15T22:00:05.648702 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/694 | record_id=694 | OLD={'record_id': 694, 'status': '(previous)'} | NEW={'record_id': 694, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:30:05] "PUT /api/admin/records/694 HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:05] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:05] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 695 in shard 0 to status=absent
+2026-04-15T22:00:05.810475 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/695 | record_id=695 | OLD={'record_id': 695, 'status': '(previous)'} | NEW={'record_id': 695, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:30:05] "PUT /api/admin/records/695 HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:05] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:05] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 696 in shard 0 to status=absent
+2026-04-15T22:00:05.973193 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/696 | record_id=696 | OLD={'record_id': 696, 'status': '(previous)'} | NEW={'record_id': 696, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:30:05] "PUT /api/admin/records/696 HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:06] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:06] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:06] "GET /admin HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:06] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:06] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:06] "GET /api/admin/active-semester HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:06] "GET /api/admin/semesters HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:06] "GET /api/admin/users HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:06] "GET /api/admin/courses HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:06] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:06] "GET /stream?session_id=d558f605-b700-44c6-98e4-0e8ca2772ccf&mac=1be9085679479ba1bf11c79f39d90131af2af634bd20db3b086f6ce0ad4d79db HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:06] "GET /api/admin/profile HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:06] "GET /api/admin/semesters/1/courses HTTP/1.1" 200 -
+✓ Direct update: record 697 in shard 0 to status=absent
+2026-04-15T22:00:06.138041 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/697 | record_id=697 | OLD={'record_id': 697, 'status': '(previous)'} | NEW={'record_id': 697, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:30:06] "PUT /api/admin/records/697 HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:06] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:06] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:06] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:10] "GET /api/admin/courses/1/sessions HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:11] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:22] "GET /admin HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:22] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+127.0.0.1 - - [16/Apr/2026 03:30:22] "GET /api/admin/active-semester HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:22] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:22] "GET /api/admin/semesters HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:22] "GET /api/admin/courses HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:22] "GET /api/admin/users HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:22] "GET /stream?session_id=d558f605-b700-44c6-98e4-0e8ca2772ccf&mac=1be9085679479ba1bf11c79f39d90131af2af634bd20db3b086f6ce0ad4d79db HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:22] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:22] "GET /api/admin/profile HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:22] "GET /api/admin/semesters/1/courses HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:26] "GET /api/admin/courses/1/sessions HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:27] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:35] "GET /student HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:35] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+127.0.0.1 - - [16/Apr/2026 03:30:35] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:35] "GET /api/student/corrections/current HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:35] "GET /stream?session_id=6d43d030-c4e1-4e73-b209-5ff6d8f9b9e9&mac=79829795f004409c170c4b4f79b12fa162121e17a84c3e8dbb0158fcfc82ccae HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:35] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:35] "GET /api/student/profile HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:35] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 675 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:46] "[35m[1mPUT /api/admin/records/675 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 676 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:46] "[35m[1mPUT /api/admin/records/676 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 677 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:46] "[35m[1mPUT /api/admin/records/677 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 678 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:46] "[35m[1mPUT /api/admin/records/678 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 679 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:46] "[35m[1mPUT /api/admin/records/679 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 680 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:46] "[35m[1mPUT /api/admin/records/680 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 681 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:46] "[35m[1mPUT /api/admin/records/681 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 682 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:46] "[35m[1mPUT /api/admin/records/682 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 683 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:46] "[35m[1mPUT /api/admin/records/683 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 684 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:46] "[35m[1mPUT /api/admin/records/684 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 685 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:46] "[35m[1mPUT /api/admin/records/685 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 686 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:46] "[35m[1mPUT /api/admin/records/686 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 687 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:46] "[35m[1mPUT /api/admin/records/687 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 688 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:46] "[35m[1mPUT /api/admin/records/688 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 689 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:47] "[35m[1mPUT /api/admin/records/689 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 690 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:47] "[35m[1mPUT /api/admin/records/690 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 691 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:47] "[35m[1mPUT /api/admin/records/691 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 692 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:47] "[35m[1mPUT /api/admin/records/692 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 693 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:47] "[35m[1mPUT /api/admin/records/693 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 694 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:47] "[35m[1mPUT /api/admin/records/694 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 695 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:47] "[35m[1mPUT /api/admin/records/695 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 696 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:47] "[35m[1mPUT /api/admin/records/696 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 697 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:47] "[35m[1mPUT /api/admin/records/697 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 698 in shard 0 to status=absent
+2026-04-15T22:00:47.568741 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/698 | record_id=698 | OLD={'record_id': 698, 'status': '(previous)'} | NEW={'record_id': 698, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:30:47] "PUT /api/admin/records/698 HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:47] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:47] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 715 in shard 0 to status=absent
+2026-04-15T22:00:47.742799 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/715 | record_id=715 | OLD={'record_id': 715, 'status': '(previous)'} | NEW={'record_id': 715, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:30:47] "PUT /api/admin/records/715 HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:47] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 716 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:47] "[35m[1mPUT /api/admin/records/716 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [16/Apr/2026 03:30:47] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 717 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:47] "[35m[1mPUT /api/admin/records/717 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 718 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:47] "[35m[1mPUT /api/admin/records/718 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 719 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:48] "[35m[1mPUT /api/admin/records/719 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 720 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:48] "[35m[1mPUT /api/admin/records/720 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 721 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:48] "[35m[1mPUT /api/admin/records/721 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 722 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:48] "[35m[1mPUT /api/admin/records/722 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 740 in shard 0 to status=present
+2026-04-15T22:00:48.293092 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/740 | record_id=740 | OLD={'record_id': 740, 'status': '(previous)'} | NEW={'record_id': 740, 'status': 'present'}
+127.0.0.1 - - [16/Apr/2026 03:30:48] "PUT /api/admin/records/740 HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 741 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:48] "[35m[1mPUT /api/admin/records/741 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:48] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:48] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 742 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:48] "[35m[1mPUT /api/admin/records/742 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 743 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:48] "[35m[1mPUT /api/admin/records/743 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 744 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:48] "[35m[1mPUT /api/admin/records/744 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 745 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:48] "[35m[1mPUT /api/admin/records/745 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 746 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:48] "[35m[1mPUT /api/admin/records/746 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 747 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:48] "[35m[1mPUT /api/admin/records/747 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 748 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:48] "[35m[1mPUT /api/admin/records/748 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 749 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:48] "[35m[1mPUT /api/admin/records/749 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 750 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:48] "[35m[1mPUT /api/admin/records/750 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 751 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:49] "[35m[1mPUT /api/admin/records/751 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 752 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:49] "[35m[1mPUT /api/admin/records/752 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 753 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:49] "[35m[1mPUT /api/admin/records/753 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 754 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:49] "[35m[1mPUT /api/admin/records/754 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 755 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:49] "[35m[1mPUT /api/admin/records/755 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 756 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:49] "[35m[1mPUT /api/admin/records/756 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 757 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:49] "[35m[1mPUT /api/admin/records/757 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 758 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:49] "[35m[1mPUT /api/admin/records/758 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 759 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:49] "[35m[1mPUT /api/admin/records/759 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 760 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:49] "[35m[1mPUT /api/admin/records/760 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 761 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:49] "[35m[1mPUT /api/admin/records/761 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 762 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:49] "[35m[1mPUT /api/admin/records/762 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 763 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:49] "[35m[1mPUT /api/admin/records/763 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 764 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:49] "[35m[1mPUT /api/admin/records/764 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 765 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:49] "[35m[1mPUT /api/admin/records/765 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 766 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:49] "[35m[1mPUT /api/admin/records/766 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 767 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:50] "[35m[1mPUT /api/admin/records/767 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 768 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:50] "[35m[1mPUT /api/admin/records/768 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 769 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:50] "[35m[1mPUT /api/admin/records/769 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 790 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:50] "[35m[1mPUT /api/admin/records/790 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 791 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:50] "[35m[1mPUT /api/admin/records/791 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 792 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:50] "[35m[1mPUT /api/admin/records/792 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 793 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:50] "[35m[1mPUT /api/admin/records/793 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 794 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:50] "[35m[1mPUT /api/admin/records/794 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 795 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:50] "[35m[1mPUT /api/admin/records/795 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 796 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:50] "[35m[1mPUT /api/admin/records/796 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 797 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:50] "[35m[1mPUT /api/admin/records/797 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 798 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:50] "[35m[1mPUT /api/admin/records/798 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 799 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:50] "[35m[1mPUT /api/admin/records/799 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 716 in shard 0 to status=present
+2026-04-15T22:00:50.959693 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/716 | record_id=716 | OLD={'record_id': 716, 'status': '(previous)'} | NEW={'record_id': 716, 'status': 'present'}
+127.0.0.1 - - [16/Apr/2026 03:30:50] "PUT /api/admin/records/716 HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:51] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 717 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:51] "[35m[1mPUT /api/admin/records/717 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:51] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 718 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:51] "[35m[1mPUT /api/admin/records/718 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 719 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:51] "[35m[1mPUT /api/admin/records/719 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 720 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:51] "[35m[1mPUT /api/admin/records/720 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 721 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:51] "[35m[1mPUT /api/admin/records/721 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 722 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:51] "[35m[1mPUT /api/admin/records/722 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 723 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:51] "[35m[1mPUT /api/admin/records/723 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 724 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:51] "[35m[1mPUT /api/admin/records/724 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 725 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:51] "[35m[1mPUT /api/admin/records/725 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 726 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:51] "[35m[1mPUT /api/admin/records/726 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 727 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:51] "[35m[1mPUT /api/admin/records/727 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 728 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:51] "[35m[1mPUT /api/admin/records/728 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 729 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:51] "[35m[1mPUT /api/admin/records/729 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 730 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:51] "[35m[1mPUT /api/admin/records/730 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 731 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:52] "[35m[1mPUT /api/admin/records/731 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 732 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:52] "[35m[1mPUT /api/admin/records/732 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 733 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:52] "[35m[1mPUT /api/admin/records/733 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 734 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:52] "[35m[1mPUT /api/admin/records/734 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 735 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:53] "[35m[1mPUT /api/admin/records/735 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 736 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:53] "[35m[1mPUT /api/admin/records/736 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 737 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:53] "[35m[1mPUT /api/admin/records/737 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 738 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:53] "[35m[1mPUT /api/admin/records/738 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 739 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:53] "[35m[1mPUT /api/admin/records/739 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+✓ Direct update: record 740 in shard 0 to status=absent
+2026-04-15T22:00:53.459485 | ACTION=ADMIN_ATT_OVERRIDE | USER=1 | ENDPOINT=/api/admin/records/740 | record_id=740 | OLD={'record_id': 740, 'status': '(previous)'} | NEW={'record_id': 740, 'status': 'absent'}
+127.0.0.1 - - [16/Apr/2026 03:30:53] "PUT /api/admin/records/740 HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:30:53] "GET /api/admin/sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:30:53] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 741 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:53] "[35m[1mPUT /api/admin/records/741 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 742 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:53] "[35m[1mPUT /api/admin/records/742 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 743 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:53] "[35m[1mPUT /api/admin/records/743 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 744 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:53] "[35m[1mPUT /api/admin/records/744 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 745 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:53] "[35m[1mPUT /api/admin/records/745 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 766 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:54] "[35m[1mPUT /api/admin/records/766 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 767 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:54] "[35m[1mPUT /api/admin/records/767 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 768 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:54] "[35m[1mPUT /api/admin/records/768 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 769 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:54] "[35m[1mPUT /api/admin/records/769 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 770 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:54] "[35m[1mPUT /api/admin/records/770 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 771 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:54] "[35m[1mPUT /api/admin/records/771 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 772 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:54] "[35m[1mPUT /api/admin/records/772 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 773 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:54] "[35m[1mPUT /api/admin/records/773 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 774 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:54] "[35m[1mPUT /api/admin/records/774 HTTP/1.1[0m" 500 -
+✓ Connected to shard 0 (port 3307)
+⚠ Record 775 not found in shard 0
+127.0.0.1 - - [16/Apr/2026 03:30:54] "[35m[1mPUT /api/admin/records/775 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [16/Apr/2026 03:34:09] "GET /api/admin/semesters HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:34:11] "GET /api/admin/semesters HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:34:52] "[32mGET / HTTP/1.1[0m" 302 -
+127.0.0.1 - - [16/Apr/2026 03:34:52] "GET /login HTTP/1.1" 200 -
+2026-04-15T22:04:57.535214 | ACTION=LOGIN_OK | USER=3 | ENDPOINT=/login | username=prof_singh
+127.0.0.1 - - [16/Apr/2026 03:34:57] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:34:57] "GET /instructor HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:34:57] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+127.0.0.1 - - [16/Apr/2026 03:34:57] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:34:57] "GET /stream?session_id=4156bdd6-8691-4ef9-86e8-e5f0a106046e&mac=b393bceec0a67f3f92f7911696cdf8ab731eb811a1f72c1fad62d19d0fab2954 HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:34:57] "GET /api/instructor/courses HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:34:57] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:35:00] "GET /api/instructor/courses/1/sessions HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:35:03] "GET /api/instructor/attendance-sessions/103/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Batch deleted 17 records for student 12 from course 1
+2026-04-15T22:05:17.801213 | ACTION=REMOVE_ENROLLMENT | USER=1 | ENDPOINT=/api/admin/courses/1/enrollments/12 | record_id=1, cascade_deleted_attendance_records=17 | OLD={'course_id': 1, 'student_id': 12} | NEW=None
+127.0.0.1 - - [16/Apr/2026 03:35:17] "DELETE /api/admin/courses/1/enrollments/12 HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:35:17] "GET /api/admin/active-semester HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:35:17] "GET /api/admin/semesters/1/courses HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:35:21] "GET /instructor HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:35:21] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+127.0.0.1 - - [16/Apr/2026 03:35:21] "GET /stream?session_id=4156bdd6-8691-4ef9-86e8-e5f0a106046e&mac=b393bceec0a67f3f92f7911696cdf8ab731eb811a1f72c1fad62d19d0fab2954 HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:35:21] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:35:21] "GET /api/instructor/courses HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:35:21] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:35:24] "GET /api/instructor/courses/1/sessions HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:35:26] "GET /api/instructor/attendance-sessions/103/records HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:35:34] "GET /student HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:35:34] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+127.0.0.1 - - [16/Apr/2026 03:35:34] "GET /api/student/corrections/current HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:35:34] "GET /api/student/profile HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:35:34] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:35:34] "GET /stream?session_id=6d43d030-c4e1-4e73-b209-5ff6d8f9b9e9&mac=79829795f004409c170c4b4f79b12fa162121e17a84c3e8dbb0158fcfc82ccae HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:35:34] "GET /isAuth HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:35:34] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:38:17] "GET /api/student/corrections/archive HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [16/Apr/2026 03:38:17] "GET /api/student/attendance-stats/archive HTTP/1.1" 200 -
+2026-04-15T22:08:47.726833 | ACTION=LOGOUT | USER=None | ENDPOINT=/logout | 
+127.0.0.1 - - [16/Apr/2026 03:38:47] "POST /logout HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:38:47] "GET /login HTTP/1.1" 200 -
+2026-04-15T22:08:54.565018 | ACTION=LOGIN_OK | USER=6 | ENDPOINT=/login | username=prof_sharma
+127.0.0.1 - - [16/Apr/2026 03:38:54] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:38:54] "GET /instructor HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:38:54] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+127.0.0.1 - - [16/Apr/2026 03:38:54] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:38:54] "GET /api/instructor/courses HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:38:54] "GET /stream?session_id=b15dd43f-8f00-4fa8-81e9-8f66d69e78fc&mac=888c22589aecc0fbfd627850844cb00d7706ae847d2bde1727ca324e9ed28b1c HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:38:54] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:38:59] "GET /api/instructor/courses/3/sessions HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:39:00] "GET /api/instructor/attendance-sessions/35/records HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Cascade deleted 44 attendance records for student 12 from shard 0
+2026-04-15T22:09:46.784088 | ACTION=DELETE_USER | USER=1 | ENDPOINT=/api/admin/users/12 | record_id=12, cascade_deleted_attendance_records=44 | OLD={'user_id': 12, 'username': 'aarav_verma0', 'role': 'student'} | NEW=None
+127.0.0.1 - - [16/Apr/2026 03:39:46] "DELETE /api/admin/users/12 HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:39:49] "GET /api/admin/users HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:39:54] "GET /instructor HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:39:54] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+127.0.0.1 - - [16/Apr/2026 03:39:54] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:39:54] "GET /stream?session_id=b15dd43f-8f00-4fa8-81e9-8f66d69e78fc&mac=888c22589aecc0fbfd627850844cb00d7706ae847d2bde1727ca324e9ed28b1c HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:39:54] "GET /api/instructor/courses HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:39:54] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:39:57] "GET /api/instructor/courses/3/students HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:39:59] "GET /api/instructor/corrections HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:40:01] "GET /api/instructor/courses/3/sessions HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:40:02] "GET /api/instructor/attendance-sessions/35/records HTTP/1.1" 200 -
+2026-04-15T22:10:17.125991 | ACTION=LOGOUT | USER=None | ENDPOINT=/logout | 
+127.0.0.1 - - [16/Apr/2026 03:40:17] "POST /logout HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:40:17] "GET /login HTTP/1.1" 200 -
+2026-04-15T22:10:21.482112 | ACTION=LOGIN_OK | USER=1 | ENDPOINT=/login | username=admin
+127.0.0.1 - - [16/Apr/2026 03:40:21] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:40:21] "GET /admin HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:40:21] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+127.0.0.1 - - [16/Apr/2026 03:40:21] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:40:21] "GET /api/admin/active-semester HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:40:21] "GET /api/admin/semesters HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:40:21] "GET /api/admin/courses HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:40:21] "GET /api/admin/users HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:40:21] "GET /api/admin/profile HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:40:21] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:40:21] "GET /stream?session_id=26a6f10e-e0d7-498d-9c6a-056c329557af&mac=1a245637ce46d0944d5b48bf5008410dfc4cc827658eced63b70ad2db1a49a65 HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:40:21] "GET /api/admin/semesters/1/courses HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:40:29] "GET /api/admin/semesters HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:40:42] "GET /admin HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:40:42] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+127.0.0.1 - - [16/Apr/2026 03:40:42] "GET /login HTTP/1.1" 200 -
+2026-04-15T22:10:47.079128 | ACTION=LOGIN_OK | USER=62 | ENDPOINT=/login | username=aman_singh50
+127.0.0.1 - - [16/Apr/2026 03:40:47] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:40:47] "GET /student HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:40:47] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+127.0.0.1 - - [16/Apr/2026 03:40:47] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:40:47] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:40:47] "GET /api/student/profile HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:40:47] "GET /stream?session_id=00682ee0-a76b-4f83-8f64-58add500758b&mac=1c4796269a12559cf764c64f2ae27bcec5296543e61e913a39bdaa3dacb1029b HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:40:47] "GET /api/student/corrections/current HTTP/1.1" 200 -
+✓ Connected to shard 2 (port 3309)
+127.0.0.1 - - [16/Apr/2026 03:40:47] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:43:33] "GET /api/admin/semesters HTTP/1.1" 200 -
+2026-04-15T22:15:03.606992 | ACTION=CREATE_COURSE | USER=1 | ENDPOINT=/api/admin/courses | record_id=11 | OLD=None | NEW={'course_id': 11, 'name': 'New course', 'code': 'CS100', 'semester_id': 1}
+127.0.0.1 - - [16/Apr/2026 03:45:03] "[35m[1mPOST /api/admin/courses HTTP/1.1[0m" 201 -
+127.0.0.1 - - [16/Apr/2026 03:45:03] "GET /api/admin/active-semester HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:45:03] "GET /api/admin/semesters/1/courses HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:45:09] "GET /api/admin/courses/11/available-instructors HTTP/1.1" 200 -
+2026-04-15T22:15:19.857044 | ACTION=ASSIGN_INSTRUCTOR | USER=1 | ENDPOINT=/api/admin/courses/11/instructors | record_id=11 | OLD=None | NEW={'course_id': 11, 'instructor_id': 3}
+127.0.0.1 - - [16/Apr/2026 03:45:19] "[35m[1mPOST /api/admin/courses/11/instructors HTTP/1.1[0m" 201 -
+127.0.0.1 - - [16/Apr/2026 03:45:19] "GET /api/admin/active-semester HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:45:19] "GET /api/admin/semesters/1/courses HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:45:28] "GET /api/admin/students HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:45:56] "GET /api/admin/students HTTP/1.1" 200 -
+2026-04-15T22:16:02.277303 | ACTION=ENROLL_STUDENT | USER=1 | ENDPOINT=/api/admin/courses/11/enrollments | record_id=11 | OLD=None | NEW={'course_id': 11, 'student_id': 16}
+127.0.0.1 - - [16/Apr/2026 03:46:02] "[35m[1mPOST /api/admin/courses/11/enrollments HTTP/1.1[0m" 201 -
+127.0.0.1 - - [16/Apr/2026 03:46:02] "GET /api/admin/active-semester HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:46:02] "GET /api/admin/semesters/1/courses HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:46:03] "GET /api/admin/students HTTP/1.1" 200 -
+2026-04-15T22:16:07.089350 | ACTION=ENROLL_STUDENT | USER=1 | ENDPOINT=/api/admin/courses/11/enrollments | record_id=11 | OLD=None | NEW={'course_id': 11, 'student_id': 13}
+127.0.0.1 - - [16/Apr/2026 03:46:07] "[35m[1mPOST /api/admin/courses/11/enrollments HTTP/1.1[0m" 201 -
+127.0.0.1 - - [16/Apr/2026 03:46:07] "GET /api/admin/active-semester HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:46:07] "GET /api/admin/semesters/1/courses HTTP/1.1" 200 -
+2026-04-15T22:16:09.194451 | ACTION=LOGOUT | USER=None | ENDPOINT=/logout | 
+127.0.0.1 - - [16/Apr/2026 03:46:09] "POST /logout HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:46:09] "GET /login HTTP/1.1" 200 -
+2026-04-15T22:16:22.159837 | ACTION=LOGIN_OK | USER=13 | ENDPOINT=/login | username=aditi_shah1
+127.0.0.1 - - [16/Apr/2026 03:46:22] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:46:22] "GET /student HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:46:22] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+127.0.0.1 - - [16/Apr/2026 03:46:22] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:46:22] "GET /stream?session_id=f9e010ac-5b5a-4e7a-868e-632009b62057&mac=a2a45497e4abcb963f029725a6279217f092bf337cee7a9ac5b3c69c42cbcb95 HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:46:22] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:46:22] "GET /api/student/profile HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:46:22] "GET /api/student/corrections/current HTTP/1.1" 200 -
+✓ Connected to shard 1 (port 3308)
+127.0.0.1 - - [16/Apr/2026 03:46:22] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+2026-04-15T22:16:51.174561 | ACTION=LOGOUT | USER=None | ENDPOINT=/logout | 
+127.0.0.1 - - [16/Apr/2026 03:46:51] "POST /logout HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:46:51] "GET /login HTTP/1.1" 200 -
+2026-04-15T22:16:54.554136 | ACTION=LOGIN_FAIL | USER=None | ENDPOINT=/login | username=aarav_verma0
+127.0.0.1 - - [16/Apr/2026 03:46:54] "[31m[1mPOST /login HTTP/1.1[0m" 401 -
+2026-04-15T22:16:58.471323 | ACTION=LOGIN_OK | USER=62 | ENDPOINT=/login | username=aman_singh50
+127.0.0.1 - - [16/Apr/2026 03:46:58] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:46:58] "GET /student HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:46:58] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+127.0.0.1 - - [16/Apr/2026 03:46:58] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:46:58] "GET /api/student/corrections/current HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:46:58] "GET /api/student/profile HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:46:58] "GET /stream?session_id=211e0035-69b5-4143-b67b-c92b84623644&mac=1fbe70820090890b2ab534d2cf633f56ced1066b291318e237a5c5b69b7de50a HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:46:58] "GET /isAuth HTTP/1.1" 200 -
+✓ Connected to shard 2 (port 3309)
+127.0.0.1 - - [16/Apr/2026 03:46:58] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+2026-04-15T22:17:42.112346 | ACTION=CREATE_SEMESTER | USER=1 | ENDPOINT=/api/admin/semesters | record_id=3 | OLD=None | NEW={'semester_id': 3, 'name': 'Sem I 2026-27', 'is_active': 1}
+127.0.0.1 - - [16/Apr/2026 03:47:42] "[35m[1mPOST /api/admin/semesters HTTP/1.1[0m" 201 -
+127.0.0.1 - - [16/Apr/2026 03:47:42] "GET /api/admin/active-semester HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:47:42] "GET /api/admin/semesters/3/courses HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:47:42] "GET /api/admin/semesters HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:47:42] "GET /api/admin/courses HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:47:46] "GET /student HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:47:46] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+127.0.0.1 - - [16/Apr/2026 03:47:46] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:47:46] "GET /stream?session_id=211e0035-69b5-4143-b67b-c92b84623644&mac=1fbe70820090890b2ab534d2cf633f56ced1066b291318e237a5c5b69b7de50a HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:47:46] "GET /api/student/corrections/current HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:47:46] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:47:46] "GET /api/student/profile HTTP/1.1" 200 -
+✓ Connected to shard 2 (port 3309)
+127.0.0.1 - - [16/Apr/2026 03:47:46] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:47:49] "GET /student HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:47:49] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+127.0.0.1 - - [16/Apr/2026 03:47:49] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:47:49] "GET /api/student/profile HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:47:49] "GET /api/student/corrections/current HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:47:49] "GET /stream?session_id=211e0035-69b5-4143-b67b-c92b84623644&mac=1fbe70820090890b2ab534d2cf633f56ced1066b291318e237a5c5b69b7de50a HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:47:49] "GET /isAuth HTTP/1.1" 200 -
+✓ Connected to shard 2 (port 3309)
+127.0.0.1 - - [16/Apr/2026 03:47:49] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+127.0.0.1 - - [16/Apr/2026 03:48:03] "GET /api/student/corrections/archive HTTP/1.1" 200 -
+✓ Connected to shard 2 (port 3309)
+127.0.0.1 - - [16/Apr/2026 03:48:03] "GET /api/student/attendance-stats/archive HTTP/1.1" 200 -

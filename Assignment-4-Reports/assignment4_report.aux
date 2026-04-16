@@ -37,4 +37,49 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {I-J}}Expected Distribution and Skew Risk}{3}{subsection.1.10}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {VIII}{\ignorespaces Observed Student-Range Distribution (Selected Strategy)}}{3}{table.8}\protected@file@percent }
 \newlabel{tab:range_distribution}{{VIII}{3}{Observed Student-Range Distribution (Selected Strategy)}{table.8}{}}
-\gdef \@abspage@last{3}
+\@writefile{toc}{\contentsline {section}{\numberline {II}Part 2: Query Routing Implementation Architecture}{3}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-A}}System Overview}{3}{subsection.2.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {IX}{\ignorespaces Shard Configuration}}{3}{table.9}\protected@file@percent }
+\newlabel{tab:shard_config}{{IX}{3}{Shard Configuration}{table.9}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-B}}Connection Management Strategy}{3}{subsection.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-B}1}Per-Request Connection Caching}{3}{subsubsection.2.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-B}2}ThreadPoolExecutor Direct Connections}{4}{subsubsection.2.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-C}}Routing Functions}{4}{subsection.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-C}1}Primary Routing: \texttt  {get\_shard\_id()}}{4}{subsubsection.2.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-C}2}Range Resolution: \texttt  {get\_shards\_for\_range()}}{4}{subsubsection.2.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-D}}Single-Shard Operations}{4}{subsection.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-D}1}\texttt  {get\_records\_for\_student()}: Read One Student}{4}{subsubsection.2.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-D}2}\texttt  {insert\_record()}: Create One Record}{4}{subsubsection.2.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-D}3}\texttt  {update\_record()}: Modify One Record}{4}{subsubsection.2.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-E}}Multi-Shard Operations (Parallelized)}{4}{subsection.2.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-E}1}\texttt  {get\_records\_for\_session()}: Read Session with Parallel Fan-Out}{4}{subsubsection.2.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-E}2}\texttt  {delete\_records\_for\_session()}: Delete Session Records (Parallel)}{5}{subsubsection.2.5.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-E}3}\texttt  {delete\_records\_for\_course()}: Batch + Parallel}{5}{subsubsection.2.5.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-F}}Helper Functions}{5}{subsection.2.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-F}1}\texttt  {get\_student\_id\_for\_record()}: Cross-Shard Lookup}{5}{subsubsection.2.6.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-G}}API Endpoint Routing}{6}{subsection.2.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-H}}Real-Time Broadcast Integration}{6}{subsection.2.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-I}}Distribution Balance}{6}{subsection.2.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {III}Implementation Details and Testing}{6}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-A}}Connection Validation}{6}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-B}}Query Verification}{6}{subsection.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-C}}Code Syntax Validation}{6}{subsection.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {IV}Conclusion}{6}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {V}SubTask 4: Scalability \& Trade-offs Analysis}{6}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-A}}Scalability: Horizontal vs. Vertical Analysis}{6}{subsection.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {V-A}1}Vertical Scaling Limitations}{6}{subsubsection.5.1.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {V-A}2}Horizontal Scaling (Sharding)}{6}{subsubsection.5.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-B}}Consistency: Ensuring Atomic Global Operations}{6}{subsection.5.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {X}{\ignorespaces API Endpoint Routing Matrix}}{7}{table.10}\protected@file@percent }
+\newlabel{tab:api_routing}{{X}{7}{API Endpoint Routing Matrix}{table.10}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {XI}{\ignorespaces Attendance Record Distribution}}{7}{table.11}\protected@file@percent }
+\newlabel{tab:distribution_balance}{{XI}{7}{Attendance Record Distribution}{table.11}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {V-B}1}Atomic Cross-Shard Operations}{7}{subsubsection.5.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {V-B}2}Data Accuracy}{7}{subsubsection.5.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-C}}Availability: The CAP Theorem Trade-off}{7}{subsection.5.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {V-C}1}Impact of Shard Failure}{7}{subsubsection.5.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-D}}Partition Tolerance: Responding to Shard Failures}{7}{subsection.5.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {V-D}1}Failure Handling}{7}{subsubsection.5.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {V-D}2}Future Improvements: Replication}{7}{subsubsection.5.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-E}}Conclusion}{7}{subsection.5.5}\protected@file@percent }
+\gdef \@abspage@last{7}
