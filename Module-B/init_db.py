@@ -44,15 +44,31 @@ SHARD_CONFIGS = {
         "database": "Scalix", "user": "Scalix", "password": "password@123"},
 }
 
-SHARD_SCHEMA_DROP = "DROP TABLE IF EXISTS shard_{shard_id}_attendance_records"
+SHARD_SCHEMA_DROP_ATTENDANCE = "DROP TABLE IF EXISTS shard_{shard_id}_attendance_records"
+SHARD_SCHEMA_DROP_CORRECTIONS = "DROP TABLE IF EXISTS shard_{shard_id}_correction_requests"
 
-SHARD_SCHEMA_CREATE = """CREATE TABLE shard_{shard_id}_attendance_records (
+SHARD_SCHEMA_CREATE_ATTENDANCE = """CREATE TABLE shard_{shard_id}_attendance_records (
     record_id      INT AUTO_INCREMENT PRIMARY KEY,
     att_session_id INT NOT NULL,
     student_id     INT NOT NULL,
     status         ENUM('present', 'absent', 'late') NOT NULL DEFAULT 'absent',
     INDEX idx_student (student_id),
     INDEX idx_session (att_session_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"""
+
+SHARD_SCHEMA_CREATE_CORRECTIONS = """CREATE TABLE shard_{shard_id}_correction_requests (
+    req_id         INT AUTO_INCREMENT PRIMARY KEY,
+    student_id     INT NOT NULL,
+    course_id      INT NOT NULL,
+    att_session_id INT NOT NULL,
+    reason         TEXT NOT NULL,
+    proof_url      TEXT,
+    status         ENUM('pending', 'accepted', 'rejected') NOT NULL DEFAULT 'pending',
+    created_at     DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_student (student_id),
+    INDEX idx_session (att_session_id),
+    INDEX idx_status (status),
+    UNIQUE KEY unique_student_session (student_id, att_session_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"""
 
 
@@ -62,7 +78,7 @@ def get_shard_id(student_id: int) -> int:
 
 
 def migrate_to_mysql_shards():
-    """Migrate attendance records from SQLite to MySQL shards using bulk inserts."""
+    """Migrate attendance records and correction requests from SQLite to MySQL shards using bulk inserts."""
     print()
     print("  Connecting to SQLite database...")
     
@@ -70,26 +86,46 @@ def migrate_to_mysql_shards():
         sqlite_conn = sqlite3.connect(DB_PATH)
         sqlite_conn.row_factory = sqlite3.Row
         
-        rows = sqlite_conn.execute(
+        # Read attendance records
+        attendance_rows = sqlite_conn.execute(
             "SELECT att_session_id, student_id, status FROM attendance_records ORDER BY student_id"
         ).fetchall()
         
-        print(f"  ✓  Found {len(rows)} attendance records")
+        # Read correction requests
+        correction_rows = sqlite_conn.execute(
+            "SELECT student_id, course_id, att_session_id, reason, proof_url, status, created_at "
+            "FROM correction_requests ORDER BY student_id"
+        ).fetchall()
+        
+        print(f"  ✓  Found {len(attendance_rows)} attendance records")
+        print(f"  ✓  Found {len(correction_rows)} correction requests")
     except sqlite3.Error as e:
-        print(f"  ✗  Cannot read attendance_records: {e}")
+        print(f"  ✗  Cannot read data: {e}")
         return
     
     # Group records by shard
     print("  Preparing data for bulk insert...")
-    shard_data = {i: [] for i in range(len(SHARD_CONFIGS))}
-    skipped = 0
+    attendance_shard_data = {i: [] for i in range(len(SHARD_CONFIGS))}
+    correction_shard_data = {i: [] for i in range(len(SHARD_CONFIGS))}
     
-    for row in rows:
+    for row in attendance_rows:
         shard_id = get_shard_id(row["student_id"])
-        shard_data[shard_id].append((row["att_session_id"], row["student_id"], row["status"]))
+        attendance_shard_data[shard_id].append((row["att_session_id"], row["student_id"], row["status"]))
     
-    for shard_id, data in shard_data.items():
+    for row in correction_rows:
+        shard_id = get_shard_id(row["student_id"])
+        correction_shard_data[shard_id].append((
+            row["student_id"], row["course_id"], row["att_session_id"],
+            row["reason"], row["proof_url"], row["status"], row["created_at"]
+        ))
+    
+    print("  Attendance records per shard:")
+    for shard_id, data in attendance_shard_data.items():
         print(f"    Shard {shard_id} (student_id % 3 == {shard_id}): {len(data)} records")
+    
+    print("  Correction requests per shard:")
+    for shard_id, data in correction_shard_data.items():
+        print(f"    Shard {shard_id} (student_id % 3 == {shard_id}): {len(data)} requests")
     
     # Connect to MySQL shards
     print()
@@ -108,14 +144,22 @@ def migrate_to_mysql_shards():
                 connection_timeout=10
             )
             
-            # Drop old table (clears all previous data)
+            # Drop old tables (clears all previous data)
             cursor = conn.cursor()
-            cursor.execute(SHARD_SCHEMA_DROP.format(shard_id=shard_id))
+            cursor.execute(SHARD_SCHEMA_DROP_ATTENDANCE.format(shard_id=shard_id))
             cursor.close()
             
-            # Create fresh table with proper AUTO_INCREMENT
             cursor = conn.cursor()
-            cursor.execute(SHARD_SCHEMA_CREATE.format(shard_id=shard_id))
+            cursor.execute(SHARD_SCHEMA_DROP_CORRECTIONS.format(shard_id=shard_id))
+            cursor.close()
+            
+            # Create fresh tables with proper AUTO_INCREMENT
+            cursor = conn.cursor()
+            cursor.execute(SHARD_SCHEMA_CREATE_ATTENDANCE.format(shard_id=shard_id))
+            cursor.close()
+            
+            cursor = conn.cursor()
+            cursor.execute(SHARD_SCHEMA_CREATE_CORRECTIONS.format(shard_id=shard_id))
             cursor.close()
             
             conn.commit()
@@ -128,46 +172,86 @@ def migrate_to_mysql_shards():
                 c.close()
             sqlite_conn.close()
             print("\n  ⚠  MySQL migration failed - continuing without shards")
-            print("     Run 'python migrate_to_mysql_shards_fast.py' manually later")
             return
     
     # Bulk insert for each shard
     print()
     print("  Bulk inserting records...")
-    counts = {}
+    attendance_counts = {}
+    correction_counts = {}
     
-    for shard_id, data in shard_data.items():
-        if not data:
-            counts[shard_id] = 0
-            continue
+    for shard_id in SHARD_CONFIGS.keys():
+        conn = mysql_conns[shard_id]
         
-        try:
-            conn = mysql_conns[shard_id]
-            cursor = conn.cursor()
-            
-            cursor.executemany(
-                f"INSERT INTO shard_{shard_id}_attendance_records "
-                "(att_session_id, student_id, status) VALUES (%s, %s, %s)",
-                data
-            )
-            
-            conn.commit()
-            counts[shard_id] = cursor.rowcount
-            cursor.close()
-            
-            print(f"    ✓  Shard {shard_id}: {counts[shard_id]} records inserted")
-        except mysql.connector.Error as e:
-            print(f"    ✗  Shard {shard_id}: {e}")
-            counts[shard_id] = 0
+        # Insert attendance records
+        attendance_data = attendance_shard_data[shard_id]
+        if attendance_data:
+            try:
+                cursor = conn.cursor()
+                cursor.executemany(
+                    f"INSERT INTO shard_{shard_id}_attendance_records "
+                    "(att_session_id, student_id, status) VALUES (%s, %s, %s)",
+                    attendance_data
+                )
+                conn.commit()
+                attendance_counts[shard_id] = cursor.rowcount
+                cursor.close()
+                print(f"    ✓  Shard {shard_id}: {attendance_counts[shard_id]} attendance records inserted")
+            except mysql.connector.Error as e:
+                print(f"    ✗  Shard {shard_id} attendance: {e}")
+                attendance_counts[shard_id] = 0
+        else:
+            attendance_counts[shard_id] = 0
+        
+        # Insert correction requests
+        correction_data = correction_shard_data[shard_id]
+        if correction_data:
+            try:
+                cursor = conn.cursor()
+                cursor.executemany(
+                    f"INSERT INTO shard_{shard_id}_correction_requests "
+                    "(student_id, course_id, att_session_id, reason, proof_url, status, created_at) "
+                    "VALUES (%s, %s, %s, %s, %s, %s, %s)",
+                    correction_data
+                )
+                conn.commit()
+                correction_counts[shard_id] = cursor.rowcount
+                cursor.close()
+                print(f"    ✓  Shard {shard_id}: {correction_counts[shard_id]} correction requests inserted")
+            except mysql.connector.Error as e:
+                print(f"    ✗  Shard {shard_id} corrections: {e}")
+                correction_counts[shard_id] = 0
+        else:
+            correction_counts[shard_id] = 0
     
-    # Close connections
+    # Close MySQL connections
     for conn in mysql_conns.values():
         conn.close()
-    sqlite_conn.close()
     
-    total = sum(counts.values())
+    total_attendance = sum(attendance_counts.values())
+    total_corrections = sum(correction_counts.values())
     print()
-    print(f"  ✓  Total migrated to MySQL shards: {total} records")
+    print(f"  ✓  Total migrated to MySQL shards:")
+    print(f"     - Attendance records: {total_attendance}")
+    print(f"     - Correction requests: {total_corrections}")
+    
+    # Delete attendance_records and correction_requests from SQLite after successful migration
+    print()
+    print("  Cleaning up SQLite...")
+    try:
+        sqlite_conn.execute("DELETE FROM attendance_records")
+        sqlite_conn.commit()
+        remaining_attendance = sqlite_conn.execute("SELECT COUNT(*) FROM attendance_records").fetchone()[0]
+        print(f"  ✓  Deleted attendance_records from SQLite (remaining: {remaining_attendance})")
+        
+        sqlite_conn.execute("DELETE FROM correction_requests")
+        sqlite_conn.commit()
+        remaining_corrections = sqlite_conn.execute("SELECT COUNT(*) FROM correction_requests").fetchone()[0]
+        print(f"  ✓  Deleted correction_requests from SQLite (remaining: {remaining_corrections})")
+    except sqlite3.Error as e:
+        print(f"  ✗  Failed to delete from SQLite: {e}")
+    finally:
+        sqlite_conn.close()
 
 
 # from app.shard import init_shards   # adjust import path to your structure
@@ -493,7 +577,9 @@ def init():
         if (sess_id, stu_id) in absent_set
     ]
 
-    sample      = random.sample(absent_list, min(40, len(absent_list)))
+    # Sample 30% of absent records for correction requests (realistic scenario)
+    sample_size = max(int(len(absent_list) * 0.3), 100)  # At least 100 requests
+    sample      = random.sample(absent_list, min(sample_size, len(absent_list)))
     cr_statuses = ["pending","pending","pending","accepted","rejected"]
     inserted_cr = 0
     inserted_cl = 0
