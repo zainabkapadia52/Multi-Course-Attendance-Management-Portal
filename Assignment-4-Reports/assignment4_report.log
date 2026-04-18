@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025/Homebrew) (preloaded format=pdflatex 2025.3.15)  16 APR 2026 10:05
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025/Homebrew) (preloaded format=pdflatex 2025.3.15)  18 APR 2026 11:48
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -573,7 +573,7 @@ Overfull \hbox (2.28287pt too wide) in paragraph at lines 86--100
  [][] 
  []
 
-<Images/shard_key_distribution.png, id=229, 774.895pt x 476.78125pt>
+<Images/shard_key_distribution.png, id=285, 774.895pt x 476.78125pt>
 File: Images/shard_key_distribution.png Graphic file (type png)
 <use Images/shard_key_distribution.png>
 Package pdftex.def Info: Images/shard_key_distribution.png  used on input line 104.
@@ -720,93 +720,141 @@ Underfull \hbox (badness 10000) in paragraph at lines 280--280
 
 
 
-Underfull \hbox (badness 1661) in paragraph at lines 305--306
-[]\OT1/ptm/m/n/10 The query rout-ing sys-tem par-ti-tions 2,128 at-ten-dance
+Underfull \hbox (badness 10000) in paragraph at lines 318--319
+[]|\OT1/ptm/m/n/8 Authentication,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 322--323
+[]|\OT1/ptm/m/n/8 Student-course
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 324--325
-[]\OT1/ptm/m/n/10 Each shard main-tains ta-ble
+[]|\OT1/ptm/m/n/8 Attendance ses-sion
  []
 
 
-Underfull \hbox (badness 4181) in paragraph at lines 330--331
- \OT1/ptm/m/it/10 1) Per-Request Con-nec-tion Caching: [][][] \OT1/ptm/m/n/10 Flask's request-
+Underfull \hbox (badness 10000) in paragraph at lines 328--329
+[]|\OT1/ptm/m/n/8 Student dis-pute
+ []
+
+LaTeX Font Info:    Font shape `OT1/pcr/m/it' in size <10> not available
+(Font)              Font shape `OT1/pcr/m/sl' tried instead on input line 349.
+
+
+[3]
+Underfull \hbox (badness 2717) in paragraph at lines 360--361
+[]\OT1/ptm/m/n/10 Course an-a-lyt-ics: \OT1/pcr/m/n/10 WHERE course_id = ? \OT1/ptm/m/n/10 (cross-
  []
 
 (/opt/homebrew/Cellar/texlive/20250308_1/share/texmf-dist/tex/latex/listings/lstlang1.sty
 File: lstlang1.sty 2024/09/23 1.10c listings language file
+) (/opt/homebrew/Cellar/texlive/20250308_1/share/texmf-dist/tex/latex/listings/lstlang1.sty
+File: lstlang1.sty 2024/09/23 1.10c listings language file
 )
 
-[3]
-LaTeX Font Info:    Font shape `OT1/pcr/m/it' in size <10> not available
-(Font)              Font shape `OT1/pcr/m/sl' tried instead on input line 385.
 
-Underfull \hbox (badness 4181) in paragraph at lines 385--386
+Underfull \hbox (badness 2875) in paragraph at lines 441--442
+[]\OT1/ptm/m/n/10 Generate at-ten-dance data ($\OMS/cmsy/m/n/10 ^^X$\OT1/ptm/m/n/10 102 ses-sions, $\OMS/cmsy/m/n/10 ^^X$\OT1/ptm/m/n/10 2,370
+ []
+
+
+
+[4]
+
+
+Underfull \hbox (badness 1783) in paragraph at lines 573--575
+[]\OT1/ptm/b/n/10 Rationale: \OT1/ptm/m/n/10 Af-ter suc-cess-ful mi-gra-tion, source data is
+ []
+
+LaTeX Font Info:    Trying to load font information for TS1+pcr on input line 586.
+(/opt/homebrew/Cellar/texlive/20250308_1/share/texmf-dist/tex/latex/psnfss/ts1pcr.fd
+File: ts1pcr.fd 2001/06/04 font definitions for TS1/pcr.
+)
+
+[5]
+Underfull \hbox (badness 1661) in paragraph at lines 707--708
+[]\OT1/ptm/m/n/10 The query rout-ing sys-tem par-ti-tions 2,128 at-ten-dance
+ []
+
+
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 726--727
+[]\OT1/ptm/m/n/10 Each shard main-tains ta-ble
+ []
+
+
+Underfull \hbox (badness 4181) in paragraph at lines 732--733
+ \OT1/ptm/m/it/10 1) Per-Request Con-nec-tion Caching: [][][] \OT1/ptm/m/n/10 Flask's request-
+ []
+
+
+
+[6]
+Underfull \hbox (badness 4181) in paragraph at lines 787--788
  \OT1/ptm/m/it/10 1) Pri-mary Rout-ing: \OT1/pcr/m/sl/10 get_shard_id()\OT1/ptm/m/it/10 : [][][] \OT1/ptm/m/n/10 Maps any
  []
 
 
-Underfull \hbox (badness 1675) in paragraph at lines 407--408
+Underfull \hbox (badness 1675) in paragraph at lines 809--810
  \OT1/ptm/m/it/10 1) \OT1/pcr/m/sl/10 get_records_for_student()\OT1/ptm/m/it/10 : Read One Stu-
  []
 
 
-Underfull \hbox (badness 2310) in paragraph at lines 430--431
+Underfull \hbox (badness 2310) in paragraph at lines 832--833
  \OT1/ptm/m/it/10 2) \OT1/pcr/m/sl/10 insert_record()\OT1/ptm/m/it/10 : Cre-ate One Record: [][][] \OT1/ptm/b/n/10 Query
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 430--431
+Underfull \hbox (badness 10000) in paragraph at lines 832--833
 \OT1/ptm/b/n/10 type: \OT1/ptm/m/n/10 Single-shard IN-SERT with di-rect rout-ing by
  []
 
 
 
 
-Underfull \hbox (badness 1762) in paragraph at lines 452--453
+Underfull \hbox (badness 1762) in paragraph at lines 854--855
  \OT1/ptm/m/it/10 3) \OT1/pcr/m/sl/10 update_record()\OT1/ptm/m/it/10 : Mod-ify One Record: [][][] \OT1/ptm/b/n/10 Query
  []
 
 
 
-[4]
-Underfull \hbox (badness 1609) in paragraph at lines 544--545
+[7]
+Underfull \hbox (badness 1609) in paragraph at lines 946--947
  \OT1/ptm/m/it/10 2) \OT1/pcr/m/sl/10 delete_records_for_session()\OT1/ptm/m/it/10 : Delete Ses-
  []
 
 
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 626--627
+Underfull \hbox (badness 10000) in paragraph at lines 1028--1029
  \OT1/ptm/m/it/10 1) \OT1/pcr/m/sl/10 get_student_id_for_record()\OT1/ptm/m/it/10 : Cross-Shard
  []
 
 
-
-[5]
-Underfull \hbox (badness 10000) in paragraph at lines 652--653
+Underfull \hbox (badness 10000) in paragraph at lines 1054--1055
 []\OT1/ptm/m/n/10 All CRUD end-points route through
  []
 
 
-Overfull \hbox (45.0713pt too wide) in paragraph at lines 657--679
+Overfull \hbox (45.0713pt too wide) in paragraph at lines 1059--1081
  [][] 
  []
 
-LaTeX Font Info:    Trying to load font information for TS1+pcr on input line 733.
-(/opt/homebrew/Cellar/texlive/20250308_1/share/texmf-dist/tex/latex/psnfss/ts1pcr.fd
-File: ts1pcr.fd 2001/06/04 font definitions for TS1/pcr.
-)
 
 
-Underfull \hbox (badness 1635) in paragraph at lines 794--796
+[8]
+
+
+
+[9]
+Underfull \hbox (badness 1635) in paragraph at lines 1196--1198
  \OT1/ptm/m/it/10 1) Atomic Cross-Shard Op-er-a-tions: [][][] \OT1/ptm/m/n/10 Un-like many dis-
  []
 
 
-
-[6]
 
 
 ** Conference Paper **
@@ -821,27 +869,27 @@ Before submitting the final camera ready copy, remember to:
 
 
 
-[7] (./assignment4_report.aux)
+[10] (./assignment4_report.aux)
  ***********
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
  ***********
 Package rerunfilecheck Info: File `assignment4_report.out' has not changed.
-(rerunfilecheck)             Checksum: F9CBF900906FE3746DE8B365AA53A122;12955.
+(rerunfilecheck)             Checksum: 478AE9E6B9F421D49994304836A75641;15553.
  ) 
 Here is how much of TeX's memory you used:
- 13524 strings out of 473190
- 209815 string characters out of 5704335
- 1420737 words of memory out of 5000000
- 36313 multiletter control sequences out of 15000+600000
+ 14068 strings out of 473190
+ 216909 string characters out of 5704335
+ 1562528 words of memory out of 5000000
+ 36622 multiletter control sequences out of 15000+600000
  600427 words of font info for 121 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 75i,11n,79p,572b,2024s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,11n,79p,572b,2019s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </opt/homebrew/Cellar/texlive/20250308_1/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></opt/homebrew/Cellar/texlive/20250308_1/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></opt/homebrew/Cellar/texlive/20250308_1/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></opt/homebrew/Cellar/texlive/20250308_1/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></opt/homebrew/Cellar/texlive/20250308_1/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></opt/homebrew/Cellar/texlive/20250308_1/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></opt/homebrew/Cellar/texlive/20250308_1/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></opt/homebrew/Cellar/texlive/20250308_1/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></opt/homebrew/Cellar/texlive/20250308_1/share/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb></opt/homebrew/Cellar/texlive/20250308_1/share/texmf-dist/fonts/type1/urw/courier/ucrb8a.pfb></opt/homebrew/Cellar/texlive/20250308_1/share/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></opt/homebrew/Cellar/texlive/20250308_1/share/texmf-dist/fonts/type1/urw/courier/ucrro8a.pfb></opt/homebrew/Cellar/texlive/20250308_1/share/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></opt/homebrew/Cellar/texlive/20250308_1/share/texmf-dist/fonts/type1/urw/times/utmbi8a.pfb></opt/homebrew/Cellar/texlive/20250308_1/share/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></opt/homebrew/Cellar/texlive/20250308_1/share/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on assignment4_report.pdf (7 pages, 264818 bytes).
+Output written on assignment4_report.pdf (10 pages, 286042 bytes).
 PDF statistics:
- 642 PDF objects out of 1000 (max. 8388607)
- 593 compressed objects within 6 object streams
- 293 named destinations out of 1000 (max. 500000)
- 454 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 976 PDF objects out of 1000 (max. 8388607)
+ 920 compressed objects within 10 object streams
+ 526 named destinations out of 1000 (max. 500000)
+ 566 words of extra memory for PDF output out of 10000 (max. 10000000)
 

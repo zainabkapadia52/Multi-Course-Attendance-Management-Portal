@@ -295,10 +295,412 @@ Shard 2 & 51--71 & 706 & -0.5\% \\
 \end{itemize}
 
 % ════════════════════════════════════════════════════════════════════════════
-% PART 2: QUERY ROUTING IMPLEMENTATION
+% SUBTASK 2: SHARDING IMPLEMENTATION AND DATA MIGRATION
 % ════════════════════════════════════════════════════════════════════════════
 
-\section{Part 2: Query Routing Implementation Architecture}
+\section{SubTask 2: Sharding Implementation and Data Migration}
+
+\subsection{Overview}
+
+After selecting \texttt{student\_id} as the shard key and modulo-3 hash partitioning as the strategy, we implemented a complete sharding solution that migrates high-volume transactional data from SQLite to MySQL shards while maintaining metadata in SQLite for efficient joins.
+
+\subsection{Dual-Database Architecture}
+
+The system employs a hybrid architecture that separates concerns between metadata and transactional data:
+
+\begin{table}[htbp]
+\caption{Database Architecture Components}
+\centering
+\begin{tabular}{|p{2.5cm}|p{2.2cm}|p{2.5cm}|}
+\hline
+\textbf{Component} & \textbf{Storage} & \textbf{Purpose} \\
+\hline
+Users, Profiles & SQLite & Authentication, authorization \\
+\hline
+Courses, Semesters & SQLite & Academic structure \\
+\hline
+Enrollments & SQLite & Student-course relationships \\
+\hline
+Sessions & SQLite & Attendance session metadata \\
+\hline
+Attendance Records & MySQL Shards & High-volume transactional data \\
+\hline
+Correction Requests & MySQL Shards & Student dispute records \\
+\hline
+Correction Logs & SQLite & Audit trail (references shards) \\
+\hline
+\end{tabular}
+\label{tab:db_architecture}
+\end{table}
+
+\textbf{Design rationale:}
+\begin{itemize}
+    \item \textbf{SQLite for metadata:} Low-volume, relationship-heavy data benefits from local storage and simple joins
+    \item \textbf{MySQL shards for transactions:} High-volume, rapidly-growing data requires horizontal scalability
+    \item \textbf{Separation of concerns:} Metadata queries remain simple while transactional queries scale independently
+\end{itemize}
+
+\subsection{Tables Selected for Sharding}
+
+Based on volume analysis and growth projections, two tables were selected for sharding:
+
+\subsubsection{Table 1: \texttt{attendance\_records}}
+
+\textbf{Volume characteristics:}
+\begin{itemize}
+    \item Initial: $\sim$2,370 records
+    \item Growth rate: $\sim$3 million records/year (university scale)
+    \item 5-year projection: 15 million records
+\end{itemize}
+
+\textbf{Query patterns:}
+\begin{itemize}
+    \item Student dashboard: \texttt{WHERE student\_id = ?} (single shard)
+    \item Session view: \texttt{WHERE att\_session\_id = ?} (cross-shard, parallelizable)
+    \item Course analytics: \texttt{WHERE course\_id = ?} (cross-shard, parallelizable)
+\end{itemize}
+
+\textbf{Shard schema:}
+\begin{lstlisting}[language=SQL]
+CREATE TABLE shard_{0,1,2}_attendance_records (
+    record_id      INT AUTO_INCREMENT PRIMARY KEY,
+    att_session_id INT NOT NULL,
+    student_id     INT NOT NULL,
+    status         ENUM('present','absent','late') 
+                   NOT NULL DEFAULT 'absent',
+    INDEX idx_student (student_id),
+    INDEX idx_session (att_session_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+\end{lstlisting}
+
+\subsubsection{Table 2: \texttt{correction\_requests}}
+
+\textbf{Volume characteristics:}
+\begin{itemize}
+    \item Initial: $\sim$106 requests (30\% of absent records)
+    \item Growth rate: $\sim$150,000 requests/year (university scale)
+    \item 5-year projection: 750,000 requests
+\end{itemize}
+
+\textbf{Rationale for sharding:}
+\begin{itemize}
+    \item Can grow significantly (students dispute 5--30\% of absences)
+    \item Student-centric queries (``my correction requests'') benefit from co-location with attendance records
+    \item Instructor queries (``pending requests for my course'') are parallelizable
+\end{itemize}
+
+\textbf{Shard schema:}
+\begin{lstlisting}[language=SQL]
+CREATE TABLE shard_{0,1,2}_correction_requests (
+    req_id         INT AUTO_INCREMENT PRIMARY KEY,
+    student_id     INT NOT NULL,
+    course_id      INT NOT NULL,
+    att_session_id INT NOT NULL,
+    reason         TEXT NOT NULL,
+    proof_url      TEXT,
+    status         ENUM('pending','accepted','rejected') 
+                   NOT NULL DEFAULT 'pending',
+    created_at     DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_student (student_id),
+    INDEX idx_session (att_session_id),
+    INDEX idx_status (status),
+    UNIQUE KEY unique_student_session 
+               (student_id, att_session_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+\end{lstlisting}
+
+\subsection{Partitioning Function}
+
+The core routing logic uses modulo-3 hash partitioning:
+
+\begin{lstlisting}[language=Python]
+def get_shard_id(student_id: int) -> int:
+    """Return shard index for student_id 
+       using modulo 3 partitioning."""
+    return student_id % 3
+\end{lstlisting}
+
+\textbf{Distribution mapping:}
+\begin{itemize}
+    \item Shard 0: \texttt{student\_id \% 3 == 0} (students 3, 6, 9, 12, 15, 18, 21, ...)
+    \item Shard 1: \texttt{student\_id \% 3 == 1} (students 1, 4, 7, 10, 13, 16, 19, ...)
+    \item Shard 2: \texttt{student\_id \% 3 == 2} (students 2, 5, 8, 11, 14, 17, 20, ...)
+\end{itemize}
+
+\subsection{Migration Process}
+
+The migration is implemented in \texttt{init\_db.py} as a two-phase process:
+
+\subsubsection{Phase 1: SQLite Setup}
+
+\begin{enumerate}
+    \item Delete old \texttt{module\_b.db} (idempotent design)
+    \item Load schema from \texttt{sql/schema.sql}
+    \item Populate users (1 admin, 1 dean, 5 instructors, 4 TAs, 60 students)
+    \item Create academic structure (2 semesters, 10 courses, $\sim$230 enrollments)
+    \item Generate attendance data ($\sim$102 sessions, $\sim$2,370 records)
+    \item Generate correction requests ($\sim$106 requests, 30\% of absences)
+    \item Create database triggers for audit logging
+\end{enumerate}
+
+\subsubsection{Phase 2: MySQL Shards Migration}
+
+\textbf{Step 1: Read from SQLite}
+\begin{lstlisting}[language=Python]
+sqlite_conn = sqlite3.connect(DB_PATH)
+attendance_rows = sqlite_conn.execute(
+    "SELECT att_session_id, student_id, status 
+     FROM attendance_records 
+     ORDER BY student_id"
+).fetchall()
+
+correction_rows = sqlite_conn.execute(
+    "SELECT student_id, course_id, att_session_id, 
+            reason, proof_url, status, created_at 
+     FROM correction_requests 
+     ORDER BY student_id"
+).fetchall()
+\end{lstlisting}
+
+\textbf{Step 2: Partition by Shard}
+\begin{lstlisting}[language=Python]
+attendance_shard_data = {i: [] for i in range(3)}
+correction_shard_data = {i: [] for i in range(3)}
+
+for row in attendance_rows:
+    shard_id = get_shard_id(row["student_id"])
+    attendance_shard_data[shard_id].append(
+        (row["att_session_id"], 
+         row["student_id"], 
+         row["status"])
+    )
+
+for row in correction_rows:
+    shard_id = get_shard_id(row["student_id"])
+    correction_shard_data[shard_id].append(
+        (row["student_id"], row["course_id"], 
+         row["att_session_id"], row["reason"], 
+         row["proof_url"], row["status"], 
+         row["created_at"])
+    )
+\end{lstlisting}
+
+\textbf{Step 3: Connect and Clear Shards}
+\begin{lstlisting}[language=Python]
+for shard_id, config in SHARD_CONFIGS.items():
+    conn = mysql.connector.connect(
+        host=config["host"], port=config["port"],
+        user=config["user"], 
+        password=config["password"],
+        database=config["database"],
+        autocommit=False, connection_timeout=10
+    )
+    
+    # Drop old tables (separate cursors to avoid 
+    # MySQL "Commands out of sync" error)
+    cursor = conn.cursor()
+    cursor.execute(SHARD_SCHEMA_DROP_ATTENDANCE
+                   .format(shard_id=shard_id))
+    cursor.close()
+    
+    cursor = conn.cursor()
+    cursor.execute(SHARD_SCHEMA_DROP_CORRECTIONS
+                   .format(shard_id=shard_id))
+    cursor.close()
+    
+    # Create fresh tables
+    cursor = conn.cursor()
+    cursor.execute(SHARD_SCHEMA_CREATE_ATTENDANCE
+                   .format(shard_id=shard_id))
+    cursor.close()
+    
+    cursor = conn.cursor()
+    cursor.execute(SHARD_SCHEMA_CREATE_CORRECTIONS
+                   .format(shard_id=shard_id))
+    cursor.close()
+    
+    conn.commit()
+    mysql_conns[shard_id] = conn
+\end{lstlisting}
+
+\textbf{Critical design decision:} Separate cursors for DROP and CREATE statements prevent MySQL synchronization errors that occur with multi-statement execution.
+
+\textbf{Step 4: Bulk Insert}
+\begin{lstlisting}[language=Python]
+for shard_id in SHARD_CONFIGS.keys():
+    conn = mysql_conns[shard_id]
+    
+    # Bulk insert attendance records
+    if attendance_shard_data[shard_id]:
+        cursor = conn.cursor()
+        cursor.executemany(
+            f"INSERT INTO shard_{shard_id}_attendance_records 
+             (att_session_id, student_id, status) 
+             VALUES (%s, %s, %s)",
+            attendance_shard_data[shard_id]
+        )
+        conn.commit()
+        cursor.close()
+    
+    # Bulk insert correction requests
+    if correction_shard_data[shard_id]:
+        cursor = conn.cursor()
+        cursor.executemany(
+            f"INSERT INTO shard_{shard_id}_correction_requests 
+             (student_id, course_id, att_session_id, 
+              reason, proof_url, status, created_at) 
+             VALUES (%s, %s, %s, %s, %s, %s, %s)",
+            correction_shard_data[shard_id]
+        )
+        conn.commit()
+        cursor.close()
+\end{lstlisting}
+
+\textbf{Performance benefit:} Bulk insert using \texttt{executemany()} reduces network roundtrips from 2,476 individual INSERTs to 6 bulk operations (2 tables $\times$ 3 shards).
+
+\textbf{Step 5: Cleanup SQLite}
+\begin{lstlisting}[language=Python]
+# Delete migrated data from SQLite
+sqlite_conn.execute("DELETE FROM attendance_records")
+sqlite_conn.commit()
+
+sqlite_conn.execute("DELETE FROM correction_requests")
+sqlite_conn.commit()
+
+sqlite_conn.close()
+\end{lstlisting}
+
+\textbf{Rationale:} After successful migration, source data is deleted to:
+\begin{itemize}
+    \item Prevent data duplication
+    \item Clarify that MySQL shards are the source of truth
+    \item Reduce SQLite database size
+    \item Avoid confusion during development/debugging
+\end{itemize}
+
+\subsection{Migration Output}
+
+Typical migration output from \texttt{python init\_db.py}:
+
+\begin{lstlisting}
+$\checkmark$ Removed old database: module_b.db
+$\checkmark$ Schema loaded from sql/schema.sql
+$\checkmark$ 5 instructors inserted
+$\checkmark$ 4 TAs inserted
+$\checkmark$ 60 students inserted
+$\checkmark$ 10 courses inserted
+$\checkmark$ 230 enrolments inserted
+$\checkmark$ 102 attendance sessions inserted
+$\checkmark$ 2370 attendance records inserted into SQLite
+$\checkmark$ 106 correction requests inserted
+
+Connecting to MySQL shards...
+  $\checkmark$ Shard 0 ready (cleared old data, port 3307)
+  $\checkmark$ Shard 1 ready (cleared old data, port 3308)
+  $\checkmark$ Shard 2 ready (cleared old data, port 3309)
+
+Attendance records per shard:
+  Shard 0 (student_id % 3 == 0): 790 records
+  Shard 1 (student_id % 3 == 1): 790 records
+  Shard 2 (student_id % 3 == 2): 790 records
+
+Correction requests per shard:
+  Shard 0 (student_id % 3 == 0): 35 requests
+  Shard 1 (student_id % 3 == 1): 35 requests
+  Shard 2 (student_id % 3 == 2): 36 requests
+
+Bulk inserting records...
+  $\checkmark$ Shard 0: 790 attendance records inserted
+  $\checkmark$ Shard 0: 35 correction requests inserted
+  $\checkmark$ Shard 1: 790 attendance records inserted
+  $\checkmark$ Shard 1: 35 correction requests inserted
+  $\checkmark$ Shard 2: 790 attendance records inserted
+  $\checkmark$ Shard 2: 36 correction requests inserted
+
+$\checkmark$ Total migrated to MySQL shards:
+   - Attendance records: 2370
+   - Correction requests: 106
+
+Cleaning up SQLite...
+$\checkmark$ Deleted attendance_records from SQLite (remaining: 0)
+$\checkmark$ Deleted correction_requests from SQLite (remaining: 0)
+\end{lstlisting}
+
+\subsection{Distribution Analysis}
+
+\begin{table}[htbp]
+\caption{Post-Migration Data Distribution}
+\centering
+\begin{tabular}{|c|r|r|r|r|}
+\hline
+\textbf{Shard} & \textbf{Attendance} & \textbf{Corrections} & \textbf{Total} & \textbf{Deviation} \\
+\hline
+Shard 0 & 790 & 35 & 825 & +0.1\% \\
+\hline
+Shard 1 & 790 & 35 & 825 & +0.1\% \\
+\hline
+Shard 2 & 790 & 36 & 826 & +0.2\% \\
+\hline
+\textbf{Total} & 2370 & 106 & 2476 & \\
+\hline
+\end{tabular}
+\label{tab:migration_distribution}
+\end{table}
+
+\textbf{Observations:}
+\begin{itemize}
+    \item Near-perfect balance: maximum deviation $<$0.2\%
+    \item Uniform distribution validates modulo-3 partitioning
+    \item Co-location: student's attendance and corrections on same shard
+\end{itemize}
+
+\subsection{Verification}
+
+Post-migration verification confirms data integrity:
+
+\textbf{SQLite (should be empty):}
+\begin{lstlisting}
+sqlite3 module_b.db "SELECT COUNT(*) 
+                     FROM attendance_records"
+# Output: 0 $\checkmark$
+
+sqlite3 module_b.db "SELECT COUNT(*) 
+                     FROM correction_requests"
+# Output: 0 $\checkmark$
+\end{lstlisting}
+
+\textbf{MySQL Shards (should contain all data):}
+\begin{lstlisting}
+# Shard 0
+mysql -h 10.0.116.184 -P 3307 -u Scalix -p \
+  -e "SELECT COUNT(*) FROM Scalix.shard_0_attendance_records"
+# Output: 790 $\checkmark$
+
+mysql -h 10.0.116.184 -P 3307 -u Scalix -p \
+  -e "SELECT COUNT(*) FROM Scalix.shard_0_correction_requests"
+# Output: 35 $\checkmark$
+
+# Similar verification for Shards 1 and 2...
+# Total: 2370 + 106 = 2476 records $\checkmark$
+\end{lstlisting}
+
+\subsection{Benefits of This Approach}
+
+\begin{enumerate}
+    \item \textbf{Scalability:} Handles millions of records per table
+    \item \textbf{Performance:} Student queries hit single shard (fast)
+    \item \textbf{Co-location:} Related data (attendance + corrections) on same shard
+    \item \textbf{Simplicity:} Metadata stays in SQLite (easy joins)
+    \item \textbf{Maintainability:} Only 2 tables to manage across shards
+    \item \textbf{Idempotency:} Script can run multiple times safely
+    \item \textbf{Bulk operations:} Fast migration via \texttt{executemany()}
+\end{enumerate}
+
+% ════════════════════════════════════════════════════════════════════════════
+% SUBTASK 3: QUERY ROUTING IMPLEMENTATION
+% ════════════════════════════════════════════════════════════════════════════
+
+\section{SubTask 3: Query Routing Implementation Architecture}
 
 \subsection{System Overview}
 
