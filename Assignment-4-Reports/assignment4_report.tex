@@ -226,7 +226,7 @@ Directory (department) & 999 & 780 & 349 & 650 & $\pm 50.8\%$ & Rejected---struc
 \end{table*}
 
 \subsubsection{Strategy 1: Range-Based}
-Range sharding was initially evaluated with static student-id intervals (Shard 0: 12--30, Shard 1: 31--50, Shard 2: 51--71).
+Range sharding was initially evaluated with static student-id buckets over the current 60-student dataset.
 
 \textbf{Why it is rejected for this project:}
 \begin{itemize}
@@ -474,9 +474,9 @@ def get_shard_id(student_id: int) -> int:
 
 \textbf{Distribution mapping:}
 \begin{itemize}
-    \item Shard 0: \texttt{student\_id \% 3 == 0} (students 3, 6, 9, 12, 15, 18, 21, ...)
-    \item Shard 1: \texttt{student\_id \% 3 == 1} (students 1, 4, 7, 10, 13, 16, 19, ...)
-    \item Shard 2: \texttt{student\_id \% 3 == 2} (students 2, 5, 8, 11, 14, 17, 20, ...)
+    \item Shard 0: \texttt{student\_id \% 3 == 0}
+    \item Shard 1: \texttt{student\_id \% 3 == 1}
+    \item Shard 2: \texttt{student\_id \% 3 == 2}
 \end{itemize}
 
 \subsection{Migration Process}
