@@ -4,15 +4,26 @@ init_db.py
 Large-scale seed script for the Multi-Course Attendance Management System.
 Reads schema from sql/schema.sql (single source of truth).
 
-Generates:
+Phase 1: SQLite Database Setup
   • 2  semesters
   • 10 courses  (5 per semester)
   •  5 instructors + 4 TAs + 1 admin + 1 dean
   • 60 students
-  • ~120 attendance sessions
-  • ~2400+ attendance records
-  • ~40  correction requests
+  • ~102 attendance sessions
+  • ~2,370 attendance records
+  • ~106 correction requests (30% of absent records)
   • correction_logs for every accepted/rejected correction
+
+Phase 2: MySQL Shards Migration
+  • Migrates attendance_records to 3 MySQL shards (modulo 3 partitioning)
+  • Migrates correction_requests to 3 MySQL shards (co-located with attendance)
+  • Deletes migrated data from SQLite (shards become source of truth)
+  • Distribution: ~790 attendance + ~35 corrections per shard
+
+Shard Configuration:
+  • Shard 0: 10.0.116.184:3307 (student_id % 3 == 0)
+  • Shard 1: 10.0.116.184:3308 (student_id % 3 == 1)
+  • Shard 2: 10.0.116.184:3309 (student_id % 3 == 2)
 
 All passwords: password123
 """
