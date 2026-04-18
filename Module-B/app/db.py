@@ -11,12 +11,21 @@ def get_db():
         g.db = sqlite3.connect(
             current_app.config["DB_PATH"],
             detect_types=sqlite3.PARSE_DECLTYPES,
-            timeout=30.0,  # Wait up to 30 seconds for DB lock
-            check_same_thread=False  # Allow access from different threads
+            timeout=60.0,  # Wait up to 60 seconds for DB lock (increased)
+            check_same_thread=False,  # Allow access from different threads
+            isolation_level=None  # Autocommit mode for better concurrency
         )
         g.db.row_factory = sqlite3.Row
         g.db.execute("PRAGMA foreign_keys = ON")
-        g.db.execute("PRAGMA journal_mode = WAL")  # Write-Ahead Logging for concurrency
+        g.db.execute("PRAGMA busy_timeout = 60000")  # 60 second busy timeout
+        
+        # Try to set WAL mode, but don't fail if database is locked
+        try:
+            g.db.execute("PRAGMA journal_mode = WAL")  # Write-Ahead Logging for concurrency
+            g.db.execute("PRAGMA synchronous = NORMAL")  # Faster writes with WAL
+        except sqlite3.OperationalError:
+            # WAL mode already set or database locked, continue anyway
+            pass
     
     return g.db
 
