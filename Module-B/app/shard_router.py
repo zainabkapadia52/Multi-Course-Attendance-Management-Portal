@@ -565,3 +565,174 @@ def delete_records_for_student_in_course(student_id: int, course_id: int, db) ->
     except Exception as e:
         logger.error(f"✗ Unexpected error deleting records for student {student_id}: {str(e)}")
         return 0
+
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# CORRECTION REQUESTS OPERATIONS (Sharded by student_id)
+# ══════════════════════════════════════════════════════════════════════════════
+
+def get_correction_requests_for_student(student_id: int) -> list:
+    """
+    Get all correction requests for a student from their shard.
+    Returns list of dicts with all fields including acted_* fields.
+    """
+    shard_id = get_shard_id(student_id)
+    
+    try:
+        conn = get_shard_conn(shard_id)
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute(
+            f"SELECT * FROM shard_{shard_id}_correction_requests "
+            "WHERE student_id = %s ORDER BY created_at DESC",
+            (student_id,)
+        )
+        rows = cursor.fetchall()
+        cursor.close()
+        logger.debug(f"✓ Retrieved {len(rows)} correction requests for student {student_id} from shard {shard_id}")
+        return rows
+    except mysql.connector.Error as e:
+        logger.error(f"✗ Query error for student {student_id} on shard {shard_id}: {str(e)}")
+        return []
+
+
+def get_correction_request_by_id(req_id: int) -> dict:
+    """
+    Get a specific correction request by req_id.
+    Scans all shards to find the request.
+    Returns dict with all fields or None if not found.
+    """
+    for shard_id in SHARD_CONFIGS:
+        try:
+            conn = get_shard_conn(shard_id)
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute(
+                f"SELECT * FROM shard_{shard_id}_correction_requests "
+                "WHERE req_id = %s LIMIT 1",
+                (req_id,)
+            )
+            row = cursor.fetchone()
+            cursor.close()
+            if row:
+                logger.debug(f"✓ Found correction request {req_id} in shard {shard_id}")
+                return row
+        except Exception as e:
+            logger.debug(f"  Shard {shard_id} scan for req_id {req_id}: {str(e)}")
+            continue
+    
+    logger.warning(f"⚠ Correction request {req_id} not found in any shard")
+    return None
+
+
+def update_correction_request_status(req_id: int, status: str, acted_by: int, acted_role: str) -> bool:
+    """
+    Update correction request status and set acted_* fields.
+    Scans all shards to find and update the request.
+    
+    Args:
+        req_id: Request ID
+        status: 'accepted' or 'rejected'
+        acted_by: User ID who processed the request
+        acted_role: Role of the user ('instructor', 'ta', 'admin')
+    
+    Returns:
+        True if updated, False if not found
+    """
+    for shard_id in SHARD_CONFIGS:
+        try:
+            conn = get_shard_conn(shard_id)
+            cursor = conn.cursor()
+            cursor.execute(
+                f"UPDATE shard_{shard_id}_correction_requests "
+                "SET status = %s, acted_by = %s, acted_role = %s, acted_at = NOW() "
+                "WHERE req_id = %s",
+                (status, acted_by, acted_role, req_id)
+            )
+            conn.commit()
+            affected = cursor.rowcount
+            cursor.close()
+            
+            if affected > 0:
+                logger.info(f"✓ Updated correction request {req_id} in shard {shard_id} to status={status}")
+                return True
+        except Exception as e:
+            logger.debug(f"  Shard {shard_id} update for req_id {req_id}: {str(e)}")
+            continue
+    
+    logger.warning(f"⚠ Correction request {req_id} not found in any shard")
+    return False
+
+
+def get_pending_corrections_for_course(course_id: int) -> list:
+    """
+    Get all pending correction requests for a course.
+    Queries all shards in parallel and merges results.
+    """
+    rows = []
+    
+    def query_shard(shard_id):
+        try:
+            cfg = SHARD_CONFIGS[shard_id]
+            conn = mysql.connector.connect(
+                host=cfg["host"], port=cfg["port"],
+                user=cfg["user"], password=cfg["password"],
+                database=cfg["database"],
+                connection_timeout=10, autocommit=False
+            )
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute(
+                f"SELECT * FROM shard_{shard_id}_correction_requests "
+                "WHERE course_id = %s AND status = 'pending' "
+                "ORDER BY created_at ASC",
+                (course_id,)
+            )
+            shard_rows = cursor.fetchall()
+            cursor.close()
+            conn.close()
+            logger.debug(f"✓ Retrieved {len(shard_rows)} pending corrections from shard {shard_id} for course {course_id}")
+            return shard_rows
+        except Exception as e:
+            logger.error(f"✗ Query error on shard {shard_id} for course {course_id}: {str(e)}")
+            return []
+    
+    try:
+        with ThreadPoolExecutor(max_workers=3) as executor:
+            futures = {executor.submit(query_shard, shard_id): shard_id 
+                      for shard_id in SHARD_CONFIGS}
+            
+            for future in as_completed(futures):
+                try:
+                    rows.extend(future.result(timeout=10))
+                except Exception as e:
+                    logger.error(f"✗ Shard query failed: {str(e)}")
+    except Exception as e:
+        logger.error(f"✗ ThreadPoolExecutor error for course {course_id}: {str(e)}")
+    
+    return rows
+
+
+def insert_correction_request(student_id: int, course_id: int, att_session_id: int, 
+                              reason: str, proof_url: str = None) -> int:
+    """
+    Insert a new correction request into the appropriate shard.
+    Returns req_id if successful, 0 if failed.
+    """
+    shard_id = get_shard_id(student_id)
+    
+    try:
+        conn = get_shard_conn(shard_id)
+        cursor = conn.cursor()
+        cursor.execute(
+            f"INSERT INTO shard_{shard_id}_correction_requests "
+            "(student_id, course_id, att_session_id, reason, proof_url, status) "
+            "VALUES (%s, %s, %s, %s, %s, 'pending')",
+            (student_id, course_id, att_session_id, reason, proof_url)
+        )
+        conn.commit()
+        req_id = cursor.lastrowid
+        cursor.close()
+        logger.info(f"✓ Inserted correction request {req_id} for student {student_id} into shard {shard_id}")
+        return req_id
+    except mysql.connector.Error as e:
+        logger.error(f"✗ Insert error for student {student_id}: {str(e)}")
+        return 0

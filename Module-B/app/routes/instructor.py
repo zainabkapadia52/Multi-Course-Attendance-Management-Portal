@@ -168,19 +168,109 @@ def list_corrections():
     sem = db.execute("SELECT semester_id FROM semesters WHERE is_active=1 LIMIT 1").fetchone()
     if not sem:
         return jsonify([])
-    rows = db.execute(
-        """SELECT cr.*, u.username AS student_name, c.name AS course_name,
-                  att.session_date, att.topic
-           FROM correction_requests cr
-           JOIN users u ON u.user_id=cr.student_id
-           JOIN courses c ON c.course_id=cr.course_id
-           JOIN attendance_sessions att ON att.att_session_id=cr.att_session_id
-           JOIN course_instructors ci ON ci.course_id=cr.course_id
-           WHERE ci.instructor_id=? AND c.semester_id=?
-           ORDER BY (cr.status='pending') DESC, cr.created_at DESC""",
+    
+    # Get instructor's courses in active semester
+    instructor_courses = db.execute(
+        """SELECT c.course_id
+           FROM courses c
+           JOIN course_instructors ci ON ci.course_id=c.course_id
+           WHERE ci.instructor_id=? AND c.semester_id=?""",
         (g.user["user_id"], sem["semester_id"])
     ).fetchall()
-    return jsonify([dict(r) for r in rows])
+    
+    if not instructor_courses:
+        return jsonify([])
+    
+    course_ids = [row["course_id"] for row in instructor_courses]
+    
+    # Get correction requests from MySQL shards for these courses
+    from ..shard_router import get_pending_corrections_for_course
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    
+    all_corrections = []
+    
+    # Query all courses in parallel
+    with ThreadPoolExecutor(max_workers=len(course_ids)) as executor:
+        # Get all corrections (not just pending) by querying shards directly
+        futures = {}
+        for course_id in course_ids:
+            future = executor.submit(_get_all_corrections_for_course, course_id)
+            futures[future] = course_id
+        
+        for future in as_completed(futures):
+            try:
+                corrections = future.result(timeout=10)
+                all_corrections.extend(corrections)
+            except Exception as e:
+                pass
+    
+    # Enrich with user and session data from SQLite
+    result = []
+    for cr in all_corrections:
+        user = db.execute("SELECT username FROM users WHERE user_id = ?", (cr["student_id"],)).fetchone()
+        course = db.execute("SELECT name FROM courses WHERE course_id = ?", (cr["course_id"],)).fetchone()
+        session = db.execute(
+            "SELECT session_date, topic FROM attendance_sessions WHERE att_session_id = ?",
+            (cr["att_session_id"],)
+        ).fetchone()
+        
+        result.append({
+            "req_id": cr["req_id"],
+            "student_id": cr["student_id"],
+            "course_id": cr["course_id"],
+            "att_session_id": cr["att_session_id"],
+            "reason": cr["reason"],
+            "proof_url": cr.get("proof_url"),
+            "status": cr["status"],
+            "created_at": cr["created_at"],
+            "student_name": user["username"] if user else "Unknown",
+            "course_name": course["name"] if course else "Unknown",
+            "session_date": session["session_date"] if session else None,
+            "topic": session["topic"] if session else None,
+        })
+    
+    # Sort: pending first (False < True), then by created_at DESC within each group
+    result.sort(key=lambda x: (x["status"] != "pending", x["created_at"]), reverse=False)
+    # Reverse the created_at within groups
+    pending_items = [x for x in result if x["status"] == "pending"]
+    other_items = [x for x in result if x["status"] != "pending"]
+    pending_items.sort(key=lambda x: x["created_at"], reverse=True)
+    other_items.sort(key=lambda x: x["created_at"], reverse=True)
+    result = pending_items + other_items
+    
+    return jsonify(result)
+
+
+def _get_all_corrections_for_course(course_id):
+    """Helper function to get all correction requests for a course from shards."""
+    import mysql.connector
+    from ..shard_router import SHARD_CONFIGS
+    
+    rows = []
+    for shard_id in SHARD_CONFIGS:
+        try:
+            cfg = SHARD_CONFIGS[shard_id]
+            conn = mysql.connector.connect(
+                host=cfg["host"], port=cfg["port"],
+                user=cfg["user"], password=cfg["password"],
+                database=cfg["database"],
+                connection_timeout=10, autocommit=False
+            )
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute(
+                f"SELECT * FROM shard_{shard_id}_correction_requests "
+                "WHERE course_id = %s "
+                "ORDER BY created_at DESC",
+                (course_id,)
+            )
+            shard_rows = cursor.fetchall()
+            cursor.close()
+            conn.close()
+            rows.extend(shard_rows)
+        except Exception:
+            continue
+    
+    return rows
 
 @bp.put("/records/<int:rid>")
 @require_role("instructor")
@@ -216,37 +306,48 @@ def update_record(rid):
 @require_role("instructor")
 @thread_safe_db("corrections", "attendance", "courses")
 def accept_correction(req_id):
-    db  = get_db()
-    req = db.execute(
-        """SELECT cr.* FROM correction_requests cr
-           JOIN course_instructors ci ON ci.course_id=cr.course_id
-           WHERE cr.req_id=? AND ci.instructor_id=?""",
-        (req_id, g.user["user_id"])
-    ).fetchone()
+    db = get_db()
+    
+    # Get correction request from MySQL shard
+    from ..shard_router import (
+        get_correction_request_by_id,
+        get_records_for_student,
+        update_record as shard_update,
+        update_correction_request_status
+    )
+    
+    req = get_correction_request_by_id(req_id)
     if not req:
-        return jsonify({"error": "Not found or forbidden"}), 404
+        return jsonify({"error": "Not found"}), 404
+    
+    # Verify this instructor teaches this course
+    instructor_check = db.execute(
+        """SELECT 1 FROM course_instructors ci
+           WHERE ci.course_id=? AND ci.instructor_id=?""",
+        (req["course_id"], g.user["user_id"])
+    ).fetchone()
+    
+    if not instructor_check:
+        return jsonify({"error": "Forbidden"}), 403
+    
     if req["status"] != "pending":
         return jsonify({"error": "Already resolved"}), 400
 
     # LOOKUP: Find the attendance record for this student in this session
-    from ..shard_router import get_records_for_student
     student_records = get_records_for_student(req["student_id"])
     att_row = next((r for r in student_records if r["att_session_id"] == req["att_session_id"]), None)
     
-    db.execute("UPDATE correction_requests SET status='accepted' WHERE req_id=?", (req_id,))
+    # Update correction request status in shard (includes acted_* fields)
+    update_correction_request_status(req_id, "accepted", g.user["user_id"], "instructor")
     
-    # UPDATE: Use shard router to update the record
+    # UPDATE: Use shard router to update the attendance record
     if att_row:
-        from ..shard_router import update_record as shard_update
-        shard_update(att_row["record_id"], "present")
-    db.execute(
-        "INSERT INTO correction_logs (req_id, action, acted_by, role) VALUES (?,?,?,?)",
-        (req_id, "accepted", g.user["user_id"], "instructor")
-    )
+        shard_update(att_row["record_id"], "present", req["student_id"])
+    
     db.commit()
     broadcast("correction_resolved", {
         "req_id":     req_id,
-        "status":     "rejected",     # ← fixed
+        "status":     "accepted",
         "student_id": req["student_id"],
         "course_id":  req["course_id"],
     })
@@ -274,27 +375,35 @@ def accept_correction(req_id):
 @require_role("instructor")
 @thread_safe_db("corrections", "attendance", "courses")
 def reject_correction(req_id):
-    db  = get_db()
-    req = db.execute(
-        """SELECT cr.* FROM correction_requests cr
-           JOIN course_instructors ci ON ci.course_id=cr.course_id
-           WHERE cr.req_id=? AND ci.instructor_id=?""",
-        (req_id, g.user["user_id"])
-    ).fetchone()
+    db = get_db()
+    
+    # Get correction request from MySQL shard
+    from ..shard_router import get_correction_request_by_id, update_correction_request_status
+    
+    req = get_correction_request_by_id(req_id)
     if not req:
-        return jsonify({"error": "Not found or forbidden"}), 404
+        return jsonify({"error": "Not found"}), 404
+    
+    # Verify this instructor teaches this course
+    instructor_check = db.execute(
+        """SELECT 1 FROM course_instructors ci
+           WHERE ci.course_id=? AND ci.instructor_id=?""",
+        (req["course_id"], g.user["user_id"])
+    ).fetchone()
+    
+    if not instructor_check:
+        return jsonify({"error": "Forbidden"}), 403
+    
     if req["status"] != "pending":
         return jsonify({"error": "Already resolved"}), 400
-    db.execute("UPDATE correction_requests SET status='rejected' WHERE req_id=?", (req_id,))
-    db.commit()
-    db.execute(
-        "INSERT INTO correction_logs (req_id, action, acted_by, role) VALUES (?,?,?,?)",
-        (req_id, "rejected", g.user["user_id"], "instructor")
-    )
+    
+    # Update correction request status in shard (includes acted_* fields)
+    update_correction_request_status(req_id, "rejected", g.user["user_id"], "instructor")
+    
     db.commit()
     broadcast("correction_resolved", {
         "req_id":     req_id,
-        "status":     "rejected",   # fixed: was "accepted" in original
+        "status":     "rejected",
         "student_id": req["student_id"],
         "course_id":  req["course_id"],
     })
@@ -394,14 +503,25 @@ def assign_ta(cid):
 @require_role("instructor")
 @thread_safe_db("corrections")
 def correction_logs(req_id):
-    rows = get_db().execute(
-        """SELECT cl.action, cl.role, cl.acted_at, u.username
-           FROM correction_logs cl
-           JOIN users u ON u.user_id=cl.acted_by
-           WHERE cl.req_id=?
-           ORDER BY cl.acted_at ASC""", (req_id,)
-    ).fetchall()
-    return jsonify([dict(r) for r in rows])
+    # Get correction request from shard (includes acted_* fields)
+    from ..shard_router import get_correction_request_by_id
+    req = get_correction_request_by_id(req_id)
+    
+    if not req:
+        return jsonify({"error": "Request not found"}), 404
+    
+    # If processed, return the acted_* fields as a log entry
+    if req["status"] != "pending":
+        db = get_db()
+        user = db.execute("SELECT username FROM users WHERE user_id = ?", (req["acted_by"],)).fetchone()
+        return jsonify([{
+            "action": req["status"],
+            "role": req["acted_role"],
+            "acted_at": req["acted_at"],
+            "username": user["username"] if user else "Unknown"
+        }])
+    
+    return jsonify([])
 
 @bp.delete("/courses/<int:cid>/tas/<int:tid>")
 @require_role("instructor")

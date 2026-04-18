@@ -59,72 +59,135 @@ def corrections_current():
     sem = db.execute("SELECT semester_id FROM semesters WHERE is_active=1 LIMIT 1").fetchone()
     if not sem:
         return jsonify([])
-    rows = db.execute(
-        """SELECT cr.*, c.name AS course_name, att.session_date, att.topic
-           FROM correction_requests cr
-           JOIN courses c ON c.course_id=cr.course_id
-           JOIN attendance_sessions att ON att.att_session_id=cr.att_session_id
-           WHERE cr.student_id=? AND c.semester_id=?
-           ORDER BY cr.created_at DESC""",
-        (g.user["user_id"], sem["semester_id"])
-    ).fetchall()
-    return jsonify([dict(r) for r in rows])
+    
+    # Get correction requests from MySQL shards for this student
+    from ..shard_router import get_correction_requests_for_student
+    corrections = get_correction_requests_for_student(g.user["user_id"])
+    
+    # Filter to active semester and enrich with course/session data
+    result = []
+    for cr in corrections:
+        course = db.execute(
+            "SELECT name, semester_id FROM courses WHERE course_id = ?",
+            (cr["course_id"],)
+        ).fetchone()
+        
+        if not course or course["semester_id"] != sem["semester_id"]:
+            continue
+        
+        session = db.execute(
+            "SELECT session_date, topic FROM attendance_sessions WHERE att_session_id = ?",
+            (cr["att_session_id"],)
+        ).fetchone()
+        
+        result.append({
+            "req_id": cr["req_id"],
+            "student_id": cr["student_id"],
+            "course_id": cr["course_id"],
+            "att_session_id": cr["att_session_id"],
+            "reason": cr["reason"],
+            "proof_url": cr.get("proof_url"),
+            "status": cr["status"],
+            "created_at": cr["created_at"],
+            "course_name": course["name"] if course else "Unknown",
+            "session_date": session["session_date"] if session else None,
+            "topic": session["topic"] if session else None,
+        })
+    
+    # Sort by created_at DESC
+    result.sort(key=lambda x: x["created_at"], reverse=True)
+    
+    return jsonify(result)
 
 @bp.get("/corrections/archive")
 @require_role("student")
 @thread_safe_db("corrections")
 def corrections_archive():
     """Correction requests grouped by past semester."""
-    db   = get_db()
+    db = get_db()
+    
+    # Get correction requests from MySQL shards for this student
+    from ..shard_router import get_correction_requests_for_student
+    corrections = get_correction_requests_for_student(g.user["user_id"])
+    
+    # Get past semesters
     sems = db.execute(
-        """SELECT DISTINCT s.semester_id, s.name
-           FROM semesters s
-           JOIN courses c ON c.semester_id=s.semester_id
-           JOIN correction_requests cr ON cr.course_id=c.course_id
-           WHERE cr.student_id=? AND s.is_active=0
-           ORDER BY s.semester_id DESC""",
-        (g.user["user_id"],)
+        """SELECT semester_id, name
+           FROM semesters
+           WHERE is_active=0
+           ORDER BY semester_id DESC"""
     ).fetchall()
-
+    
     result = []
     for sem in sems:
-        rows = db.execute(
-            """SELECT cr.*, c.name AS course_name, att.session_date, att.topic
-               FROM correction_requests cr
-               JOIN courses c ON c.course_id=cr.course_id
-               JOIN attendance_sessions att ON att.att_session_id=cr.att_session_id
-               WHERE cr.student_id=? AND c.semester_id=?
-               ORDER BY cr.created_at DESC""",
-            (g.user["user_id"], sem["semester_id"])
-        ).fetchall()
-        if rows:
+        sem_corrections = []
+        
+        for cr in corrections:
+            course = db.execute(
+                "SELECT name, semester_id FROM courses WHERE course_id = ?",
+                (cr["course_id"],)
+            ).fetchone()
+            
+            if not course or course["semester_id"] != sem["semester_id"]:
+                continue
+            
+            session = db.execute(
+                "SELECT session_date, topic FROM attendance_sessions WHERE att_session_id = ?",
+                (cr["att_session_id"],)
+            ).fetchone()
+            
+            sem_corrections.append({
+                "req_id": cr["req_id"],
+                "student_id": cr["student_id"],
+                "course_id": cr["course_id"],
+                "att_session_id": cr["att_session_id"],
+                "reason": cr["reason"],
+                "proof_url": cr.get("proof_url"),
+                "status": cr["status"],
+                "created_at": cr["created_at"],
+                "course_name": course["name"] if course else "Unknown",
+                "session_date": session["session_date"] if session else None,
+                "topic": session["topic"] if session else None,
+            })
+        
+        if sem_corrections:
+            # Sort by created_at DESC
+            sem_corrections.sort(key=lambda x: x["created_at"], reverse=True)
             result.append({
                 "semester_id":   sem["semester_id"],
                 "semester_name": sem["name"],
-                "requests":      [dict(r) for r in rows]
+                "requests":      sem_corrections
             })
+    
     return jsonify(result)
 
 @bp.get("/corrections/<int:req_id>/logs")
 @require_role("student")
 @thread_safe_db("corrections")
 def correction_logs(req_id):
-    db  = get_db()
-    # Verify this request belongs to this student
-    req = db.execute(
-        "SELECT 1 FROM correction_requests WHERE req_id=? AND student_id=?",
-        (req_id, g.user["user_id"])
-    ).fetchone()
+    # Get correction request from shard (includes acted_* fields)
+    from ..shard_router import get_correction_request_by_id
+    req = get_correction_request_by_id(req_id)
+    
     if not req:
+        return jsonify({"error": "Request not found"}), 404
+    
+    # Verify this request belongs to this student
+    if req["student_id"] != g.user["user_id"]:
         return jsonify({"error": "Not found"}), 404
-    rows = db.execute(
-        """SELECT cl.action, cl.role, cl.acted_at, u.username
-           FROM correction_logs cl
-           JOIN users u ON u.user_id=cl.acted_by
-           WHERE cl.req_id=?
-           ORDER BY cl.acted_at ASC""", (req_id,)
-    ).fetchall()
-    return jsonify([dict(r) for r in rows])
+    
+    # If processed, return the acted_* fields as a log entry
+    if req["status"] != "pending":
+        db = get_db()
+        user = db.execute("SELECT username FROM users WHERE user_id = ?", (req["acted_by"],)).fetchone()
+        return jsonify([{
+            "action": req["status"],
+            "role": req["acted_role"],
+            "acted_at": req["acted_at"],
+            "username": user["username"] if user else "Unknown"
+        }])
+    
+    return jsonify([])
 
 @bp.get("/attendance-stats/current")
 @require_role("student")
@@ -399,14 +462,43 @@ def course_sessions(cid):
 @require_role("student")
 @thread_safe_db("corrections")
 def my_corrections():
-    rows = get_db().execute(
-        """SELECT cr.*, c.name AS course_name, att.session_date, att.topic
-           FROM correction_requests cr
-           JOIN courses c ON c.course_id=cr.course_id
-           JOIN attendance_sessions att ON att.att_session_id=cr.att_session_id
-           WHERE cr.student_id=? ORDER BY cr.created_at DESC""", (g.user["user_id"],)
-    ).fetchall()
-    return jsonify([dict(r) for r in rows])
+    db = get_db()
+    
+    # Get correction requests from MySQL shards for this student
+    from ..shard_router import get_correction_requests_for_student
+    corrections = get_correction_requests_for_student(g.user["user_id"])
+    
+    # Enrich with course/session data
+    result = []
+    for cr in corrections:
+        course = db.execute(
+            "SELECT name FROM courses WHERE course_id = ?",
+            (cr["course_id"],)
+        ).fetchone()
+        
+        session = db.execute(
+            "SELECT session_date, topic FROM attendance_sessions WHERE att_session_id = ?",
+            (cr["att_session_id"],)
+        ).fetchone()
+        
+        result.append({
+            "req_id": cr["req_id"],
+            "student_id": cr["student_id"],
+            "course_id": cr["course_id"],
+            "att_session_id": cr["att_session_id"],
+            "reason": cr["reason"],
+            "proof_url": cr.get("proof_url"),
+            "status": cr["status"],
+            "created_at": cr["created_at"],
+            "course_name": course["name"] if course else "Unknown",
+            "session_date": session["session_date"] if session else None,
+            "topic": session["topic"] if session else None,
+        })
+    
+    # Sort by created_at DESC
+    result.sort(key=lambda x: x["created_at"], reverse=True)
+    
+    return jsonify(result)
 
 @bp.post("/corrections")
 @require_role("student")
@@ -423,15 +515,26 @@ def submit_correction():
     if not db.execute("SELECT 1 FROM course_enrollments WHERE course_id=? AND student_id=?",
                       (course_id, g.user["user_id"])).fetchone():
         return jsonify({"error": "Not enrolled"}), 403
+    
+    # Insert into MySQL shard instead of SQLite
+    from ..shard_router import insert_correction_request
+    
     try:
-        cur = db.execute(
-            "INSERT INTO correction_requests (student_id,course_id,att_session_id,reason,proof_url) VALUES (?,?,?,?,?)",
-            (g.user["user_id"], course_id, att_session_id, reason, proof_url)
+        req_id = insert_correction_request(
+            student_id=g.user["user_id"],
+            course_id=course_id,
+            att_session_id=att_session_id,
+            reason=reason,
+            proof_url=proof_url if proof_url else None
         )
-        req_id = cur.lastrowid
+        
+        if req_id == 0:
+            return jsonify({"error": "Failed to submit correction request"}), 500
+        
         db.commit()
-    except Exception:
+    except Exception as e:
         return jsonify({"error": "You already submitted a request for this session"}), 409
+    
     broadcast("correction_submitted", {
         "course_id": course_id, "att_session_id": att_session_id,
         "student_id": g.user["user_id"]
