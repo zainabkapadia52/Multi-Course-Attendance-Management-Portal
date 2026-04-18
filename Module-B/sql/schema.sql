@@ -85,14 +85,20 @@ CREATE TABLE IF NOT EXISTS correction_requests (
     UNIQUE (student_id, att_session_id)
 );
 
-CREATE TABLE IF NOT EXISTS correction_logs (
-    log_id   INTEGER PRIMARY KEY AUTOINCREMENT,
-    req_id   INTEGER NOT NULL REFERENCES correction_requests(req_id) ON DELETE CASCADE,
-    action   TEXT    NOT NULL CHECK(action IN ('accepted','rejected')),
-    acted_by INTEGER NOT NULL REFERENCES users(user_id),
-    role     TEXT    NOT NULL,
-    acted_at TEXT    NOT NULL DEFAULT (datetime('now'))
-);
+-- ══════════════════════════════════════════════════════════════════════════════
+-- DEPRECATED: correction_logs table has been merged into correction_requests
+-- The acted_by, acted_role, and acted_at fields are now stored directly in
+-- the sharded correction_requests table (shard_X_correction_requests in MySQL).
+-- This table is kept here for reference only and is no longer used.
+-- ══════════════════════════════════════════════════════════════════════════════
+-- CREATE TABLE IF NOT EXISTS correction_logs (
+--     log_id   INTEGER PRIMARY KEY AUTOINCREMENT,
+--     req_id   INTEGER NOT NULL REFERENCES correction_requests(req_id) ON DELETE CASCADE,
+--     action   TEXT    NOT NULL CHECK(action IN ('accepted','rejected')),
+--     acted_by INTEGER NOT NULL REFERENCES users(user_id),
+--     role     TEXT    NOT NULL,
+--     acted_at TEXT    NOT NULL DEFAULT (datetime('now'))
+-- );
 
 CREATE TABLE IF NOT EXISTS raw_changes (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,

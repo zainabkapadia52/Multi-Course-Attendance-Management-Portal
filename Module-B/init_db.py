@@ -12,7 +12,7 @@ Phase 1: SQLite Database Setup
   • ~102 attendance sessions
   • ~2,370 attendance records
   • ~106 correction requests (30% of absent records)
-  • correction_logs for every accepted/rejected correction
+  • acted_* fields populated for accepted/rejected corrections
 
 Phase 2: MySQL Shards Migration
   • Migrates attendance_records to 3 MySQL shards (modulo 3 partitioning)
@@ -76,9 +76,13 @@ SHARD_SCHEMA_CREATE_CORRECTIONS = """CREATE TABLE shard_{shard_id}_correction_re
     proof_url      TEXT,
     status         ENUM('pending', 'accepted', 'rejected') NOT NULL DEFAULT 'pending',
     created_at     DATETIME DEFAULT CURRENT_TIMESTAMP,
+    acted_by       INT,
+    acted_role     VARCHAR(20),
+    acted_at       DATETIME,
     INDEX idx_student (student_id),
     INDEX idx_session (att_session_id),
     INDEX idx_status (status),
+    INDEX idx_acted_by (acted_by),
     UNIQUE KEY unique_student_session (student_id, att_session_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"""
 
@@ -102,10 +106,12 @@ def migrate_to_mysql_shards():
             "SELECT att_session_id, student_id, status FROM attendance_records ORDER BY student_id"
         ).fetchall()
         
-        # Read correction requests
+        # Read correction requests (acted_* fields will be NULL for pending, populated for accepted/rejected)
         correction_rows = sqlite_conn.execute(
-            "SELECT student_id, course_id, att_session_id, reason, proof_url, status, created_at "
-            "FROM correction_requests ORDER BY student_id"
+            """SELECT student_id, course_id, att_session_id, reason, 
+                      proof_url, status, created_at
+               FROM correction_requests
+               ORDER BY student_id"""
         ).fetchall()
         
         print(f"  ✓  Found {len(attendance_rows)} attendance records")
@@ -123,11 +129,37 @@ def migrate_to_mysql_shards():
         shard_id = get_shard_id(row["student_id"])
         attendance_shard_data[shard_id].append((row["att_session_id"], row["student_id"], row["status"]))
     
+    # For correction requests, we need to look up the instructor for accepted/rejected ones
+    # Build a map of course_id -> instructor_id from SQLite
+    course_to_instructor = {}
+    try:
+        course_instr_rows = sqlite_conn.execute(
+            """SELECT ci.course_id, ci.instructor_id
+               FROM course_instructors ci"""
+        ).fetchall()
+        for row in course_instr_rows:
+            course_to_instructor[row["course_id"]] = row["instructor_id"]
+    except sqlite3.Error as e:
+        print(f"  ⚠  Warning: Could not load course instructors: {e}")
+    
     for row in correction_rows:
         shard_id = get_shard_id(row["student_id"])
+        
+        # Generate acted_* fields based on status
+        acted_by = None
+        acted_role = None
+        acted_at = None
+        
+        if row["status"] in ("accepted", "rejected"):
+            # For processed requests, set acted_* fields
+            acted_by = course_to_instructor.get(row["course_id"])
+            acted_role = "instructor"
+            acted_at = row["created_at"]  # Use created_at as acted_at for seed data
+        
         correction_shard_data[shard_id].append((
             row["student_id"], row["course_id"], row["att_session_id"],
-            row["reason"], row["proof_url"], row["status"], row["created_at"]
+            row["reason"], row["proof_url"], row["status"], row["created_at"],
+            acted_by, acted_role, acted_at
         ))
     
     print("  Attendance records per shard:")
@@ -221,8 +253,9 @@ def migrate_to_mysql_shards():
                 cursor = conn.cursor()
                 cursor.executemany(
                     f"INSERT INTO shard_{shard_id}_correction_requests "
-                    "(student_id, course_id, att_session_id, reason, proof_url, status, created_at) "
-                    "VALUES (%s, %s, %s, %s, %s, %s, %s)",
+                    "(student_id, course_id, att_session_id, reason, proof_url, status, created_at, "
+                    "acted_by, acted_role, acted_at) "
+                    "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
                     correction_data
                 )
                 conn.commit()
@@ -579,7 +612,7 @@ def init():
     conn.commit()
     print(f"  ✓  {len(records)} attendance records inserted into main SQLite DB")
 
-    # ── correction requests + correction_logs ─────────────────────────────────
+    # ── correction requests (with merged acted_* fields) ──────────────────────
     absent_set  = {(r[0], r[1]) for r in records if r[2] == "absent"}
     absent_list = [
         (sess_id, stu_id, course_ids[code])
@@ -593,10 +626,17 @@ def init():
     sample      = random.sample(absent_list, min(sample_size, len(absent_list)))
     cr_statuses = ["pending","pending","pending","accepted","rejected"]
     inserted_cr = 0
-    inserted_cl = 0
 
     for sess_id, stu_id, cid in sample:
         status = random.choice(cr_statuses)
+        acted_by = None
+        acted_role = None
+        
+        # For accepted/rejected requests, populate acted_* fields
+        if status in ("accepted", "rejected"):
+            acted_by = cid_to_instr.get(cid)
+            acted_role = "instructor"
+        
         try:
             cur = conn.execute(
                 """INSERT OR IGNORE INTO correction_requests
@@ -612,34 +652,19 @@ def init():
 
             inserted_cr += 1
 
-            # For every accepted or rejected request write a correction_log entry.
-            # acted_by = the instructor responsible for that course.
-            # No trigger on correction_logs — it is append-only by design.
-            if status in ("accepted", "rejected"):
-                acted_by = cid_to_instr.get(cid)
-                if acted_by:
-                    conn.execute(
-                        """INSERT INTO correction_logs
-                           (req_id, action, acted_by, role, acted_at)
-                           VALUES (?,?,?,?,datetime('now'))""",
-                        (req_id, status, acted_by, "instructor")
-                    )
-                    inserted_cl += 1
-
-                # If accepted also mark attendance as present
-                if status == "accepted":
-                    conn.execute(
-                        """UPDATE attendance_records
-                           SET status = 'present'
-                           WHERE att_session_id = ? AND student_id = ?""",
-                        (sess_id, stu_id)
-                    )
+            # If accepted also mark attendance as present
+            if status == "accepted":
+                conn.execute(
+                    """UPDATE attendance_records
+                       SET status = 'present'
+                       WHERE att_session_id = ? AND student_id = ?""",
+                    (sess_id, stu_id)
+                )
 
         except sqlite3.IntegrityError:
             pass
 
-    print(f"  ✓  {inserted_cr} correction requests inserted")
-    print(f"  ✓  {inserted_cl} correction_logs entries inserted")
+    print(f"  ✓  {inserted_cr} correction requests inserted (with merged acted_* fields)")
 
     first_student = conn.execute(
         "SELECT username FROM users WHERE role='student' ORDER BY user_id LIMIT 1"

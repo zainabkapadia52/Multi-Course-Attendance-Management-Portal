@@ -5765,3 +5765,451 @@
 127.0.0.1 - - [16/Apr/2026 03:48:03] "GET /api/student/corrections/archive HTTP/1.1" 200 -
 ✓ Connected to shard 2 (port 3309)
 127.0.0.1 - - [16/Apr/2026 03:48:03] "GET /api/student/attendance-stats/archive HTTP/1.1" 200 -
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5050
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 415-861-673
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5050
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 415-861-673
+127.0.0.1 - - [18/Apr/2026 14:55:31] "[33mPOST /api/auth/login HTTP/1.1[0m" 404 -
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5050
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 415-861-673
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5050
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 637-473-595
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5050
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 637-473-595
+127.0.0.1 - - [18/Apr/2026 15:08:14] "[32mGET / HTTP/1.1[0m" 302 -
+127.0.0.1 - - [18/Apr/2026 15:08:14] "GET /login HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:08:14] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-04-18T09:38:19.544553 | ACTION=LOGIN_OK | USER=12 | ENDPOINT=/login | username=aarav_verma0
+127.0.0.1 - - [18/Apr/2026 15:08:19] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:08:19] "GET /student HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:08:19] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Apr/2026 15:08:19] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:08:19] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:08:19] "GET /api/student/corrections/current HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:08:19] "GET /stream?session_id=e66578be-0082-4aa2-a85f-083cfe56bdc4&mac=a56dc20ba1d1dae6afa7e0525f484ada1110bbed80d48705379636fc97c6e656 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:08:19] "GET /api/student/profile HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [18/Apr/2026 15:08:19] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [18/Apr/2026 15:08:25] "GET /api/student/courses/1/sessions HTTP/1.1" 200 -
+2026-04-18T09:38:35.204955 | ACTION=SUBMIT_CORRECTION | USER=12 | ENDPOINT=/api/student/corrections | req_id=102 | OLD=None | NEW={'req_id': 102, 'course_id': 1, 'att_session_id': 11, 'reason': 'I was ill'}
+127.0.0.1 - - [18/Apr/2026 15:08:35] "[35m[1mPOST /api/student/corrections HTTP/1.1[0m" 201 -
+127.0.0.1 - - [18/Apr/2026 15:08:35] "GET /api/student/corrections/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Connected to shard 1 (port 3308)
+✓ Connected to shard 2 (port 3309)
+⚠ Correction request 102 not found in any shard
+127.0.0.1 - - [18/Apr/2026 15:08:37] "[33mGET /api/student/corrections/102/logs HTTP/1.1[0m" 404 -
+2026-04-18T09:38:41.082772 | ACTION=LOGOUT | USER=None | ENDPOINT=/logout | 
+127.0.0.1 - - [18/Apr/2026 15:08:41] "POST /logout HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:08:41] "GET /login HTTP/1.1" 200 -
+2026-04-18T09:38:46.540418 | ACTION=LOGIN_OK | USER=3 | ENDPOINT=/login | username=prof_singh
+127.0.0.1 - - [18/Apr/2026 15:08:46] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:08:46] "GET /instructor HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:08:46] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Apr/2026 15:08:46] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:08:46] "GET /api/instructor/courses HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:08:46] "GET /stream?session_id=8cea8187-f502-4fc4-8a88-90452af29939&mac=32a8bb4d2c556231bc2001b41d9749cdb95f9ac5f138de72172f8c629618d715 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:08:46] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:08:48] "GET /api/instructor/corrections HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Connected to shard 1 (port 3308)
+✓ Connected to shard 2 (port 3309)
+⚠ Correction request 102 not found in any shard
+✓ Direct update: record 11 in shard 0 to status=present
+2026-04-18T09:38:51.653546 | ACTION=ACCEPT_CORRECTION | USER=3 | ENDPOINT=/api/instructor/corrections/102/accept | req_id=102 record_id=11 | OLD={'req_id': 102, 'req_status': 'pending', 'record_id': 11, 'record_status': 'absent'} | NEW={'req_id': 102, 'req_status': 'accepted', 'record_id': 11, 'record_status': 'present'}
+127.0.0.1 - - [18/Apr/2026 15:08:51] "POST /api/instructor/corrections/102/accept HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:08:51] "GET /api/instructor/corrections HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:08:57] "GET /instructor HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:08:57] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Apr/2026 15:08:57] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:08:57] "GET /stream?session_id=8cea8187-f502-4fc4-8a88-90452af29939&mac=32a8bb4d2c556231bc2001b41d9749cdb95f9ac5f138de72172f8c629618d715 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:08:57] "GET /api/instructor/courses HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:08:57] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:08:59] "GET /api/instructor/corrections HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Connected to shard 1 (port 3308)
+✓ Connected to shard 2 (port 3309)
+⚠ Correction request 102 not found in any shard
+⚠ Record 11 not found in shard 0
+2026-04-18T09:39:01.328939 | ACTION=ACCEPT_CORRECTION | USER=3 | ENDPOINT=/api/instructor/corrections/102/accept | req_id=102 record_id=11 | OLD={'req_id': 102, 'req_status': 'pending', 'record_id': 11, 'record_status': 'present'} | NEW={'req_id': 102, 'req_status': 'accepted', 'record_id': 11, 'record_status': 'present'}
+127.0.0.1 - - [18/Apr/2026 15:09:01] "POST /api/instructor/corrections/102/accept HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:09:01] "GET /api/instructor/corrections HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Connected to shard 1 (port 3308)
+✓ Connected to shard 2 (port 3309)
+⚠ Correction request 102 not found in any shard
+⚠ Record 11 not found in shard 0
+2026-04-18T09:39:06.544021 | ACTION=ACCEPT_CORRECTION | USER=3 | ENDPOINT=/api/instructor/corrections/102/accept | req_id=102 record_id=11 | OLD={'req_id': 102, 'req_status': 'pending', 'record_id': 11, 'record_status': 'present'} | NEW={'req_id': 102, 'req_status': 'accepted', 'record_id': 11, 'record_status': 'present'}
+127.0.0.1 - - [18/Apr/2026 15:09:06] "POST /api/instructor/corrections/102/accept HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:09:06] "GET /api/instructor/corrections HTTP/1.1" 200 -
+ * Detected change in '/Users/umangshikarvar/Desktop/Multi-Course-Attendance-Management-Portal/Module-B/app/routes/instructor.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 637-473-595
+127.0.0.1 - - [18/Apr/2026 15:10:13] "GET /stream?session_id=8cea8187-f502-4fc4-8a88-90452af29939&mac=32a8bb4d2c556231bc2001b41d9749cdb95f9ac5f138de72172f8c629618d715 HTTP/1.1" 200 -
+ * Detected change in '/Users/umangshikarvar/Desktop/Multi-Course-Attendance-Management-Portal/Module-B/app/routes/ta.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 637-473-595
+127.0.0.1 - - [18/Apr/2026 15:10:45] "GET /stream?session_id=8cea8187-f502-4fc4-8a88-90452af29939&mac=32a8bb4d2c556231bc2001b41d9749cdb95f9ac5f138de72172f8c629618d715 HTTP/1.1" 200 -
+ * Detected change in '/Users/umangshikarvar/Desktop/Multi-Course-Attendance-Management-Portal/Module-B/app/routes/student.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 637-473-595
+127.0.0.1 - - [18/Apr/2026 15:11:25] "GET /stream?session_id=8cea8187-f502-4fc4-8a88-90452af29939&mac=32a8bb4d2c556231bc2001b41d9749cdb95f9ac5f138de72172f8c629618d715 HTTP/1.1" 200 -
+ * Detected change in '/Users/umangshikarvar/Desktop/Multi-Course-Attendance-Management-Portal/Module-B/app/routes/student.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 637-473-595
+127.0.0.1 - - [18/Apr/2026 15:11:54] "GET /stream?session_id=8cea8187-f502-4fc4-8a88-90452af29939&mac=32a8bb4d2c556231bc2001b41d9749cdb95f9ac5f138de72172f8c629618d715 HTTP/1.1" 200 -
+ * Detected change in '/Users/umangshikarvar/Desktop/Multi-Course-Attendance-Management-Portal/Module-B/app/routes/student.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 637-473-595
+127.0.0.1 - - [18/Apr/2026 15:12:13] "GET /stream?session_id=8cea8187-f502-4fc4-8a88-90452af29939&mac=32a8bb4d2c556231bc2001b41d9749cdb95f9ac5f138de72172f8c629618d715 HTTP/1.1" 200 -
+ * Detected change in '/Users/umangshikarvar/Desktop/Multi-Course-Attendance-Management-Portal/Module-B/app/routes/student.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 637-473-595
+127.0.0.1 - - [18/Apr/2026 15:12:41] "GET /stream?session_id=8cea8187-f502-4fc4-8a88-90452af29939&mac=32a8bb4d2c556231bc2001b41d9749cdb95f9ac5f138de72172f8c629618d715 HTTP/1.1" 200 -
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5050
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 637-473-595
+127.0.0.1 - - [18/Apr/2026 15:13:43] "[32mGET / HTTP/1.1[0m" 302 -
+127.0.0.1 - - [18/Apr/2026 15:13:43] "GET /login HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:13:44] "[31m[1mGET /stream?session_id=8cea8187-f502-4fc4-8a88-90452af29939&mac=32a8bb4d2c556231bc2001b41d9749cdb95f9ac5f138de72172f8c629618d715 HTTP/1.1[0m" 401 -
+2026-04-18T09:43:50.892983 | ACTION=LOGIN_OK | USER=3 | ENDPOINT=/login | username=prof_singh
+127.0.0.1 - - [18/Apr/2026 15:13:50] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:13:50] "GET /instructor HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:13:50] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Apr/2026 15:13:50] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:13:50] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:13:50] "GET /stream?session_id=3d2baecb-283a-4fdb-9280-7a56db48a50e&mac=59b5ee54d3094ae7aea67caea6373ed14504d68bcfa680d1955f32ec4a691a4d HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:13:50] "GET /api/instructor/courses HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:13:52] "GET /api/instructor/corrections HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:13:54] "[33mPOST /api/instructor/corrections/4/accept HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Apr/2026 15:13:55] "GET /api/instructor/corrections HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:13:56] "[33mPOST /api/instructor/corrections/4/accept HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Apr/2026 15:13:56] "GET /api/instructor/corrections HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:13:58] "[33mPOST /api/instructor/corrections/4/accept HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Apr/2026 15:13:58] "GET /api/instructor/corrections HTTP/1.1" 200 -
+ * Detected change in '/Users/umangshikarvar/Desktop/Multi-Course-Attendance-Management-Portal/Module-B/app/routes/instructor.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 637-473-595
+127.0.0.1 - - [18/Apr/2026 15:14:59] "GET /stream?session_id=3d2baecb-283a-4fdb-9280-7a56db48a50e&mac=59b5ee54d3094ae7aea67caea6373ed14504d68bcfa680d1955f32ec4a691a4d HTTP/1.1" 200 -
+ * Detected change in '/Users/umangshikarvar/Desktop/Multi-Course-Attendance-Management-Portal/Module-B/app/routes/instructor.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 637-473-595
+127.0.0.1 - - [18/Apr/2026 15:15:30] "GET /stream?session_id=3d2baecb-283a-4fdb-9280-7a56db48a50e&mac=59b5ee54d3094ae7aea67caea6373ed14504d68bcfa680d1955f32ec4a691a4d HTTP/1.1" 200 -
+ * Detected change in '/Users/umangshikarvar/Desktop/Multi-Course-Attendance-Management-Portal/Module-B/app/routes/ta.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 637-473-595
+127.0.0.1 - - [18/Apr/2026 15:16:00] "GET /stream?session_id=3d2baecb-283a-4fdb-9280-7a56db48a50e&mac=59b5ee54d3094ae7aea67caea6373ed14504d68bcfa680d1955f32ec4a691a4d HTTP/1.1" 200 -
+ * Detected change in '/Users/umangshikarvar/Desktop/Multi-Course-Attendance-Management-Portal/Module-B/app/routes/ta.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 637-473-595
+127.0.0.1 - - [18/Apr/2026 15:16:19] "GET /stream?session_id=3d2baecb-283a-4fdb-9280-7a56db48a50e&mac=59b5ee54d3094ae7aea67caea6373ed14504d68bcfa680d1955f32ec4a691a4d HTTP/1.1" 200 -
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5050
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 637-473-595
+127.0.0.1 - - [18/Apr/2026 15:16:38] "[31m[1mGET /stream?session_id=3d2baecb-283a-4fdb-9280-7a56db48a50e&mac=59b5ee54d3094ae7aea67caea6373ed14504d68bcfa680d1955f32ec4a691a4d HTTP/1.1[0m" 401 -
+127.0.0.1 - - [18/Apr/2026 15:16:40] "[32mGET / HTTP/1.1[0m" 302 -
+127.0.0.1 - - [18/Apr/2026 15:16:40] "GET /login HTTP/1.1" 200 -
+2026-04-18T09:46:43.822179 | ACTION=LOGIN_OK | USER=3 | ENDPOINT=/login | username=prof_singh
+127.0.0.1 - - [18/Apr/2026 15:16:43] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:16:43] "GET /instructor HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:16:43] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Apr/2026 15:16:43] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:16:43] "GET /api/instructor/courses HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:16:43] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:16:43] "GET /stream?session_id=14d2f6f2-09fa-4acd-af28-d2dff95bf8ed&mac=18d6e080c2c2173b9508ac22e375ad46d016f837abfdcab57a6b350f5866522b HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:16:46] "GET /api/instructor/corrections HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Updated correction request 4 in shard 0 to status=accepted
+✓ Direct update: record 64 in shard 0 to status=present
+2026-04-18T09:46:47.930240 | ACTION=ACCEPT_CORRECTION | USER=3 | ENDPOINT=/api/instructor/corrections/4/accept | req_id=4 record_id=64 | OLD={'req_id': 4, 'req_status': 'pending', 'record_id': 64, 'record_status': 'absent'} | NEW={'req_id': 4, 'req_status': 'accepted', 'record_id': 64, 'record_status': 'present'}
+127.0.0.1 - - [18/Apr/2026 15:16:47] "POST /api/instructor/corrections/4/accept HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:16:48] "GET /api/instructor/corrections HTTP/1.1" 200 -
+2026-04-18T09:46:54.832915 | ACTION=LOGOUT | USER=None | ENDPOINT=/logout | 
+127.0.0.1 - - [18/Apr/2026 15:16:54] "POST /logout HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:16:54] "GET /login HTTP/1.1" 200 -
+2026-04-18T09:46:58.688306 | ACTION=LOGIN_OK | USER=12 | ENDPOINT=/login | username=aarav_verma0
+127.0.0.1 - - [18/Apr/2026 15:16:58] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:16:58] "GET /student HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:16:58] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Apr/2026 15:16:58] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:16:58] "GET /api/student/profile HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:16:58] "GET /stream?session_id=7d98c768-def6-4ee3-9545-fc93221355da&mac=9ebff91e16e1dbe656fc24a079b94ac0f770290be0864edd2271e722f290f3d0 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:16:58] "GET /isAuth HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [18/Apr/2026 15:16:58] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:16:58] "GET /api/student/corrections/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [18/Apr/2026 15:17:00] "GET /api/student/corrections/archive HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:17:00] "GET /api/student/attendance-stats/archive HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [18/Apr/2026 15:17:05] "GET /api/student/courses/1/sessions HTTP/1.1" 200 -
+2026-04-18T09:47:14.051590 | ACTION=SUBMIT_CORRECTION | USER=12 | ENDPOINT=/api/student/corrections | req_id=102 | OLD=None | NEW={'req_id': 102, 'course_id': 1, 'att_session_id': 11, 'reason': 'i was ill'}
+127.0.0.1 - - [18/Apr/2026 15:17:14] "[35m[1mPOST /api/student/corrections HTTP/1.1[0m" 201 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [18/Apr/2026 15:17:14] "GET /api/student/corrections/current HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:17:30] "GET /student HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:17:30] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Apr/2026 15:17:30] "GET /stream?session_id=7d98c768-def6-4ee3-9545-fc93221355da&mac=9ebff91e16e1dbe656fc24a079b94ac0f770290be0864edd2271e722f290f3d0 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:17:30] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:17:30] "GET /api/student/profile HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:17:30] "GET /isAuth HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [18/Apr/2026 15:17:30] "GET /api/student/corrections/current HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:17:30] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+ * Detected change in '/Users/umangshikarvar/Desktop/Multi-Course-Attendance-Management-Portal/Module-B/app/routes/student.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 637-473-595
+127.0.0.1 - - [18/Apr/2026 15:18:41] "GET /stream?session_id=7d98c768-def6-4ee3-9545-fc93221355da&mac=9ebff91e16e1dbe656fc24a079b94ac0f770290be0864edd2271e722f290f3d0 HTTP/1.1" 200 -
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5050
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 415-861-673
+127.0.0.1 - - [18/Apr/2026 15:21:26] "GET /stream?session_id=7d98c768-def6-4ee3-9545-fc93221355da&mac=9ebff91e16e1dbe656fc24a079b94ac0f770290be0864edd2271e722f290f3d0 HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Updated correction request 2 in shard 0 to status=accepted
+✓ Updated correction request 2 in shard 0 to status=pending
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5050
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 637-473-595
+127.0.0.1 - - [18/Apr/2026 15:24:20] "[31m[1mGET /stream?session_id=7d98c768-def6-4ee3-9545-fc93221355da&mac=9ebff91e16e1dbe656fc24a079b94ac0f770290be0864edd2271e722f290f3d0 HTTP/1.1[0m" 401 -
+127.0.0.1 - - [18/Apr/2026 15:24:22] "[32mGET / HTTP/1.1[0m" 302 -
+127.0.0.1 - - [18/Apr/2026 15:24:22] "GET /login HTTP/1.1" 200 -
+2026-04-18T09:54:24.362976 | ACTION=LOGIN_OK | USER=12 | ENDPOINT=/login | username=aarav_verma0
+127.0.0.1 - - [18/Apr/2026 15:24:24] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:24:24] "GET /student HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:24:24] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Apr/2026 15:24:24] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:24:24] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:24:24] "GET /stream?session_id=04f3e1c0-2714-4b51-aa36-56abf4d375b7&mac=9e769e57f54972d8b3c6635333c5efa1f1cd77246703039296e2d96ab05fac83 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:24:24] "GET /api/student/profile HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [18/Apr/2026 15:24:24] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:24:24] "GET /api/student/corrections/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [18/Apr/2026 15:24:30] "GET /api/student/courses/1/sessions HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Inserted correction request 31 for student 12 into shard 0
+2026-04-18T09:54:39.702786 | ACTION=SUBMIT_CORRECTION | USER=12 | ENDPOINT=/api/student/corrections | req_id=31 | OLD=None | NEW={'req_id': 31, 'course_id': 1, 'att_session_id': 11, 'reason': 'I was ill'}
+127.0.0.1 - - [18/Apr/2026 15:24:39] "[35m[1mPOST /api/student/corrections HTTP/1.1[0m" 201 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [18/Apr/2026 15:24:39] "GET /api/student/corrections/current HTTP/1.1" 200 -
+2026-04-18T09:54:45.614153 | ACTION=LOGOUT | USER=None | ENDPOINT=/logout | 
+127.0.0.1 - - [18/Apr/2026 15:24:45] "POST /logout HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:24:45] "GET /login HTTP/1.1" 200 -
+ * Detected change in '/Users/umangshikarvar/Desktop/Multi-Course-Attendance-Management-Portal/Module-B/test_routes_http.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 637-473-595
+2026-04-18T09:55:06.841610 | ACTION=LOGIN_OK | USER=12 | ENDPOINT=/login | username=aarav_verma0
+127.0.0.1 - - [18/Apr/2026 15:25:06] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:25:06] "GET /student HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:25:06] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Apr/2026 15:25:06] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:25:06] "GET /stream?session_id=6e554eb3-408f-4896-9025-9f68769778ce&mac=74befdca31e2259d6f0938ca5c293a943a5fd03709ab017b03805e5bbdaed69e HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:25:06] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:25:06] "GET /api/student/profile HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [18/Apr/2026 15:25:06] "GET /api/student/corrections/current HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:25:06] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+2026-04-18T09:55:09.016361 | ACTION=LOGOUT | USER=None | ENDPOINT=/logout | 
+127.0.0.1 - - [18/Apr/2026 15:25:09] "POST /logout HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:25:09] "GET /login HTTP/1.1" 200 -
+2026-04-18T09:55:16.720796 | ACTION=LOGIN_OK | USER=3 | ENDPOINT=/login | username=prof_singh
+127.0.0.1 - - [18/Apr/2026 15:25:16] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:25:16] "GET /instructor HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:25:16] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Apr/2026 15:25:16] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:25:16] "GET /stream?session_id=daab1679-973d-4a3c-ad10-d6b4b7557ddb&mac=0f4bc8329b0c24ecfe344a25f98728c6efd2aad0e551e2d8dee770372b70b886 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:25:16] "GET /api/instructor/courses HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:25:16] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:25:18] "GET /api/instructor/corrections HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Updated correction request 31 in shard 0 to status=accepted
+✓ Direct update: record 11 in shard 0 to status=present
+2026-04-18T09:55:24.485649 | ACTION=ACCEPT_CORRECTION | USER=3 | ENDPOINT=/api/instructor/corrections/31/accept | req_id=31 record_id=11 | OLD={'req_id': 31, 'req_status': 'pending', 'record_id': 11, 'record_status': 'absent'} | NEW={'req_id': 31, 'req_status': 'accepted', 'record_id': 11, 'record_status': 'present'}
+127.0.0.1 - - [18/Apr/2026 15:25:24] "POST /api/instructor/corrections/31/accept HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:25:24] "GET /api/instructor/corrections HTTP/1.1" 200 -
+2026-04-18T09:55:31.866617 | ACTION=LOGOUT | USER=None | ENDPOINT=/logout | 
+127.0.0.1 - - [18/Apr/2026 15:25:31] "POST /logout HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:25:31] "GET /login HTTP/1.1" 200 -
+2026-04-18T09:55:35.103965 | ACTION=LOGIN_OK | USER=12 | ENDPOINT=/login | username=aarav_verma0
+127.0.0.1 - - [18/Apr/2026 15:25:35] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:25:35] "GET /student HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:25:35] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Apr/2026 15:25:35] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:25:35] "GET /stream?session_id=56d30960-bfe7-4625-bf03-8173d94dded2&mac=84b8049c8741a0684e0585499cda47b3821dc995f4bed8f8ed230cfb223de80b HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:25:35] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:25:35] "GET /api/student/profile HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [18/Apr/2026 15:25:35] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:25:35] "GET /api/student/corrections/current HTTP/1.1" 200 -
+2026-04-18T09:55:39.701133 | ACTION=LOGOUT | USER=None | ENDPOINT=/logout | 
+127.0.0.1 - - [18/Apr/2026 15:25:39] "POST /logout HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:25:39] "GET /login HTTP/1.1" 200 -
+2026-04-18T09:55:45.153259 | ACTION=LOGIN_OK | USER=3 | ENDPOINT=/login | username=prof_singh
+127.0.0.1 - - [18/Apr/2026 15:25:45] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:25:45] "GET /instructor HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:25:45] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Apr/2026 15:25:45] "GET /stream?session_id=dc37948d-b011-41e2-ad5b-b36e07d864a9&mac=3b7ad98f8ec8eb4705a38e9d5725b635fd7a056095bd659d50a6e54a210f7ac3 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:25:45] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:25:45] "GET /api/instructor/courses HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:25:45] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:25:46] "GET /api/instructor/corrections HTTP/1.1" 200 -
+2026-04-18T09:56:03.074985 | ACTION=LOGIN_OK | USER=3 | ENDPOINT=/login | username=prof_singh
+2026-04-18T09:56:03.076133 | ACTION=UNAUTHORIZED | USER=None | ENDPOINT=/api/instructor/corrections | 
+ * Detected change in '/Users/umangshikarvar/Desktop/Multi-Course-Attendance-Management-Portal/Module-B/test_routes_http.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 637-473-595
+127.0.0.1 - - [18/Apr/2026 15:26:14] "GET /stream?session_id=dc37948d-b011-41e2-ad5b-b36e07d864a9&mac=3b7ad98f8ec8eb4705a38e9d5725b635fd7a056095bd659d50a6e54a210f7ac3 HTTP/1.1" 200 -
+ * Detected change in '/Users/umangshikarvar/Desktop/Multi-Course-Attendance-Management-Portal/Module-B/app/routes/instructor.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 637-473-595
+127.0.0.1 - - [18/Apr/2026 15:26:37] "GET /stream?session_id=dc37948d-b011-41e2-ad5b-b36e07d864a9&mac=3b7ad98f8ec8eb4705a38e9d5725b635fd7a056095bd659d50a6e54a210f7ac3 HTTP/1.1" 200 -
+ * Detected change in '/Users/umangshikarvar/Desktop/Multi-Course-Attendance-Management-Portal/Module-B/app/routes/instructor.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 637-473-595
+127.0.0.1 - - [18/Apr/2026 15:26:55] "GET /stream?session_id=dc37948d-b011-41e2-ad5b-b36e07d864a9&mac=3b7ad98f8ec8eb4705a38e9d5725b635fd7a056095bd659d50a6e54a210f7ac3 HTTP/1.1" 200 -
+ * Detected change in '/Users/umangshikarvar/Desktop/Multi-Course-Attendance-Management-Portal/Module-B/app/routes/ta.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 637-473-595
+127.0.0.1 - - [18/Apr/2026 15:27:04] "GET /stream?session_id=dc37948d-b011-41e2-ad5b-b36e07d864a9&mac=3b7ad98f8ec8eb4705a38e9d5725b635fd7a056095bd659d50a6e54a210f7ac3 HTTP/1.1" 200 -
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5050
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 637-473-595
+127.0.0.1 - - [18/Apr/2026 15:29:26] "[32mGET / HTTP/1.1[0m" 302 -
+127.0.0.1 - - [18/Apr/2026 15:29:26] "GET /login HTTP/1.1" 200 -
+2026-04-18T09:59:29.044686 | ACTION=LOGIN_OK | USER=3 | ENDPOINT=/login | username=prof_singh
+127.0.0.1 - - [18/Apr/2026 15:29:29] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:29:29] "GET /instructor HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:29:29] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Apr/2026 15:29:29] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:29:29] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:29:29] "GET /stream?session_id=004916ce-9cc4-4d12-bdde-893b6912e9bf&mac=36ea0f0aae79cf146b8ff8dc176ab42603821440d1595eadbb0dd29ede9e9edc HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:29:29] "GET /api/instructor/courses HTTP/1.1" 200 -
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5050
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 637-473-595
+127.0.0.1 - - [18/Apr/2026 15:30:05] "[31m[1mGET /stream?session_id=004916ce-9cc4-4d12-bdde-893b6912e9bf&mac=36ea0f0aae79cf146b8ff8dc176ab42603821440d1595eadbb0dd29ede9e9edc HTTP/1.1[0m" 401 -
+127.0.0.1 - - [18/Apr/2026 15:30:06] "[32mGET / HTTP/1.1[0m" 302 -
+127.0.0.1 - - [18/Apr/2026 15:30:06] "GET /login HTTP/1.1" 200 -
+2026-04-18T10:00:19.506915 | ACTION=LOGIN_OK | USER=3 | ENDPOINT=/login | username=prof_singh
+127.0.0.1 - - [18/Apr/2026 15:30:19] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:30:19] "GET /instructor HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:30:19] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Apr/2026 15:30:19] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:30:19] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:30:19] "GET /stream?session_id=2384aaf4-d890-4045-a57f-22c40be374ca&mac=aa0f5d5e1321fc05da9cd65c5fd4f08ca66440d1288a60ad74e20117e9d0631d HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:30:19] "GET /api/instructor/courses HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:30:20] "GET /api/instructor/corrections HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Updated correction request 4 in shard 0 to status=accepted
+✓ Direct update: record 64 in shard 0 to status=present
+2026-04-18T10:00:22.211147 | ACTION=ACCEPT_CORRECTION | USER=3 | ENDPOINT=/api/instructor/corrections/4/accept | req_id=4 record_id=64 | OLD={'req_id': 4, 'req_status': 'pending', 'record_id': 64, 'record_status': 'absent'} | NEW={'req_id': 4, 'req_status': 'accepted', 'record_id': 64, 'record_status': 'present'}
+127.0.0.1 - - [18/Apr/2026 15:30:22] "POST /api/instructor/corrections/4/accept HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:30:22] "GET /api/instructor/corrections HTTP/1.1" 200 -
+2026-04-18T10:00:25.183104 | ACTION=LOGOUT | USER=None | ENDPOINT=/logout | 
+127.0.0.1 - - [18/Apr/2026 15:30:25] "POST /logout HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:30:25] "GET /login HTTP/1.1" 200 -
+2026-04-18T10:00:30.117250 | ACTION=LOGIN_OK | USER=12 | ENDPOINT=/login | username=aarav_verma0
+127.0.0.1 - - [18/Apr/2026 15:30:30] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:30:30] "GET /student HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:30:30] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Apr/2026 15:30:30] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:30:30] "GET /stream?session_id=947d27e1-afad-4867-a276-3fd3dd20aa12&mac=44390527207304882ba6063e3e1766054d309880398fbefc7d241fad280a610c HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:30:30] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:30:30] "GET /api/student/profile HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [18/Apr/2026 15:30:30] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:30:30] "GET /api/student/corrections/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [18/Apr/2026 15:30:34] "GET /api/student/courses/1/sessions HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Inserted correction request 31 for student 12 into shard 0
+2026-04-18T10:00:41.176476 | ACTION=SUBMIT_CORRECTION | USER=12 | ENDPOINT=/api/student/corrections | req_id=31 | OLD=None | NEW={'req_id': 31, 'course_id': 1, 'att_session_id': 11, 'reason': 'I was ill'}
+127.0.0.1 - - [18/Apr/2026 15:30:41] "[35m[1mPOST /api/student/corrections HTTP/1.1[0m" 201 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [18/Apr/2026 15:30:41] "GET /api/student/corrections/current HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:30:50] "GET /student HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:30:50] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Apr/2026 15:30:50] "GET /login HTTP/1.1" 200 -
+2026-04-18T10:00:55.593225 | ACTION=LOGIN_OK | USER=3 | ENDPOINT=/login | username=prof_singh
+127.0.0.1 - - [18/Apr/2026 15:30:55] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:30:55] "GET /instructor HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:30:55] "[33mGET /static/js/data-sync.js HTTP/1.1[0m" 404 -
+127.0.0.1 - - [18/Apr/2026 15:30:55] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:30:55] "GET /isAuth HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:30:55] "GET /api/instructor/courses HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:30:55] "GET /stream?session_id=ba7b9704-f1bc-4222-89f4-e024d44109d5&mac=c24ea67bf1e2cfef07645405b33b2d236946f800a6d32592304c2bc1acd30d32 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:30:57] "GET /api/instructor/corrections HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Updated correction request 31 in shard 0 to status=accepted
+✓ Direct update: record 11 in shard 0 to status=present
+2026-04-18T10:00:59.260423 | ACTION=ACCEPT_CORRECTION | USER=3 | ENDPOINT=/api/instructor/corrections/31/accept | req_id=31 record_id=11 | OLD={'req_id': 31, 'req_status': 'pending', 'record_id': 11, 'record_status': 'absent'} | NEW={'req_id': 31, 'req_status': 'accepted', 'record_id': 11, 'record_status': 'present'}
+127.0.0.1 - - [18/Apr/2026 15:30:59] "POST /api/instructor/corrections/31/accept HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [18/Apr/2026 15:30:59] "GET /api/student/attendance-stats/current HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:30:59] "GET /api/student/corrections/current HTTP/1.1" 200 -
+✓ Connected to shard 0 (port 3307)
+127.0.0.1 - - [18/Apr/2026 15:30:59] "GET /api/student/courses/1/sessions HTTP/1.1" 200 -
+127.0.0.1 - - [18/Apr/2026 15:30:59] "GET /api/instructor/corrections HTTP/1.1" 200 -
