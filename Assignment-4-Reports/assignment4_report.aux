@@ -18,86 +18,91 @@
 \newlabel{tab:viable_candidates}{{III}{2}{Final Candidate Comparison}{table.3}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {I-F}}Candidate Evaluation Against the Three Criteria}{2}{subsection.1.6}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {I-F}1}Criterion 1: High Cardinality}{2}{subsubsection.1.6.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {I-F}2}Criterion 2: Query Alignment}{2}{subsubsection.1.6.2}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {IV}{\ignorespaces Cardinality of Candidate Keys}}{2}{table.4}\protected@file@percent }
 \newlabel{tab:cardinality}{{IV}{2}{Cardinality of Candidate Keys}{table.4}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {I-F}2}Criterion 2: Query Alignment}{2}{subsubsection.1.6.2}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {V}{\ignorespaces Query-Alignment Summary for Finalists}}{2}{table.5}\protected@file@percent }
 \newlabel{tab:query_alignment}{{V}{2}{Query-Alignment Summary for Finalists}{table.5}{}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {I-F}3}Criterion 3: Stability}{2}{subsubsection.1.6.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {I-G}}Selected Shard Key}{2}{subsection.1.7}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {VI}{\ignorespaces Final Decision Matrix}}{2}{table.6}\protected@file@percent }
 \newlabel{tab:decision_matrix}{{VI}{2}{Final Decision Matrix}{table.6}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {I-H}}Partitioning Strategy Comparison and Justification}{2}{subsection.1.8}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {I-H}1}Strategy 1: Range-Based}{2}{subsubsection.1.8.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {I-H}}Partitioning Strategy Comparison and Justification}{3}{subsection.1.8}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {VII}{\ignorespaces Strategy-Level Distribution Comparison}}{3}{table.7}\protected@file@percent }
 \newlabel{tab:strategy_comparison}{{VII}{3}{Strategy-Level Distribution Comparison}{table.7}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {I-H}1}Strategy 1: Range-Based}{3}{subsubsection.1.8.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {I-H}2}Strategy 2: Hash-Based}{3}{subsubsection.1.8.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {I-H}3}Strategy 3: Directory-Based (Department Mapping)}{3}{subsubsection.1.8.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {I-I}}Final Partitioning Decision}{3}{subsection.1.9}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {I-J}}Expected Distribution and Skew Risk}{3}{subsection.1.10}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {VIII}{\ignorespaces Observed Student-Range Distribution (Selected Strategy)}}{3}{table.8}\protected@file@percent }
-\newlabel{tab:range_distribution}{{VIII}{3}{Observed Student-Range Distribution (Selected Strategy)}{table.8}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {II}SubTask 2: Sharding Implementation and Data Migration}{3}{section.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-A}}Overview}{3}{subsection.2.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-B}}Dual-Database Architecture}{3}{subsection.2.2}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {IX}{\ignorespaces Database Architecture Components}}{3}{table.9}\protected@file@percent }
-\newlabel{tab:db_architecture}{{IX}{3}{Database Architecture Components}{table.9}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-C}}Tables Selected for Sharding}{3}{subsection.2.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {VIII}{\ignorespaces Observed Student-Hash Distribution (Selected Strategy)}}{3}{table.8}\protected@file@percent }
+\newlabel{tab:range_distribution}{{VIII}{3}{Observed Student-Hash Distribution (Selected Strategy)}{table.8}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {I-K}}Shard Key Analysis for \texttt  {correction\_requests}}{3}{subsection.1.11}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {IX}{\ignorespaces Cardinality for \texttt  {correction\_requests} Candidates}}{3}{table.9}\protected@file@percent }
+\newlabel{tab:cr_cardinality}{{IX}{3}{Cardinality for \texttt {correction\_requests} Candidates}{table.9}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {X}{\ignorespaces Distribution for \texttt  {correction\_requests} (40 Rows)}}{4}{table.10}\protected@file@percent }
+\newlabel{tab:cr_distribution}{{X}{4}{Distribution for \texttt {correction\_requests} (40 Rows)}{table.10}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {II}SubTask 2: Sharding Implementation and Data Migration}{4}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-A}}Overview}{4}{subsection.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-B}}Dual-Database Architecture}{4}{subsection.2.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {XI}{\ignorespaces Database Architecture Components}}{4}{table.11}\protected@file@percent }
+\newlabel{tab:db_architecture}{{XI}{4}{Database Architecture Components}{table.11}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-C}}Tables Selected for Sharding}{4}{subsection.2.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-C}1}Table 1: \texttt  {attendance\_records}}{4}{subsubsection.2.3.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-C}2}Table 2: \texttt  {correction\_requests}}{4}{subsubsection.2.3.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-D}}Partitioning Function}{4}{subsection.2.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-E}}Migration Process}{4}{subsection.2.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-E}1}Phase 1: SQLite Setup}{4}{subsubsection.2.5.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-E}2}Phase 2: MySQL Shards Migration}{4}{subsubsection.2.5.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-F}}Migration Output}{5}{subsection.2.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-D}}Partitioning Function}{5}{subsection.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-E}}Migration Process}{5}{subsection.2.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-E}1}Phase 1: SQLite Setup}{5}{subsubsection.2.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-E}2}Phase 2: MySQL Shards Migration}{5}{subsubsection.2.5.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-F}}Migration Output}{6}{subsection.2.6}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-G}}Distribution Analysis}{6}{subsection.2.7}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {X}{\ignorespaces Post-Migration Data Distribution}}{6}{table.10}\protected@file@percent }
-\newlabel{tab:migration_distribution}{{X}{6}{Post-Migration Data Distribution}{table.10}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {XII}{\ignorespaces Post-Migration Data Distribution}}{6}{table.12}\protected@file@percent }
+\newlabel{tab:migration_distribution}{{XII}{6}{Post-Migration Data Distribution}{table.12}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-H}}Verification}{6}{subsection.2.8}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-I}}Benefits of This Approach}{6}{subsection.2.9}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {III}SubTask 3: Query Routing Implementation Architecture}{6}{section.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-A}}System Overview}{6}{subsection.3.1}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {XI}{\ignorespaces Shard Configuration}}{6}{table.11}\protected@file@percent }
-\newlabel{tab:shard_config}{{XI}{6}{Shard Configuration}{table.11}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-B}}Connection Management Strategy}{6}{subsection.3.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-B}1}Per-Request Connection Caching}{6}{subsubsection.3.2.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-B}2}ThreadPoolExecutor Direct Connections}{6}{subsubsection.3.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {III}SubTask 3: Query Routing Implementation Architecture}{7}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-A}}System Overview}{7}{subsection.3.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {XIII}{\ignorespaces Shard Configuration}}{7}{table.13}\protected@file@percent }
+\newlabel{tab:shard_config}{{XIII}{7}{Shard Configuration}{table.13}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-B}}Connection Management Strategy}{7}{subsection.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-B}1}Per-Request Connection Caching}{7}{subsubsection.3.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-B}2}ThreadPoolExecutor Direct Connections}{7}{subsubsection.3.2.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-C}}Routing Functions}{7}{subsection.3.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-C}1}Primary Routing: \texttt  {get\_shard\_id()}}{7}{subsubsection.3.3.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-C}2}Range Resolution: \texttt  {get\_shards\_for\_range()}}{7}{subsubsection.3.3.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-D}}Single-Shard Operations}{7}{subsection.3.4}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-D}1}\texttt  {get\_records\_for\_student()}: Read One Student}{7}{subsubsection.3.4.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-D}2}\texttt  {insert\_record()}: Create One Record}{7}{subsubsection.3.4.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-D}3}\texttt  {update\_record()}: Modify One Record}{7}{subsubsection.3.4.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-E}}Multi-Shard Operations (Parallelized)}{7}{subsection.3.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-E}1}\texttt  {get\_records\_for\_session()}: Read Session with Parallel Fan-Out}{7}{subsubsection.3.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-D}3}\texttt  {update\_record()}: Modify One Record}{8}{subsubsection.3.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-E}}Multi-Shard Operations (Parallelized)}{8}{subsection.3.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-E}1}\texttt  {get\_records\_for\_session()}: Read Session with Parallel Fan-Out}{8}{subsubsection.3.5.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-E}2}\texttt  {delete\_records\_for\_session()}: Delete Session Records (Parallel)}{8}{subsubsection.3.5.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-E}3}\texttt  {delete\_records\_for\_course()}: Batch + Parallel}{8}{subsubsection.3.5.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-F}}Helper Functions}{8}{subsection.3.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-F}1}\texttt  {get\_student\_id\_for\_record()}: Cross-Shard Lookup}{8}{subsubsection.3.6.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-G}}API Endpoint Routing}{8}{subsection.3.7}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {XII}{\ignorespaces API Endpoint Routing Matrix}}{9}{table.12}\protected@file@percent }
-\newlabel{tab:api_routing}{{XII}{9}{API Endpoint Routing Matrix}{table.12}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-F}}Helper Functions}{9}{subsection.3.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-F}1}\texttt  {get\_student\_id\_for\_record()}: Cross-Shard Lookup}{9}{subsubsection.3.6.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-G}}API Endpoint Routing}{9}{subsection.3.7}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-H}}Real-Time Broadcast Integration}{9}{subsection.3.8}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-I}}Distribution Balance}{9}{subsection.3.9}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {XIII}{\ignorespaces Attendance Record Distribution}}{9}{table.13}\protected@file@percent }
-\newlabel{tab:distribution_balance}{{XIII}{9}{Attendance Record Distribution}{table.13}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {IV}Implementation Details and Testing}{9}{section.4}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-A}}Connection Validation}{9}{subsection.4.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-B}}Query Verification}{9}{subsection.4.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-C}}Code Syntax Validation}{9}{subsection.4.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {V}Conclusion}{9}{section.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {VI}SubTask 4: Scalability \& Trade-offs Analysis}{9}{section.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-A}}Scalability: Horizontal vs. Vertical Analysis}{9}{subsection.6.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VI-A}1}Vertical Scaling Limitations}{9}{subsubsection.6.1.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {XIV}{\ignorespaces API Endpoint Routing Matrix}}{10}{table.14}\protected@file@percent }
+\newlabel{tab:api_routing}{{XIV}{10}{API Endpoint Routing Matrix}{table.14}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {XV}{\ignorespaces Attendance Record Distribution}}{10}{table.15}\protected@file@percent }
+\newlabel{tab:distribution_balance}{{XV}{10}{Attendance Record Distribution}{table.15}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {V}Conclusion}{10}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {VI}SubTask 4: Scalability \& Trade-offs Analysis}{10}{section.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-A}}Scalability: Horizontal vs. Vertical Analysis}{10}{subsection.6.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VI-A}1}Vertical Scaling Limitations}{10}{subsubsection.6.1.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VI-A}2}Horizontal Scaling (Sharding)}{10}{subsubsection.6.1.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-B}}Consistency: Ensuring Atomic Global Operations}{10}{subsection.6.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VI-B}1}Atomic Cross-Shard Operations}{10}{subsubsection.6.2.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VI-B}2}Data Accuracy}{10}{subsubsection.6.2.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-C}}Availability: The CAP Theorem Trade-off}{10}{subsection.6.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VI-C}1}Impact of Shard Failure}{10}{subsubsection.6.3.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-D}}Partition Tolerance: Responding to Shard Failures}{10}{subsection.6.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VI-D}1}Failure Handling}{10}{subsubsection.6.4.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VI-D}2}Future Improvements: Replication}{10}{subsubsection.6.4.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-E}}Conclusion}{10}{subsection.6.5}\protected@file@percent }
-\gdef \@abspage@last{10}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-D}}Partition Tolerance: Responding to Shard Failures}{11}{subsection.6.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VI-D}1}Failure Handling}{11}{subsubsection.6.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VI-D}2}Future Improvements: Replication}{11}{subsubsection.6.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-E}}Conclusion}{11}{subsection.6.5}\protected@file@percent }
+\gdef \@abspage@last{11}

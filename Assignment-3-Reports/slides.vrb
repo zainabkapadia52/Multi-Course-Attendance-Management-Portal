@@ -1,0 +1,19 @@
+\frametitle{Transaction Lifecycle}
+\begin{lstlisting}[language=Python]
+txn = Transaction(users_table, orders_table)
+txn.begin()  # Allocate unique txn_id
+
+try:
+    txn.insert(users_table, {"id": 1, "name": "Alice"})
+    txn.insert(orders_table, {"id": 10, "user_id": 1})
+    txn.commit()  # Apply all staged WAL entries to heap
+except Exception:
+    txn.rollback()  # Mark entries rolledback, rebuild index
+    raise
+\end{lstlisting}
+
+\begin{itemize}
+  \item \textbf{Atomicity}: All-or-nothing across multiple tables
+  \item \textbf{Isolation}: Single-threaded execution per transaction
+  \item \textbf{Durability}: WAL persisted before heap writes
+\end{itemize}
