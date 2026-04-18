@@ -57,9 +57,6 @@ The target high-volume table for horizontal partitioning is \texttt{attendance\_
 \texttt{course\_id} & Derived via join & Many operational queries are course-scoped (attendance sessions, corrections, rosters). \\
 \texttt{semester\_id} & Derived via joins & Archive/report workloads are commonly semester-bounded. \\
 \texttt{status} & Direct column & Correction workflows filter absent records; potentially useful as a secondary partition dimension. \\
-\texttt{(student\_id, course\_id)} & Composite (derived) & Captures student-course locality, useful for per-course student analytics. \\
-\texttt{(student\_id, att\_session\_id)} & Composite (natural uniqueness) & Mirrors logical grain of a student attendance mark for one session. \\
-\texttt{(course\_id, att\_session\_id)} & Composite (derived+direct) & Preserves locality for session-level and course-level instructor operations. \\
 \texttt{department} & Derived via profile joins & Can model organizational shards for dean/admin views. \\
 \bottomrule
 \end{tabular}
@@ -87,16 +84,12 @@ where $N$ is total records and $S$ is number of shards.
 \toprule
 \textbf{Key} & \textbf{Counts} & \textbf{Max $|c_i-\mu|$} & \textbf{Max Dev.} \\
 \midrule
-\texttt{student\_id} & 686, 736, 706 & 27.33 & 3.85\% \\
-\texttt{att\_session\_id} & 691, 722, 715 & 18.67 & 2.63\% \\
-\texttt{record\_id} & 701, 706, 721 & 11.67 & 1.65\% \\
-\texttt{student\_id+course\_id} & 688, 754, 686 & 44.67 & 6.30\% \\
-\texttt{student\_id+att\_session\_id} & 715, 712, 701 & 5.67 & 0.80\% \\
-\texttt{course\_id+att\_session\_id} & 633, 720, 775 & 65.67 & 9.26\% \\
-\texttt{student\_id+att\_session\_id (range)} & already covered above & -- & -- \\
-\texttt{semester\_id} & 1459, 669 (2 active shards) & 749.67 & 105.69\% \\
-\texttt{status} & 1797, 331 (2 values only) & 1087.67 & 153.34\% \\
-\texttt{department} & 999, 780, 349 & 360.33 & 50.80\% \\
+student\_id & 686, 736, 706 & 27.33 & 3.85\% \\
+att\_session\_id & 691, 722, 715 & 18.67 & 2.63\% \\
+record\_id & 701, 706, 721 & 11.67 & 1.65\% \\
+semester\_id & 1459, 669 (2 active shards) & 749.67 & 105.69\% \\
+status & 1797, 331 (2 values only) & 1087.67 & 153.34\% \\
+department & 999, 780, 349 & 360.33 & 50.80\% \\
 \bottomrule
 \end{tabular}
 \label{tab:distribution_results}
@@ -118,7 +111,7 @@ Three candidates are rejected before final comparison:
 \end{itemize}
 
 \subsection{Viable Candidate Comparison}
-After elimination, the practical set is \texttt{record\_id}, \texttt{att\_session\_id}, \texttt{student\_id}, and composite \texttt{student\_id+course\_id}.
+After elimination, the practical set is \texttt{record\_id}, \texttt{att\_session\_id}, and \texttt{student\_id}.
 
 \begin{table}[htbp]
 \caption{Final Candidate Comparison}
@@ -127,10 +120,9 @@ After elimination, the practical set is \texttt{record\_id}, \texttt{att\_sessio
 \toprule
 \textbf{Key} & \textbf{Max Dev.} & \textbf{Join Req.?} & \textbf{Stable?} & \textbf{Query Aligned?} \\
 \midrule
-\texttt{record\_id} & 1.65\% & No & Yes & No \\
-\texttt{att\_session\_id} & 2.63\% & No & Yes & Partial \\
-\texttt{student\_id} & 3.85\% & No & Yes & Yes \\
-\texttt{student\_id+course\_id} & 6.30\% & Yes & Yes & Yes \\
+record\_id & 1.65\% & No & Yes & No \\
+att\_session\_id & 2.63\% & No & Yes & Partial \\
+student\_id & 3.85\% & No & Yes & Yes \\
 \bottomrule
 \end{tabular}
 \label{tab:viable_candidates}
@@ -150,13 +142,13 @@ Distinct value counts were measured from the current dataset:
 \toprule
 \textbf{Key} & \textbf{Distinct Values} & \textbf{Verdict} \\
 \midrule
-\texttt{record\_id} & 2128 & Too high; PK with no semantic grouping \\
-\texttt{att\_session\_id} & 95 & Moderate \\
-\texttt{student\_id} & 60 & Good; maps to real entities \\
-\texttt{course\_id} & 10 & Too low \\
-\texttt{semester\_id} & 2 & Eliminated \\
-\texttt{department} & 5 & Too low \\
-\texttt{status} & 2 & Eliminated \\
+record\_id & 2128 & Too high; PK with no semantic grouping \\
+att\_session\_id & 95 & Moderate \\
+student\_id & 60 & Good; maps to real entities \\
+course\_id & 10 & Too low \\
+semester\_id & 2 & Eliminated \\
+department & 5 & Too low \\
+status & 2 & Eliminated \\
 \bottomrule
 \end{tabular}
 \label{tab:cardinality}
@@ -167,10 +159,10 @@ Distinct value counts were measured from the current dataset:
 \subsubsection{Criterion 2: Query Alignment}
 Actual route logic is dominated by student-centric filters, with patterns such as:
 \begin{itemize}
-    \item \texttt{WHERE ar.student\_id = ?}
-    \item \texttt{WHERE student\_id = ? AND att\_session\_id = ?}
-    \item \texttt{WHERE att.course\_id = ? AND ar.student\_id = ?}
-    \item \texttt{WHERE student\_id = ?}
+    \item \texttt{WHERE ar.student\_id = }$?$
+    \item \texttt{WHERE student\_id = }$?$ \texttt{AND att\_session\_id = }$?$
+    \item \texttt{WHERE att.course\_id = }$?$ \texttt{AND ar.student\_id = }$?$
+    \item \texttt{WHERE student\_id = }$?$
 \end{itemize}
 
 \begin{table}[htbp]
@@ -180,10 +172,9 @@ Actual route logic is dominated by student-centric filters, with patterns such a
 \toprule
 \textbf{Key} & \textbf{Route Alignment} & \textbf{Impact} \\
 \midrule
-\texttt{record\_id} & Low & Student history is scattered across shards \\
-\texttt{att\_session\_id} & Partial & Helps instructor session views, weaker for student dashboards \\
-\texttt{student\_id} & High & Student-facing queries route to exactly one shard \\
-\texttt{student\_id+course\_id} & High & Good locality but more complex routing logic \\
+record\_id & Low & Student history is scattered across shards \\
+att\_session\_id & Partial & Helps instructor session views, weaker for student dashboards \\
+student\_id & High & Student-facing queries route to exactly one shard \\
 \bottomrule
 \end{tabular}
 \label{tab:query_alignment}
@@ -216,10 +207,12 @@ Stable & 0 observed key-change events in audit data \\
 \subsection{Partitioning Strategy Comparison and Justification}
 Experimental comparison was conducted on \texttt{attendance\_records} with 2128 rows.
 
-\begin{table}[htbp]
+\begin{table*}[t]
 \caption{Strategy-Level Distribution Comparison}
 \centering
-\begin{tabular}{p{2.1cm}p{0.7cm}p{0.7cm}p{0.7cm}p{1.05cm}p{1.0cm}p{1.4cm}}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{p{3.1cm}p{1.0cm}p{1.0cm}p{1.0cm}p{2.0cm}p{2.0cm}p{2.5cm}}
 \toprule
 \textbf{Strategy} & \textbf{S0} & \textbf{S1} & \textbf{S2} & \textbf{Max Imbalance} & \textbf{Max Deviation} & \textbf{Decision} \\
 \midrule
@@ -228,16 +221,17 @@ Hash (\texttt{student\_id \% 3}) & 739 & 674 & 715 & 65 & $\pm 5.0\%$ & \textbf{
 Directory (department) & 999 & 780 & 349 & 650 & $\pm 50.8\%$ & Rejected---structural skew \\
 \bottomrule
 \end{tabular}
+\normalsize
 \label{tab:strategy_comparison}
-\end{table}
+\end{table*}
 
 \subsubsection{Strategy 1: Range-Based}
-Range sharding was initially evaluated with static student-id intervals (Shard 0: 12--30, Shard 1: 31--50, Shard 2: 51--71).
+Range sharding was initially evaluated with static student-id buckets over the current 60-student dataset.
 
 \textbf{Why it is rejected for this project:}
 \begin{itemize}
     \item New student registrations always receive IDs above the current maximum and therefore accumulate on the last shard.
-    \item Range locality has little value for this workload because queries are student-specific (\texttt{WHERE student\_id = ?}), not ID-range scans.
+    \item Range locality has little value for this workload because queries are student-specific (\texttt{WHERE student\_id = }$?$), not ID-range scans.
     \item Although the current seeded snapshot is balanced, the approach has a structural long-term growth flaw.
 \end{itemize}
 
@@ -315,10 +309,10 @@ For 3 shards, expected mean load is:
 \toprule
 \textbf{Key} & \textbf{Distinct Values} & \textbf{Verdict} \\
 \midrule
-\texttt{student\_id} & 31 & Good; maps to real entities \\
-\texttt{att\_session\_id} & 31 & Good but session-scoped only \\
-\texttt{course\_id} & 9 & Too low \\
-\texttt{status} & 3 & Eliminated \\
+student\_id & 31 & Good; maps to real entities \\
+att\_session\_id & 31 & Good but session-scoped only \\
+course\_id & 9 & Too low \\
+status & 3 & Eliminated \\
 \bottomrule
 \end{tabular}
 \label{tab:cr_cardinality}
@@ -331,17 +325,17 @@ For 3 shards, expected mean load is:
 \toprule
 \textbf{Strategy} & \textbf{S0} & \textbf{S1} & \textbf{S2} & \textbf{Max Imbalance} & \textbf{Max Dev.} \\
 \midrule
-\texttt{student\_id} hash & 15 & 10 & 15 & 5 & $\pm 24.8\%$ \\
-\texttt{student\_id} range & 15 & 13 & 12 & 3 & $\pm 22.6\%$ \\
-\texttt{course\_id} hash & 14 & 12 & 14 & 2 & $\pm 7.5\%$ \\
-\texttt{att\_session\_id} hash & 7 & 19 & 14 & 12 & $\pm 42.9\%$ \\
-\texttt{status} & 8 & 26 & 6 & -- & eliminated \\
+student\_id hash & 15 & 10 & 15 & 5 & $\pm 24.8\%$ \\
+student\_id range & 15 & 13 & 12 & 3 & $\pm 22.6\%$ \\
+course\_id hash & 14 & 12 & 14 & 2 & $\pm 7.5\%$ \\
+att\_session\_id hash & 7 & 19 & 14 & 12 & $\pm 42.9\%$ \\
+status & 8 & 26 & 6 & -- & eliminated \\
 \bottomrule
 \end{tabular}
 \label{tab:cr_distribution}
 \end{table}
 
-For this table, the primary objective is \textbf{join locality}, not standalone spread. Correction workflows frequently join \texttt{correction\_requests} with \texttt{attendance\_records} by \texttt{(student\_id, att\_session\_id)}:
+For this table, the primary objective is \textbf{join locality}, not standalone spread. Correction workflows frequently join \texttt{correction\_requests} with \texttt{attendance\_records} using \texttt{student\_id} and \texttt{att\_session\_id}:
 
 \begin{lstlisting}[language=SQL]
 SELECT cr.*, ar.status
@@ -349,7 +343,7 @@ FROM correction_requests cr
 JOIN attendance_records ar
   ON ar.att_session_id = cr.att_session_id
  AND ar.student_id = cr.student_id
-WHERE cr.student_id = ?;
+WHERE cr.student_id = $?$;
 \end{lstlisting}
 
 \textbf{Final decision for \texttt{correction\_requests}:} shard by \texttt{student\_id} using the same hash function \texttt{student\_id \% 3}. This guarantees co-location with \texttt{attendance\_records} and avoids cross-shard joins for the dominant correction workflow.
@@ -415,9 +409,9 @@ Based on volume analysis and growth projections, two tables were selected for sh
 
 \textbf{Query patterns:}
 \begin{itemize}
-    \item Student dashboard: \texttt{WHERE student\_id = ?} (single shard)
-    \item Session view: \texttt{WHERE att\_session\_id = ?} (cross-shard, parallelizable)
-    \item Course analytics: \texttt{WHERE course\_id = ?} (cross-shard, parallelizable)
+    \item Student dashboard: \texttt{WHERE student\_id = }$?$ (single shard)
+    \item Session view: \texttt{WHERE att\_session\_id = }$?$ (cross-shard, parallelizable)
+    \item Course analytics: \texttt{WHERE course\_id = }$?$ (cross-shard, parallelizable)
 \end{itemize}
 
 \textbf{Shard schema:}
@@ -463,9 +457,7 @@ CREATE TABLE shard_{0,1,2}_correction_requests (
     created_at     DATETIME DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_student (student_id),
     INDEX idx_session (att_session_id),
-    INDEX idx_status (status),
-    UNIQUE KEY unique_student_session 
-               (student_id, att_session_id)
+    INDEX idx_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
 \end{lstlisting}
 
@@ -482,9 +474,9 @@ def get_shard_id(student_id: int) -> int:
 
 \textbf{Distribution mapping:}
 \begin{itemize}
-    \item Shard 0: \texttt{student\_id \% 3 == 0} (students 3, 6, 9, 12, 15, 18, 21, ...)
-    \item Shard 1: \texttt{student\_id \% 3 == 1} (students 1, 4, 7, 10, 13, 16, 19, ...)
-    \item Shard 2: \texttt{student\_id \% 3 == 2} (students 2, 5, 8, 11, 14, 17, 20, ...)
+    \item Shard 0: \texttt{student\_id \% 3 == 0}
+    \item Shard 1: \texttt{student\_id \% 3 == 1}
+    \item Shard 2: \texttt{student\_id \% 3 == 2}
 \end{itemize}
 
 \subsection{Migration Process}

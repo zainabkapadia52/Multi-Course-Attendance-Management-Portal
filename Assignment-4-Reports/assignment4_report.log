@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2026.1.11)  18 APR 2026 12:31
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2026.1.11)  18 APR 2026 12:57
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -567,113 +567,59 @@ Underfull \hbox (badness 3861) in paragraph at lines 58--59
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 60--60
-[]|\OT1/pcr/m/n/8 (student_id,
- []
-
-
-Underfull \hbox (badness 2941) in paragraph at lines 60--60
-[]|\OT1/ptm/m/n/8 Composite (de-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 61--61
-[]|\OT1/pcr/m/n/8 (student_id,
- []
-
-
-Overfull \hbox (3.71361pt too wide) in paragraph at lines 61--61
-\OT1/pcr/m/n/8 att_session_id)| 
- []
-
-
-Underfull \hbox (badness 2460) in paragraph at lines 61--62
-[]|\OT1/ptm/m/n/8 Mirrors log-i-cal grain of
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 62--62
-[]|\OT1/pcr/m/n/8 (course_id,
- []
-
-
-Overfull \hbox (3.71361pt too wide) in paragraph at lines 62--62
-\OT1/pcr/m/n/8 att_session_id)| 
- []
-
-
-Underfull \hbox (badness 2941) in paragraph at lines 62--62
-[]|\OT1/ptm/m/n/8 Composite (de-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 62--63
-[]|\OT1/ptm/m/n/8 Preserves lo-cal-ity for
- []
-
-
-Underfull \hbox (badness 1983) in paragraph at lines 62--63
-\OT1/ptm/m/n/8 session-level and course-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 63--64
+Underfull \hbox (badness 10000) in paragraph at lines 60--61
 \OT1/ptm/m/n/8 shards for dean/ad-min
  []
 
 
-Underfull \hbox (badness 3471) in paragraph at lines 71--72
+Underfull \hbox (badness 3471) in paragraph at lines 68--69
 \OT1/ptm/m/n/10 student-centric, while in-struc-tor and TA APIs are
  []
 
 
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 77--78
+Underfull \hbox (badness 10000) in paragraph at lines 74--75
 []\OT1/ptm/m/n/10 Using the seeded dataset (2128 rows in
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 88--89
+Underfull \hbox (badness 10000) in paragraph at lines 85--86
 []|\OT1/ptm/b/n/8 Max
  []
 
 
-Overfull \hbox (29.13593pt too wide) in paragraph at lines 93--93
-[]|\OT1/pcr/m/n/8 student_id+course_id| 
- []
-
-
-Overfull \hbox (53.13594pt too wide) in paragraph at lines 94--94
-[]|\OT1/pcr/m/n/8 student_id+att_session_id| 
- []
-
-
-Overfull \hbox (48.33594pt too wide) in paragraph at lines 95--95
-[]|\OT1/pcr/m/n/8 course_id+att_session_id| 
- []
-
-
-Overfull \hbox (53.13594pt too wide) in paragraph at lines 96--96
-[]|\OT1/pcr/m/n/8 student_id+att_session_id
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 96--96
-[]|\OT1/ptm/m/n/8 already cov-ered
- []
-
-
-Overfull \hbox (2.28287pt too wide) in paragraph at lines 86--103
+Overfull \hbox (2.28287pt too wide) in paragraph at lines 83--96
  [][] 
  []
 
-<Images/shard_key_distribution.png, id=285, 774.895pt x 476.78125pt>
+<Images/shard_key_distribution.png, id=289, 774.895pt x 476.78125pt>
 File: Images/shard_key_distribution.png Graphic file (type png)
 <use Images/shard_key_distribution.png>
 Package pdftex.def Info: Images/shard_key_distribution.png  used on input line 
-107.
+100.
 (pdftex.def)             Requested size: 252.0pt x 155.04663pt.
+
+Underfull \hbox (badness 4048) in paragraph at lines 114--115
+[]\OT1/ptm/m/n/10 After elim-i-na-tion, the prac-ti-cal set is \OT1/pcr/m/n/10 
+record_id\OT1/ptm/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 121--121
+[]|\OT1/ptm/b/n/8 Join
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 121--122
+[]|\OT1/ptm/b/n/8 Query
+ []
+
+
+Overfull \hbox (17.1279pt too wide) in paragraph at lines 119--129
+ [][] 
+ []
+
 
 
 [1{/usr/local/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/usr/l
@@ -681,215 +627,119 @@ ocal/texlive/2025/texmf-dist/fonts/enc/dvips/base/8r.enc}
 
 
 ]
-Underfull \hbox (badness 4048) in paragraph at lines 121--122
-[]\OT1/ptm/m/n/10 After elim-i-na-tion, the prac-ti-cal set is \OT1/pcr/m/n/10 
-record_id\OT1/ptm/m/n/10 ,
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 164--165
+[]\OT1/pcr/m/n/10 WHERE att.course_id = $\OT1/cmr/m/n/10 ?$ \OT1/pcr/m/n/10 AND
+
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 121--122
-\OT1/pcr/m/n/10 att_session_id\OT1/ptm/m/n/10 , \OT1/pcr/m/n/10 student_id\OT1/
-ptm/m/n/10 , and com-pos-ite
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 128--128
-[]|\OT1/ptm/b/n/8 Join
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 128--129
-[]|\OT1/ptm/b/n/8 Query
- []
-
-
-Overfull \hbox (23.44545pt too wide) in paragraph at lines 133--133
-[]|\OT1/pcr/m/n/8 student_id+course_id| 
- []
-
-
-Overfull \hbox (17.1279pt too wide) in paragraph at lines 126--137
- [][] 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 171--172
-[]\OT1/pcr/m/n/10 WHERE student_id = ? AND
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 172--173
-[]\OT1/pcr/m/n/10 WHERE att.course_id = ? AND
- []
-
-
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 181--181
+Underfull \hbox (badness 10000) in paragraph at lines 173--173
 []|\OT1/ptm/b/n/8 Route
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 183--184
+Underfull \hbox (badness 10000) in paragraph at lines 175--176
 []|\OT1/ptm/m/n/8 Student his-tory is
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 183--184
+Underfull \hbox (badness 10000) in paragraph at lines 175--176
 \OT1/ptm/m/n/8 scat-tered across
  []
 
 
-Overfull \hbox (26.29091pt too wide) in paragraph at lines 186--186
-[]|\OT1/pcr/m/n/8 student_id+course_id| 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 186--187
-[]|\OT1/ptm/m/n/8 Good lo-cal-ity but
- []
-
-
-Underfull \hbox (badness 1946) in paragraph at lines 193--194
+Underfull \hbox (badness 1946) in paragraph at lines 184--185
 \OT1/ptm/m/n/10 served stu-dent iden-ti-fier changes in the cur-rent dataset
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 213--215
+Underfull \hbox (badness 10000) in paragraph at lines 204--206
 []\OT1/ptm/b/n/10 Why not \OT1/pcr/b/n/10 record_id \OT1/ptm/b/n/10 de-spite ti
 ghter bal-ance?
  []
 
 
-Underfull \hbox (badness 3049) in paragraph at lines 213--215
+Underfull \hbox (badness 3049) in paragraph at lines 204--206
 \OT1/pcr/m/n/10 record_id \OT1/ptm/m/n/10 is an auto-increment iden-ti-fier wit
 h lit-tle
  []
 
 
-
-[2 <./Images/shard_key_distribution.png>]
-Underfull \hbox (badness 10000) in paragraph at lines 217--218
+Underfull \hbox (badness 10000) in paragraph at lines 208--209
 []\OT1/ptm/m/n/10 Experimental com-par-i-son was con-ducted on
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 224--224
-[]|\OT1/ptm/b/n/8 Max
+Underfull \hbox (badness 10000) in paragraph at lines 219--219
+[]|\OT1/ptm/m/n/8 Range (\OT1/pcr/m/n/8 student_id
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 224--224
-\OT1/ptm/b/n/8 De-vi-a-
+Underfull \hbox (badness 10000) in paragraph at lines 219--220
+[]|\OT1/ptm/m/n/8 Rejected---static
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 226--226
-[]|\OT1/ptm/m/n/8 Range
+Underfull \hbox (badness 10000) in paragraph at lines 220--220
+[]|\OT1/ptm/m/n/8 Hash (\OT1/pcr/m/n/8 student_id %
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 226--226
-\OT1/ptm/m/n/8 (\OT1/pcr/m/n/8 student_id
+Underfull \hbox (badness 10000) in paragraph at lines 221--222
+[]|\OT1/ptm/m/n/8 Rejected---structural
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 226--227
-[]|\OT1/ptm/m/n/8 Rejected---
- []
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 226--227
-\OT1/ptm/m/n/8 static
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 227--227
-[]|\OT1/ptm/m/n/8 Hash
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 227--227
-\OT1/ptm/m/n/8 (\OT1/pcr/m/n/8 student_id
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 228--229
-[]|\OT1/ptm/m/n/8 Rejected---
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 228--229
-\OT1/ptm/m/n/8 structural
- []
-
-
-Overfull \hbox (49.66336pt too wide) in paragraph at lines 222--232
- [][] 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 245--246
+[2 <./Images/shard_key_distribution.png>]
+Underfull \hbox (badness 10000) in paragraph at lines 239--240
  \OT1/ptm/m/it/10 2) Strat-egy 2: Hash-Based: [][][] \OT1/ptm/m/n/10 Hash place
 -ment uses
  []
 
 
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 288--288
+Underfull \hbox (badness 10000) in paragraph at lines 282--282
 []|\OT1/pcr/m/n/8 student_id % 3
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 289--289
+Underfull \hbox (badness 10000) in paragraph at lines 283--283
 []|\OT1/pcr/m/n/8 student_id % 3
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 290--290
+Underfull \hbox (badness 10000) in paragraph at lines 284--284
 []|\OT1/pcr/m/n/8 student_id % 3
  []
+
+
 
 LaTeX Font Info:    Font shape `OT1/pcr/m/it' in size <10> not available
-(Font)              Font shape `OT1/pcr/m/sl' tried instead on input line 303.
+(Font)              Font shape `OT1/pcr/m/sl' tried instead on input line 297.
 
-Overfull \hbox (4.60408pt too wide) in paragraph at lines 319--319
-[]|\OT1/pcr/m/n/8 att_session_id| 
- []
-
-
-Underfull \hbox (badness 5388) in paragraph at lines 319--320
+Underfull \hbox (badness 5388) in paragraph at lines 313--314
 []|\OT1/ptm/m/n/8 Good but session-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 332--333
+Underfull \hbox (badness 10000) in paragraph at lines 326--327
 []|\OT1/ptm/b/n/8 Max
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 334--334
-[]|\OT1/pcr/m/n/8 student_id
+Underfull \hbox (badness 10000) in paragraph at lines 331--331
+[]|\OT1/ptm/m/n/8 att[]session[]id
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 335--335
-[]|\OT1/pcr/m/n/8 student_id
- []
-
-
-Overfull \hbox (7.4491pt too wide) in paragraph at lines 337--337
-[]|\OT1/pcr/m/n/8 att_session_id
- []
-
-
-Overfull \hbox (5.32274pt too wide) in paragraph at lines 338--339
+Overfull \hbox (5.32274pt too wide) in paragraph at lines 332--333
 []|\OT1/ptm/m/n/8 eliminated| 
  []
 
 
-Overfull \hbox (10.63376pt too wide) in paragraph at lines 330--342
+Overfull \hbox (10.63376pt too wide) in paragraph at lines 324--336
  [][] 
  []
 
@@ -898,39 +748,44 @@ File: lstlang1.sty 2024/09/23 1.10c listings language file
 )
 
 [3]
-Underfull \hbox (badness 10000) in paragraph at lines 378--379
+LaTeX Font Info:    Trying to load font information for TS1+pcr on input line 3
+46.
+ (/usr/local/texlive/2025/texmf-dist/tex/latex/psnfss/ts1pcr.fd
+File: ts1pcr.fd 2001/06/04 font definitions for TS1/pcr.
+)
+Underfull \hbox (badness 10000) in paragraph at lines 372--373
 []|\OT1/ptm/m/n/8 Authentication,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 382--383
+Underfull \hbox (badness 10000) in paragraph at lines 376--377
 []|\OT1/ptm/m/n/8 Student-course
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 384--385
+Underfull \hbox (badness 10000) in paragraph at lines 378--379
 []|\OT1/ptm/m/n/8 Attendance ses-sion
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 388--389
+Underfull \hbox (badness 10000) in paragraph at lines 382--383
 []|\OT1/ptm/m/n/8 Student dis-pute
  []
 
 
 
 
-Underfull \hbox (badness 2717) in paragraph at lines 420--421
-[]\OT1/ptm/m/n/10 Course an-a-lyt-ics: \OT1/pcr/m/n/10 WHERE course_id = ? \OT1
-/ptm/m/n/10 (cross-
+Underfull \hbox (badness 3557) in paragraph at lines 414--415
+[]\OT1/ptm/m/n/10 Course an-a-lyt-ics: \OT1/pcr/m/n/10 WHERE course_id = $\OT1/
+cmr/m/n/10 ?$ \OT1/ptm/m/n/10 (cross-
  []
 
-
-
-[4] (/usr/local/texlive/2025/texmf-dist/tex/latex/listings/lstlang1.sty
+(/usr/local/texlive/2025/texmf-dist/tex/latex/listings/lstlang1.sty
 File: lstlang1.sty 2024/09/23 1.10c listings language file
 )
-Underfull \hbox (badness 2875) in paragraph at lines 501--502
+
+[4]
+Underfull \hbox (badness 2875) in paragraph at lines 493--494
 []\OT1/ptm/m/n/10 Generate at-ten-dance data ($\OMS/cmsy/m/n/10 ^^X$\OT1/ptm/m/
 n/10 102 ses-sions, $\OMS/cmsy/m/n/10 ^^X$\OT1/ptm/m/n/10 2,370
  []
@@ -940,31 +795,27 @@ n/10 102 ses-sions, $\OMS/cmsy/m/n/10 ^^X$\OT1/ptm/m/n/10 2,370
 
 
 [5]
-Underfull \hbox (badness 1783) in paragraph at lines 633--635
+Underfull \hbox (badness 1783) in paragraph at lines 625--627
 []\OT1/ptm/b/n/10 Rationale: \OT1/ptm/m/n/10 Af-ter suc-cess-ful mi-gra-tion, s
 ource data is
  []
 
-LaTeX Font Info:    Trying to load font information for TS1+pcr on input line 6
-46.
-(/usr/local/texlive/2025/texmf-dist/tex/latex/psnfss/ts1pcr.fd
-File: ts1pcr.fd 2001/06/04 font definitions for TS1/pcr.
-)
 
 
 
-[6]
-Underfull \hbox (badness 1661) in paragraph at lines 767--768
+Underfull \hbox (badness 1661) in paragraph at lines 759--760
 []\OT1/ptm/m/n/10 The query rout-ing sys-tem par-ti-tions 2,128 at-ten-dance
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 786--787
+
+[6]
+Underfull \hbox (badness 10000) in paragraph at lines 778--779
 []\OT1/ptm/m/n/10 Each shard main-tains ta-ble
  []
 
 
-Underfull \hbox (badness 4181) in paragraph at lines 792--793
+Underfull \hbox (badness 4181) in paragraph at lines 784--785
  \OT1/ptm/m/it/10 1) Per-Request Con-nec-tion Caching: [][][] \OT1/ptm/m/n/10 F
 lask's request-
  []
@@ -972,25 +823,25 @@ lask's request-
 
 
 
-Underfull \hbox (badness 4181) in paragraph at lines 847--848
+Underfull \hbox (badness 4181) in paragraph at lines 839--840
  \OT1/ptm/m/it/10 1) Pri-mary Rout-ing: \OT1/pcr/m/sl/10 get_shard_id()\OT1/ptm
 /m/it/10 : [][][] \OT1/ptm/m/n/10 Maps any
  []
 
 
-Underfull \hbox (badness 1675) in paragraph at lines 869--870
+Underfull \hbox (badness 1675) in paragraph at lines 861--862
  \OT1/ptm/m/it/10 1) \OT1/pcr/m/sl/10 get_records_for_student()\OT1/ptm/m/it/10
  : Read One Stu-
  []
 
 
-Underfull \hbox (badness 2310) in paragraph at lines 892--893
+Underfull \hbox (badness 2310) in paragraph at lines 884--885
  \OT1/ptm/m/it/10 2) \OT1/pcr/m/sl/10 insert_record()\OT1/ptm/m/it/10 : Cre-ate
  One Record: [][][] \OT1/ptm/b/n/10 Query
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 892--893
+Underfull \hbox (badness 10000) in paragraph at lines 884--885
 \OT1/ptm/b/n/10 type: \OT1/ptm/m/n/10 Single-shard IN-SERT with di-rect rout-in
 g by
  []
@@ -998,7 +849,7 @@ g by
 
 
 [7]
-Underfull \hbox (badness 1762) in paragraph at lines 914--915
+Underfull \hbox (badness 1762) in paragraph at lines 906--907
  \OT1/ptm/m/it/10 3) \OT1/pcr/m/sl/10 update_record()\OT1/ptm/m/it/10 : Mod-ify
  One Record: [][][] \OT1/ptm/b/n/10 Query
  []
@@ -1006,7 +857,7 @@ Underfull \hbox (badness 1762) in paragraph at lines 914--915
 
 
 
-Underfull \hbox (badness 1609) in paragraph at lines 1006--1007
+Underfull \hbox (badness 1609) in paragraph at lines 998--999
  \OT1/ptm/m/it/10 2) \OT1/pcr/m/sl/10 delete_records_for_session()\OT1/ptm/m/it
 /10 : Delete Ses-
  []
@@ -1014,32 +865,32 @@ Underfull \hbox (badness 1609) in paragraph at lines 1006--1007
 
 
 [8]
-Underfull \hbox (badness 10000) in paragraph at lines 1088--1089
+Underfull \hbox (badness 10000) in paragraph at lines 1080--1081
  \OT1/ptm/m/it/10 1) \OT1/pcr/m/sl/10 get_student_id_for_record()\OT1/ptm/m/it/
 10 : Cross-Shard
  []
 
 
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1114--1115
+Underfull \hbox (badness 10000) in paragraph at lines 1106--1107
 []\OT1/ptm/m/n/10 All CRUD end-points route through
  []
 
 
-Overfull \hbox (45.0713pt too wide) in paragraph at lines 1119--1141
+Overfull \hbox (45.0713pt too wide) in paragraph at lines 1111--1133
  [][] 
  []
 
 
 
+
+
 [9]
-
-
-Underfull \hbox (badness 1635) in paragraph at lines 1256--1258
+Underfull \hbox (badness 1635) in paragraph at lines 1248--1250
  \OT1/ptm/m/it/10 1) Atomic Cross-Shard Op-er-a-tions: [][][] \OT1/ptm/m/n/10 U
 n-like many dis-
  []
+
+
 
 
 
@@ -1066,27 +917,17 @@ Before submitting the final camera ready copy, remember to:
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
  ***********
-
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
-
-Package rerunfilecheck Warning: File `assignment4_report.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `assignment4_report.out':
-(rerunfilecheck)             Before: 71DBE7E32E6188639B786B0FE2984CBF;15568
-(rerunfilecheck)             After:  4CFE2B4778E3A725A8F930DBB161CBFE;15852.
+Package rerunfilecheck Info: File `assignment4_report.out' has not changed.
+(rerunfilecheck)             Checksum: 4CFE2B4778E3A725A8F930DBB161CBFE;15852.
  ) 
 Here is how much of TeX's memory you used:
- 14082 strings out of 473190
- 213335 string characters out of 5715800
- 1452114 words of memory out of 5000000
- 36626 multiletter control sequences out of 15000+600000
+ 14081 strings out of 473190
+ 213322 string characters out of 5715800
+ 1494013 words of memory out of 5000000
+ 36627 multiletter control sequences out of 15000+600000
  600427 words of font info for 121 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 75i,11n,79p,488b,2066s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,11n,79p,488b,2239s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb
 ></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb><
 /usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></u
@@ -1103,10 +944,10 @@ ist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2025/texmf-dist/fonts/
 type1/urw/times/utmbi8a.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw
 /times/utmr8a.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/times/utm
 ri8a.pfb>
-Output written on assignment4_report.pdf (11 pages, 292089 bytes).
+Output written on assignment4_report.pdf (11 pages, 292215 bytes).
 PDF statistics:
- 993 PDF objects out of 1000 (max. 8388607)
- 936 compressed objects within 10 object streams
- 537 named destinations out of 1000 (max. 500000)
- 566 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 994 PDF objects out of 1000 (max. 8388607)
+ 937 compressed objects within 10 object streams
+ 535 named destinations out of 1000 (max. 500000)
+ 574 words of extra memory for PDF output out of 10000 (max. 10000000)
 
