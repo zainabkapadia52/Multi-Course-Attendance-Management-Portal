@@ -91,6 +91,9 @@ where $N$ is total records and $S$ is number of shards.
 \texttt{att\_session\_id} & 691, 722, 715 & 18.67 & 2.63\% \\
 \texttt{record\_id} & 701, 706, 721 & 11.67 & 1.65\% \\
 \texttt{student\_id+course\_id} & 688, 754, 686 & 44.67 & 6.30\% \\
+\texttt{student\_id+att\_session\_id} & 715, 712, 701 & 5.67 & 0.80\% \\
+\texttt{course\_id+att\_session\_id} & 633, 720, 775 & 65.67 & 9.26\% \\
+\texttt{student\_id+att\_session\_id (range)} & already covered above & -- & -- \\
 \texttt{semester\_id} & 1459, 669 (2 active shards) & 749.67 & 105.69\% \\
 \texttt{status} & 1797, 331 (2 values only) & 1087.67 & 153.34\% \\
 \texttt{department} & 999, 780, 349 & 360.33 & 50.80\% \\
@@ -132,6 +135,8 @@ After elimination, the practical set is \texttt{record\_id}, \texttt{att\_sessio
 \end{tabular}
 \label{tab:viable_candidates}
 \end{table}
+
+Based on the viable candidate comparison in Table~\ref{tab:viable_candidates}, \textbf{\texttt{student\_id} is selected as the shard key}. It is the only candidate that simultaneously satisfies all three criteria---sufficient cardinality for balanced distribution, direct presence in student-facing API predicates, and guaranteed stability post-insertion. The following section formally justifies this selection against each criterion.
 
 \subsection{Candidate Evaluation Against the Three Criteria}
 
@@ -214,36 +219,37 @@ Experimental comparison was conducted on \texttt{attendance\_records} with 2128 
 \begin{table}[htbp]
 \caption{Strategy-Level Distribution Comparison}
 \centering
-\begin{tabular}{p{2.2cm}p{0.8cm}p{0.8cm}p{0.8cm}p{1.2cm}p{1.2cm}}
+\begin{tabular}{p{2.1cm}p{0.7cm}p{0.7cm}p{0.7cm}p{1.05cm}p{1.0cm}p{1.4cm}}
 \toprule
-\textbf{Strategy} & \textbf{S0} & \textbf{S1} & \textbf{S2} & \textbf{Max Imbalance} & \textbf{Max Deviation} \\
+\textbf{Strategy} & \textbf{S0} & \textbf{S1} & \textbf{S2} & \textbf{Max Imbalance} & \textbf{Max Deviation} & \textbf{Decision} \\
 \midrule
-Range (\texttt{student\_id}) & 686 & 736 & 706 & 50 & $\pm 3.8\%$ \\
-Hash (\texttt{student\_id \% 3}) & 739 & 674 & 715 & 65 & $\pm 5.0\%$ \\
-Directory (department) & 999 & 780 & 349 & 650 & $\pm 50.8\%$ \\
+Range (\texttt{student\_id} ranges) & 686 & 736 & 706 & 50 & $\pm 3.8\%$ & Rejected---static boundaries \\
+Hash (\texttt{student\_id \% 3}) & 739 & 674 & 715 & 65 & $\pm 5.0\%$ & \textbf{Selected} \\
+Directory (department) & 999 & 780 & 349 & 650 & $\pm 50.8\%$ & Rejected---structural skew \\
 \bottomrule
 \end{tabular}
 \label{tab:strategy_comparison}
 \end{table}
 
 \subsubsection{Strategy 1: Range-Based}
-Range sharding divides contiguous student-id intervals as follows: Shard 0: 12--30, Shard 1: 31--50, Shard 2: 51--71.
+Range sharding was initially evaluated with static student-id intervals (Shard 0: 12--30, Shard 1: 31--50, Shard 2: 51--71).
 
-\textbf{Why it suits this project:}
+\textbf{Why it is rejected for this project:}
 \begin{itemize}
-    \item \textbf{Routing simplicity:} shard resolution is a constant-time boundary check.
-    \item \textbf{Cohort locality:} adjacent students remain colocated, improving batch/cohort style queries.
-    \item \textbf{Best observed balance:} lowest deviation among all tested strategies ($\pm 3.8\%$).
+    \item New student registrations always receive IDs above the current maximum and therefore accumulate on the last shard.
+    \item Range locality has little value for this workload because queries are student-specific (\texttt{WHERE student\_id = ?}), not ID-range scans.
+    \item Although the current seeded snapshot is balanced, the approach has a structural long-term growth flaw.
 \end{itemize}
 
 \subsubsection{Strategy 2: Hash-Based}
 Hash placement uses \texttt{shard\_id = student\_id \% 3}.
 
-\textbf{Why not chosen:}
+\textbf{Why selected:}
 \begin{itemize}
-    \item Slightly worse observed balance than range ($\pm 5.0\%$ vs $\pm 3.8\%$).
-    \item Breaks range locality for cohort-level access patterns.
-    \item Resharding from $k$ to $k+1$ shards causes widespread key remapping.
+    \item This is identity hash over sequential integer IDs, yielding naturally interleaved assignment (12$\rightarrow$0, 13$\rightarrow$1, 14$\rightarrow$2, ...).
+    \item New students are automatically distributed across all shards without boundary recalibration.
+    \item Entity locality is fully preserved: all rows for a given \texttt{student\_id} always map to one shard.
+    \item Observed distribution is acceptable ($\pm 5.0\%$, 65-record imbalance) and self-correcting with growth.
 \end{itemize}
 
 \subsubsection{Strategy 3: Directory-Based (Department Mapping)}
@@ -259,29 +265,29 @@ Directory mapping assigns students to shards by department (Computer Science, El
 \textbf{Noted advantage:} directory schemes offer flexible reassignment by changing mapping entries without changing key formulas.
 
 \subsection{Final Partitioning Decision}
-\textbf{Selected strategy: range-based sharding on \texttt{student\_id}.}
+\textbf{Selected strategy: hash-based sharding on \texttt{student\_id} using identity hash \texttt{student\_id \% 3}.}
 
 \begin{enumerate}
-    \item \textbf{Best empirical balance} on current data ($\pm 3.8\%$ and only 50-record imbalance).
-    \item \textbf{Zero routing overhead} beyond simple interval checks.
-    \item \textbf{Access-pattern alignment} with student-centric API filters.
-    \item \textbf{Cohort locality preservation} for operational analytics.
-    \item \textbf{Practical maintenance} via periodic boundary adjustment.
+    \item \textbf{Future-proof load balancing:} avoids last-shard overflow from monotonically increasing student IDs.
+    \item \textbf{Identity-hash simplicity:} constant-time routing with no directory lookup.
+    \item \textbf{Entity locality preserved:} one student's data remains co-located in one shard.
+    \item \textbf{Query alignment:} student-centric predicates route directly via \texttt{student\_id}.
+    \item \textbf{Scalable growth behavior:} no periodic boundary maintenance required.
 \end{enumerate}
 
 \subsection{Expected Distribution and Skew Risk}
-Using current range boundaries:
+Using hash-based routing on \texttt{student\_id}:
 
 \begin{table}[htbp]
-\caption{Observed Student-Range Distribution (Selected Strategy)}
+\caption{Observed Student-Hash Distribution (Selected Strategy)}
 \centering
-\begin{tabular}{p{1.25cm}p{2.2cm}p{1.2cm}p{1.4cm}}
+\begin{tabular}{p{1.2cm}p{2.4cm}p{1.2cm}p{1.4cm}}
 \toprule
-\textbf{Shard} & \textbf{\texttt{student\_id} Range} & \textbf{Records} & \textbf{Deviation} \\
+\textbf{Shard} & \textbf{Hash Condition} & \textbf{Records} & \textbf{Deviation} \\
 \midrule
-Shard 0 & 12--30 & 686 & -3.3\% \\
-Shard 1 & 31--50 & 736 & +3.8\% \\
-Shard 2 & 51--71 & 706 & -0.5\% \\
+Shard 0 & \texttt{student\_id \% 3 = 0} & 739 & +4.2\% \\
+Shard 1 & \texttt{student\_id \% 3 = 1} & 674 & -4.8\% \\
+Shard 2 & \texttt{student\_id \% 3 = 2} & 715 & +0.8\% \\
 \bottomrule
 \end{tabular}
 \label{tab:range_distribution}
@@ -289,10 +295,64 @@ Shard 2 & 51--71 & 706 & -0.5\% \\
 
 \textbf{Skew risks and mitigation:}
 \begin{itemize}
-    \item \textbf{Growth drift:} new students accumulate in the highest ID range and can overload the last shard.
-    \item \textbf{Activity skew:} uneven engagement by student groups can create write hotspots.
-    \item \textbf{Mitigation:} periodically recalibrate boundaries; at larger scale, migrate to hash/directory-assisted placement.
+    \item \textbf{Activity skew:} uneven engagement by specific students can create temporary shard hotspots.
+    \item \textbf{Small-sample variance:} modest deviations at this scale are expected and reduce as data volume grows.
+    \item \textbf{Mitigation:} monitor shard counts monthly and rebalance only if sustained deviation exceeds threshold (e.g., 20\%).
 \end{itemize}
+
+\subsection{Shard Key Analysis for \texttt{correction\_requests}}
+The \texttt{correction\_requests} table currently has 40 rows, so pure distribution statistics are noise-sensitive. Still, key selection was evaluated for consistency and query locality.
+
+For 3 shards, expected mean load is:
+\[
+\mu = \frac{40}{3} = 13.3
+\]
+
+\begin{table}[htbp]
+\caption{Cardinality for \texttt{correction\_requests} Candidates}
+\centering
+\begin{tabular}{p{2.2cm}p{1.6cm}p{2.4cm}}
+\toprule
+\textbf{Key} & \textbf{Distinct Values} & \textbf{Verdict} \\
+\midrule
+\texttt{student\_id} & 31 & Good; maps to real entities \\
+\texttt{att\_session\_id} & 31 & Good but session-scoped only \\
+\texttt{course\_id} & 9 & Too low \\
+\texttt{status} & 3 & Eliminated \\
+\bottomrule
+\end{tabular}
+\label{tab:cr_cardinality}
+\end{table}
+
+\begin{table}[htbp]
+\caption{Distribution for \texttt{correction\_requests} (40 Rows)}
+\centering
+\begin{tabular}{p{2.1cm}p{0.8cm}p{0.8cm}p{0.8cm}p{1.2cm}p{1.0cm}}
+\toprule
+\textbf{Strategy} & \textbf{S0} & \textbf{S1} & \textbf{S2} & \textbf{Max Imbalance} & \textbf{Max Dev.} \\
+\midrule
+\texttt{student\_id} hash & 15 & 10 & 15 & 5 & $\pm 24.8\%$ \\
+\texttt{student\_id} range & 15 & 13 & 12 & 3 & $\pm 22.6\%$ \\
+\texttt{course\_id} hash & 14 & 12 & 14 & 2 & $\pm 7.5\%$ \\
+\texttt{att\_session\_id} hash & 7 & 19 & 14 & 12 & $\pm 42.9\%$ \\
+\texttt{status} & 8 & 26 & 6 & -- & eliminated \\
+\bottomrule
+\end{tabular}
+\label{tab:cr_distribution}
+\end{table}
+
+For this table, the primary objective is \textbf{join locality}, not standalone spread. Correction workflows frequently join \texttt{correction\_requests} with \texttt{attendance\_records} by \texttt{(student\_id, att\_session\_id)}:
+
+\begin{lstlisting}[language=SQL]
+SELECT cr.*, ar.status
+FROM correction_requests cr
+JOIN attendance_records ar
+  ON ar.att_session_id = cr.att_session_id
+ AND ar.student_id = cr.student_id
+WHERE cr.student_id = ?;
+\end{lstlisting}
+
+\textbf{Final decision for \texttt{correction\_requests}:} shard by \texttt{student\_id} using the same hash function \texttt{student\_id \% 3}. This guarantees co-location with \texttt{attendance\_records} and avoids cross-shard joins for the dominant correction workflow.
 
 % ════════════════════════════════════════════════════════════════════════════
 % SUBTASK 2: SHARDING IMPLEMENTATION AND DATA MIGRATION
